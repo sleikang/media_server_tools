@@ -15,7 +15,7 @@ class tmdb:
     :param movieid
     :return True or False, iteminfo
     """
-    def getmoveinfo(self, movieid : str, language : str = 'zh-CN'):
+    def get_move_info(self, movieid : str, language : str = 'zh-CN'):
         iteminfo = {}
         try:
             url = '{}/movie/{}?api_key={}&language={}&append_to_response=alternative_titles'.format(self.host, movieid, self.key, language)
@@ -34,7 +34,7 @@ class tmdb:
     :param tvid
     :return True or False, iteminfo
     """
-    def gettvinfo(self, tvid : str, language : str = 'zh-CN'):
+    def get_tv_info(self, tvid : str, language : str = 'zh-CN'):
         iteminfo = {}
         try:
             url = '{}/tv/{}?api_key={}&language={}&append_to_response=alternative_titles'.format(self.host, tvid, self.key, language)
@@ -53,10 +53,10 @@ class tmdb:
     :param personid 人物ID
     :return True or False, personinfo
     """
-    def getpersoninfo(self, personid : str, language : str = 'zh-CN'):
+    def get_person_info(self, personid : str, language : str = 'zh-CN'):
         personinfo = {}
         try:
-            url = '{}/person/{}?api_key={}&language={}&append_to_response=alternative_titles'.format(self.host, personid, self.key, language)
+            url = '{}/person/{}?api_key={}&language={}'.format(self.host, personid, self.key, language)
             p = requests.get(url)
             if p.status_code != 200:
                 self.err = p.text

@@ -21,7 +21,7 @@ class emby:
     :param parentid 父文件夹ID
     :return True or False, items
     """
-    def getitems(self, parentid : str = ''):
+    def get_items(self, parentid : str = ''):
         items = {}
         try:
             if len(parentid):
@@ -43,7 +43,7 @@ class emby:
     :param itemid 项目ID
     :return True or False, iteminfo
     """
-    def getiteminfo(self, itemid : str):
+    def get_item_info(self, itemid : str):
         iteminfo = {}
         try:
             url = '{}/emby/Users/{}/Items/{}?Fields=ChannelMappingInfo&api_key={}'.format(self.host, self.userid, itemid, self.key)
@@ -62,7 +62,7 @@ class emby:
     :param iteminfo 项目信息
     :return True or False, iteminfo
     """
-    def setiteminfo(self, itemid : str, iteminfo):
+    def set_item_info(self, itemid : str, iteminfo):
         try:
             url = '{}/emby/Items/{}?api_key={}'.format(self.host, itemid, self.key)
             headers = {'Content-Type':'application/json'}
