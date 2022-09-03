@@ -41,7 +41,8 @@ class embyserver:
             return False
         ret = self.__check_media_info__(itemlist=itmes)
         for task in self.tasklist:
-            task.result()
+            ret, name = task.result()
+            print('媒体[{}]处理完成'.format(name))
         self.tasklist.clear()
         self.threadpool.shutdown(wait=True)
         return ret
@@ -60,11 +61,9 @@ class embyserver:
                         print('获取Emby媒体列表失败, {}'.format(self.embyclient.err))
                         continue
                     self.__check_media_info__(itemlist=items)
-                    time.sleep(0.1)
                 else:
                     task = self.threadpool.submit(self.__to_deal_with_item__, item)
                     self.tasklist.append(task)
-                    time.sleep(0.1)
 
             return True     
         except Exception as result:
@@ -93,7 +92,7 @@ class embyserver:
                 else:
                     ret, name = self.__get_media_tmdb_name__(type=2, id=iteminfo['ProviderIds']['Tmdb'])
                     if ret == False:
-                        return False
+                        return False, item['Name']
                     originalname = iteminfo['Name']
                     iteminfo['Name'] = name
                     iteminfo['LockedFields'] = ['Name']
@@ -130,18 +129,18 @@ class embyserver:
                         updatepeople = True
 
             if not updatename and not updatepeople:
-                return False
+                return True, item['Name']
             ret = self.embyclient.set_item_info(itemid=iteminfo['Id'], iteminfo=iteminfo)
             if ret:
                 if updatename:
                     print('原始媒体名称[{}]更新为[{}]'.format(originalname, iteminfo['Name']))
                 elif updatepeople:
                     print('原始媒体名称[{}]更新人物'.format(iteminfo['Name']))
-            return True
+            return True, item['Name']
                     
         except Exception as result:
             self.err = "异常错误：{}".format(result)
-            return False    
+            return False, item['Name']    
 
     """
     获取媒体tmdb中文
