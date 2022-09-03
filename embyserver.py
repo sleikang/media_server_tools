@@ -3,6 +3,7 @@ from emby import emby
 from tmdb import tmdb
 from concurrent.futures import ThreadPoolExecutor
 import re
+import zhconv
 
 class embyserver:
     embyclient = None
@@ -97,7 +98,7 @@ class embyserver:
                     
             if 'People' in iteminfo:
                 for people in iteminfo['People']:
-                    if self.__is_chinese__(string=people['Name'], mode=2):
+                    if self.__is_chinese__(string=people['Name'], mode=2) and not self.__is_chinese__(string=people['Name'], mode=3):
                         if not re.match(pattern='\s+', string=people['Name']):
                             continue
                         
@@ -114,7 +115,8 @@ class embyserver:
                         if ret == False:
                             continue
                     else:
-                        name = peopleinfo['Name']
+                        name = re.sub(pattern='\s+', repl='', string=name)
+                        name = zhconv.convert(peopleinfo['Name'], 'zh-cn')
                         originalpeoplename = people['Name']
                         peopleinfo['Name'] = name
                         peopleinfo['LockedFields'] = ['Name']
@@ -191,8 +193,10 @@ class embyserver:
                 for name in personinfo['also_known_as']:
                     if not self.__is_chinese__(string=name, mode=2):
                         continue
-                    
+                    if self.__is_chinese__(string=name, mode=3):
+                        name = zhconv.convert(name, 'zh-cn')
                     return True, re.sub(pattern='\s+', repl='', string=name)
+                break
             return False, None
         except Exception as result:
             self.err = "异常错误：{}".format(result)
@@ -232,8 +236,9 @@ class embyserver:
                 if '\u4e00' <= ch <= '\u9FA5':
                     return True
             elif mode == 3:
-                if '\u9FA6' <= ch <= '\u9FFF':
-                    return True
+                if '\u4e00' <= ch <= '\u9FFF':
+                    if zhconv.convert(ch, 'zh-cn') != ch:
+                        return True
         if re.match(pattern='^[0-9]+$', string=string):
             return True
         return False
