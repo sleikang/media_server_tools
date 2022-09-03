@@ -12,3 +12,5 @@ embykey = ''
 #TMDB APIKEY
 tmdbkey = ''
 #每次刷新全部媒体间隔时间 [小时]
+
+![image](https://user-images.githubusercontent.com/23020770/188265314-73610b4e-264d-4b8c-9750-e707512f7fef.png)
