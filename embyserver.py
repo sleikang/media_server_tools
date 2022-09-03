@@ -1,7 +1,6 @@
-import time
 from emby import emby
 from tmdb import tmdb
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import re
 import zhconv
 
@@ -40,7 +39,7 @@ class embyserver:
             print('获取Emby媒体列表失败, {}'.format(self.embyclient.err))
             return False
         ret = self.__check_media_info__(itemlist=itmes)
-        for task in self.tasklist:
+        for task in as_completed(self.tasklist):
             ret, name = task.result()
             print('媒体[{}]处理完成'.format(name))
         self.tasklist.clear()
