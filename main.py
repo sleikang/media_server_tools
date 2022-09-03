@@ -12,14 +12,17 @@ embykey = ''
 tmdbkey = ''
 #线程数量
 threadnum = 16
+#是否刷新人名
+updatepeople = True
 #每次刷新全部媒体间隔时间 [小时]
 updatetime = 1
 
 if __name__ == '__main__':
-    embymediaclient = embyserver(embyhost=embyhost, embyuserid=embyuserid, embykey=embykey, tmdbkey=tmdbkey, threadnum=threadnum)
+    embymediaclient = embyserver(embyhost=embyhost, embyuserid=embyuserid, embykey=embykey, tmdbkey=tmdbkey, threadnum=threadnum, updatepeople=updatepeople)
     while True:
         try:
+            print('开始刷新媒体库元数据')
             embymediaclient.update_media_name()
-            time.sleep(updatetime * 3600)
+            print('刷新媒体库元数据完成')
         except Exception as reuslt:
             print(reuslt)

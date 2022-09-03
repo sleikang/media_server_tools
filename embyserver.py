@@ -11,6 +11,7 @@ class embyserver:
     languagelist = None
     threadpool = None
     tasklist = None
+    updatepeople = None
     err = None
 
     """
@@ -20,12 +21,13 @@ class embyserver:
     :param tmdbkey Tmdb ApiKey
     :param threadnum 线程数量 
     """
-    def __init__(self, embyhost : str, embyuserid : str, embykey : str, tmdbkey : str, threadnum : int = 10) -> None:
+    def __init__(self, embyhost : str, embyuserid : str, embykey : str, tmdbkey : str, threadnum : int = 10, updatepeople : int = False) -> None:
         self.embyclient = emby(host=embyhost, userid=embyuserid, key=embykey)
         self.tmdbclient = tmdb(key=tmdbkey)
         self.languagelist = ['zh-CN', 'zh-SG', 'zh-TW']
         self.threadpool = ThreadPoolExecutor(max_workers=threadnum)
         self.tasklist = []
+        self.updatepeople = updatepeople
 
     """
     更新媒体中文名称
@@ -40,6 +42,7 @@ class embyserver:
         ret = self.__check_media_info__(itemlist=itmes)
         for task in self.tasklist:
             task.result()
+        self.tasklist.clear()
         self.threadpool.shutdown(wait=True)
         return ret
 
@@ -96,7 +99,7 @@ class embyserver:
                     iteminfo['LockedFields'] = ['Name']
                     updatename = True
                     
-            if 'People' in iteminfo:
+            if self.updatepeople and 'People' in iteminfo:
                 for people in iteminfo['People']:
                     if self.__is_chinese__(string=people['Name'], mode=2) and not self.__is_chinese__(string=people['Name'], mode=3):
                         if not re.match(pattern='\s+', string=people['Name']):
