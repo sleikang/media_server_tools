@@ -46,6 +46,9 @@ class embyserver:
                     if ret == False:
                         print('获取Emby媒体信息失败, {}'.format(self.embyclient.err))
                         continue
+                    if 'Tmdb' not in iteminfo['ProviderIds']:
+                        print('媒体[{}]Tmdb不存在'.format(item['Id']))
+                        continue
                     if 'Series' in item['Type']:
                         ret, name = self.__gettmdbname__(type=1, id=iteminfo['ProviderIds']['Tmdb'])
                     else:
