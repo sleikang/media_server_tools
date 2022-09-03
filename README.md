@@ -1,5 +1,5 @@
 # EmbyChineseNameSynchronous
-Emby 英文媒体标题自动同步中文标题
+Emby 英文媒体标题自动同步中文标题和中文人名
 
 使用说明看main.py文件，配置完成直接运行main.py即可
 
