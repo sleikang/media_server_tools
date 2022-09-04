@@ -47,6 +47,25 @@ class tmdb:
         except Exception as result:
             self.err = "异常错误：{}".format(result)
             return False, iteminfo
+
+    """
+    获取tv季信息
+    :param tvid
+    :return True or False, iteminfo
+    """
+    def get_tv_season_info(self, tvid : str, seasonid : str, language : str = 'zh-CN'):
+        iteminfo = {}
+        try:
+            url = '{}/tv/{}/season/{}?api_key={}&language={}&append_to_response=alternative_titles'.format(self.host, tvid, seasonid, self.key, language)
+            p = requests.get(url)
+            if p.status_code != 200:
+                self.err = p.text
+                return False, iteminfo
+            iteminfo = json.loads(p.text)
+            return True, iteminfo
+        except Exception as result:
+            self.err = "异常错误：{}".format(result)
+            return False, iteminfo
     
     """
     获取人物信息
