@@ -118,7 +118,7 @@ class embyserver:
                     else:
                         name = re.sub(pattern='\s+', repl='', string=name)
                         name = zhconv.convert(peopleinfo['Name'], 'zh-cn')
-                        originalpeoplename = people['Name']
+                    originalpeoplename = people['Name']
                     peopleinfo['Name'] = name
                     peopleinfo['LockedFields'] = ['Name']
                     people['Name'] = name
