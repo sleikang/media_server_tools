@@ -27,11 +27,13 @@ tmdbkey = '$TMDBKEY'
 threadnum = $THREADNUM
 #是否刷新人名
 updatepeople = $UPDATEPEOPLE
+#是否更新概述
+updateoverview = $UPDATEOVERVIEW
 #每次刷新全部媒体间隔时间 [小时]
 updatetime = $UPDATETIME
 
 if __name__ == '__main__':
-    embymediaclient = embyserver(embyhost=embyhost, embyuserid=embyuserid, embykey=embykey, tmdbkey=tmdbkey, threadnum=threadnum, updatepeople=updatepeople)
+    embymediaclient = embyserver(embyhost=embyhost, embyuserid=embyuserid, embykey=embykey, tmdbkey=tmdbkey, threadnum=threadnum, updatepeople=updatepeople, updateoverview=updateoverview)
     while True:
         try:
             print('开始刷新媒体库元数据')
