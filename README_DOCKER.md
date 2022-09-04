@@ -10,6 +10,7 @@ docker run -itd \
   -e TMDBKEY=tmdbkey \
   -e THREADNUM=16 \
   -e UPDATEPEOPLE=True \
+  -e UPDATEOVERVIEW=True \
   -e UPDATETIME=1 \
   -e TZ=Asia/Shanghai \
   ddsderek/embychinesenamesynchronous:latest
@@ -31,6 +32,7 @@ services:
             - TMDBKEY=tmdbkey
             - THREADNUM=16
             - UPDATEPEOPLE=True
+            - UPDATEOVERVIEW=True
             - UPDATETIME=1
             - TZ=Asia/Shanghai
         image: 'ddsderek/embychinesenamesynchronous:latest'
