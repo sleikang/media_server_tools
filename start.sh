@@ -7,6 +7,9 @@ touch /setting.lock
 mkdir -p /opt/logs
 touch /opt/logs/EmbyChineseNameSynchronous.log
 
+ln -sf /usr/share/zoneinfo/$TZ   /etc/localtime
+echo $TZ > /etc/timezone
+
 cat > /opt/main.py <<EOF
 import time
 from embyserver import embyserver
@@ -38,6 +41,7 @@ if __name__ == '__main__':
             print(reuslt)
 
 EOF
+
 }
 
 if [ ! -f /setting.lock ]; then
