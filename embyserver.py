@@ -38,12 +38,11 @@ class embyserver:
         if ret == False:
             print('获取Emby媒体列表失败, {}'.format(self.embyclient.err))
             return False
+        self.tasklist = []
         ret = self.__check_media_info__(itemlist=itmes)
         for task in as_completed(self.tasklist):
             ret, name = task.result()
             print('媒体[{}]处理完成'.format(name))
-        self.tasklist.clear()
-        self.threadpool.shutdown(wait=True)
         return ret
 
     """
