@@ -83,13 +83,19 @@ class embyserver:
                 if not ret:
                     print('获取Emby媒体信息失败, {}'.format(self.embyclient.err))
                     return False
-                if 'Tmdb' not in iteminfo['ProviderIds']:
+                if 'Tmdb' not in iteminfo['ProviderIds'] and 'tmdb' not in iteminfo['ProviderIds']:
                     print('媒体[{}]Tmdb不存在'.format(item['Id']))
                     return False
-                if 'Series' in item['Type']:
-                    ret, name = self.__get_media_tmdb_name__(type=1, id=iteminfo['ProviderIds']['Tmdb'])
+                
+                if 'Tmdb' in iteminfo['ProviderIds']:
+                    tmdbid = iteminfo['ProviderIds']['Tmdb']
                 else:
-                    ret, name = self.__get_media_tmdb_name__(type=2, id=iteminfo['ProviderIds']['Tmdb'])
+                    tmdbid = iteminfo['ProviderIds']['tmdb']
+
+                if 'Series' in item['Type']:
+                    ret, name = self.__get_media_tmdb_name__(type=1, id=tmdbid)
+                else:
+                    ret, name = self.__get_media_tmdb_name__(type=2, id=tmdbid)
                     if not ret:
                         return False, item['Name']
                     originalname = iteminfo['Name']
@@ -108,11 +114,15 @@ class embyserver:
                         print('获取Emby人物信息失败, {}'.format(self.embyclient.err))
                         continue
 
-                    if 'Tmdb' not in peopleinfo['ProviderIds']:
+                    if 'Tmdb' not in peopleinfo['ProviderIds'] and 'tmdb' not in peopleinfo['ProviderIds']:
                         print('人物[{}]Tmdb不存在'.format(peopleinfo['Id']))
                         continue
+                    if 'Tmdb' in peopleinfo['ProviderIds']:
+                        tmdbid = peopleinfo['ProviderIds']['Tmdb']
+                    else:
+                        tmdbid = peopleinfo['ProviderIds']['tmdb']
                     if not self.__is_chinese__(string=peopleinfo['Name'], mode=2):
-                        ret, name = self.__get_person_tmdb_name(personid=peopleinfo['ProviderIds']['Tmdb'])
+                        ret, name = self.__get_person_tmdb_name(personid=tmdbid)
                         if not ret:
                             continue
                     else:
