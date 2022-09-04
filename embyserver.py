@@ -98,10 +98,10 @@ class embyserver:
                     ret, name = self.__get_media_tmdb_name__(type=2, id=tmdbid)
                     if not ret:
                         return False, item['Name']
-                    originalname = iteminfo['Name']
-                    iteminfo['Name'] = name
-                    iteminfo['LockedFields'] = ['Name']
-                    updatename = True
+                originalname = iteminfo['Name']
+                iteminfo['Name'] = name
+                iteminfo['LockedFields'] = ['Name']
+                updatename = True
                     
             if self.updatepeople and 'People' in iteminfo:
                 for people in iteminfo['People']:
