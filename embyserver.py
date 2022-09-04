@@ -96,8 +96,8 @@ class embyserver:
                     ret, name = self.__get_media_tmdb_name__(type=1, id=tmdbid)
                 else:
                     ret, name = self.__get_media_tmdb_name__(type=2, id=tmdbid)
-                    if not ret:
-                        return False, item['Name']
+                if not ret:
+                    return False, item['Name']
                 originalname = iteminfo['Name']
                 iteminfo['Name'] = name
                 iteminfo['LockedFields'] = ['Name']
