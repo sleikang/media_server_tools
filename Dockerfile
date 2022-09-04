@@ -6,6 +6,7 @@ ENV EMBYHOST=embyhost \
     TMDBKEY=tmdbkey \
     THREADNUM=16 \
     UPDATEPEOPLE=True \
+    UPDATEOVERVIEW=True \
     UPDATETIME=1 \
     TZ=Asia/Shanghai
 
