@@ -3,15 +3,7 @@
 ```
 docker run -itd \
   --name EmbyChineseNameSynchronous \
-  -v ./logs:/opt/logs \
-  -e EMBYHOST=embyhost \
-  -e EMBYUSERID=embyuserid \
-  -e EMBYKEY=embykey \
-  -e TMDBKEY=tmdbkey \
-  -e THREADNUM=16 \
-  -e UPDATEPEOPLE=True \
-  -e UPDATEOVERVIEW=True \
-  -e UPDATETIME=1 \
+  -v ./config:/opt/config \
   -e TZ=Asia/Shanghai \
   ddsderek/embychinesenamesynchronous:latest
 ```
@@ -24,16 +16,8 @@ services:
     embychinesenamesynchronous:
         container_name: EmbyChineseNameSynchronous
         volumes:
-            - './logs:/opt/logs'
+            - './config:/opt/config'
         environment:
-            - EMBYHOST=embyhost
-            - EMBYUSERID=embyuserid
-            - EMBYKEY=embykey
-            - TMDBKEY=tmdbkey
-            - THREADNUM=16
-            - UPDATEPEOPLE=True
-            - UPDATEOVERVIEW=True
-            - UPDATETIME=1
             - TZ=Asia/Shanghai
         image: 'ddsderek/embychinesenamesynchronous:latest'
 ```
