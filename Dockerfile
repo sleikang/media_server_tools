@@ -10,7 +10,7 @@ RUN apk add --update --no-cache \
     pip install zhconv && \
     pip install requests && \
     pip install simplejson && \
-    pip install yaml && \
+    pip install pyyaml && \
     pip install logging && \
     # 清理
     rm -rf /tmp/* /root/.cache /var/cache/apk/*
