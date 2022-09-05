@@ -8,10 +8,12 @@ RUN apk add --update --no-cache \
     py3-pip \
     bash \
     tzdata && \
+    pip install --upgrade pip setuptools wheel && \
     pip install zhconv && \
     pip install requests && \
     pip install simplejson && \
     pip install pyyaml && \
+    pip install logging && \
     # 清理
     rm -rf /tmp/* /root/.cache /var/cache/apk/*
 
