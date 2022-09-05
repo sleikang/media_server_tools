@@ -11,8 +11,8 @@ RUN apk add --update --no-cache \
     pip install requests && \
     pip install simplejson && \
     pip install pyyaml && \
-    python -m pip install --upgrade setupTools && \
-    python -m pip install --upgrade pip && \
+    python3 -m pip install --upgrade setupTools && \
+    python3 -m pip install --upgrade pip && \
     pip install logging && \
     # 清理
     rm -rf /tmp/* /root/.cache /var/cache/apk/*
