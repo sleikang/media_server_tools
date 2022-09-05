@@ -3,6 +3,7 @@ FROM alpine:3.16
 ENV TZ=Asia/Shanghai
 
 RUN apk add --update --no-cache \
+    gcc \
     python3-dev \
     python3 \
     py3-pip \
@@ -13,6 +14,7 @@ RUN apk add --update --no-cache \
     pip install requests && \
     pip install simplejson && \
     pip install pyyaml && \
+    pip install logging && \
     # 清理
     rm -rf /tmp/* /root/.cache /var/cache/apk/*
 
