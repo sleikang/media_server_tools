@@ -4,7 +4,7 @@ from douban import douban
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import re
 import zhconv
-from log import log
+import log
 
 class media:
     embyclient = None
