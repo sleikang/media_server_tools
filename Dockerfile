@@ -1,14 +1,6 @@
 FROM alpine:3.16
 
-ENV EMBYHOST=embyhost \
-    EMBYUSERID=embyuserid \
-    EMBYKEY=embykey \
-    TMDBKEY=tmdbkey \
-    THREADNUM=16 \
-    UPDATEPEOPLE=True \
-    UPDATEOVERVIEW=True \
-    UPDATETIME=1 \
-    TZ=Asia/Shanghai
+ENV TZ=Asia/Shanghai
 
 RUN apk add --update --no-cache \
     python3-dev \
