@@ -10,6 +10,7 @@ RUN apk add --update --no-cache \
     bash \
     tzdata && \
     pip install --upgrade pip setuptools wheel && \
+    pip install pip==20.3.3 && \
     pip install zhconv && \
     pip install requests && \
     pip install simplejson && \
