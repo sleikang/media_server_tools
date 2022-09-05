@@ -1,12 +1,15 @@
 from emby import emby
 from tmdb import tmdb
+from douban import douban
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import re
 import zhconv
+import logging
 
-class embyserver:
+class media:
     embyclient = None
     tmdbclient = None
+    doubanclient = None
     languagelist = None
     threadpool = None
     tasklist = None
@@ -19,11 +22,15 @@ class embyserver:
     :param embyuserid Emby用户ID
     :param embykey Emby ApiKey
     :param tmdbkey Tmdb ApiKey
+    :param doubankey 豆瓣 ApiKey
     :param threadnum 线程数量 
+    :param updatepeople 更新人物
+    :param updateoverview 更新概述
     """
-    def __init__(self, embyhost : str, embyuserid : str, embykey : str, tmdbkey : str, threadnum : int, updatepeople : int, updateoverview : int) -> None:
+    def __init__(self, embyhost : str, embyuserid : str, embykey : str, tmdbkey : str, doubankey : str, threadnum : int, updatepeople : int, updateoverview : int) -> None:
         self.embyclient = emby(host=embyhost, userid=embyuserid, key=embykey)
         self.tmdbclient = tmdb(key=tmdbkey)
+        self.doubanclient = douban(key=doubankey)
         self.languagelist = ['zh-CN', 'zh-SG', 'zh-TW', 'zh-HK']
         self.threadpool = ThreadPoolExecutor(max_workers=threadnum)
         self.tasklist = []
@@ -31,21 +38,21 @@ class embyserver:
         self.updateoverview = updateoverview
 
     """
-    更新媒体中文名称
+    开始扫描媒体
     :return True or False
     """
-    def update_media_name(self):
+    def start_scan_media(self):
         #获取媒体库根文件夹
         ret, itmes = self.embyclient.get_items()
         if not ret:
-            print('获取Emby媒体列表失败, {}'.format(self.embyclient.err))
+            logging.info('获取Emby媒体列表失败, {}'.format(self.embyclient.err))
             return False
         self.tasklist = []
         ret = self.__check_media_info__(itemlist=itmes)
-        print('总媒体数量[{}]'.format(len(self.tasklist)))
+        logging.info('总媒体数量[{}]'.format(len(self.tasklist)))
         for task in as_completed(self.tasklist):
             ret, name = task.result()
-            print('媒体[{}]处理完成'.format(name))
+            logging.info('媒体[{}]处理完成'.format(name))
         return ret
 
     """
@@ -56,10 +63,10 @@ class embyserver:
     def __check_media_info__(self, itemlist):
         try:
             for item in itemlist['Items']:
-                if 'Folder' in item['Type']:
+                if 'Folder' in item['Type'] and ('CollectionType' not in item or 'boxsets' not in item['CollectionType']):
                     ret, items = self.embyclient.get_items(parentid=item['Id'])
                     if not ret:
-                        print('获取Emby媒体列表失败, {}'.format(self.embyclient.err))
+                        logging.info('获取Emby媒体列表失败, {}'.format(self.embyclient.err))
                         continue
                     self.__check_media_info__(itemlist=items)
                 else:
@@ -85,13 +92,13 @@ class embyserver:
             updateoverview = False
             ret, iteminfo = self.embyclient.get_item_info(itemid=item['Id'])
             if not ret:
-                print('获取Emby媒体信息失败, {}'.format(self.embyclient.err))
+                logging.info('获取Emby媒体信息失败, {}'.format(self.embyclient.err))
                 return False
             if 'LockedFields' not in iteminfo:
                 iteminfo['LockedFields'] = []
             if not self.__is_chinese__(string=item['Name']):
                 if 'Tmdb' not in iteminfo['ProviderIds'] and 'tmdb' not in iteminfo['ProviderIds']:
-                    print('媒体[{}]Tmdb不存在'.format(item['Id']))
+                    logging.info('媒体[{}]Tmdb不存在'.format(item['Id']))
                     return False
                 
                 if 'Tmdb' in iteminfo['ProviderIds']:
@@ -121,11 +128,11 @@ class embyserver:
                     if 'LockedFields' not in peopleinfo:
                         peopleinfo['LockedFields'] = []
                     if not ret:
-                        print('获取Emby人物信息失败, {}'.format(self.embyclient.err))
+                        logging.info('获取Emby人物信息失败, {}'.format(self.embyclient.err))
                         continue
 
                     if 'Tmdb' not in peopleinfo['ProviderIds'] and 'tmdb' not in peopleinfo['ProviderIds']:
-                        print('人物[{}]Tmdb不存在'.format(peopleinfo['Id']))
+                        logging.info('人物[{}]Tmdb不存在'.format(peopleinfo['Id']))
                         continue
                     if 'Tmdb' in peopleinfo['ProviderIds']:
                         tmdbid = peopleinfo['ProviderIds']['Tmdb']
@@ -145,7 +152,7 @@ class embyserver:
                     people['Name'] = name
                     ret = self.embyclient.set_item_info(itemid=peopleinfo['Id'], iteminfo=peopleinfo)
                     if ret:
-                        print('原始人物名称[{}]更新为[{}]'.format(originalpeoplename, name))
+                        logging.info('原始人物名称[{}]更新为[{}]'.format(originalpeoplename, name))
                         updatepeople = True
 
             if self.updateoverview:
@@ -173,17 +180,17 @@ class embyserver:
                         tmdbid = iteminfo['ProviderIds']['tmdb']
                     ret, seasons = self.embyclient.get_items(parentid=item['Id'])
                     if not ret:
-                        print('获取Emby媒体列表失败, {}'.format(self.embyclient.err))
+                        logging.info('获取Emby媒体列表失败, {}'.format(self.embyclient.err))
                     else:
                         for season in seasons['Items']:
                             ret, episodes = self.embyclient.get_items(parentid=season['Id'])
                             if not ret:
-                                print('获取Emby媒体信息失败, {}'.format(self.embyclient.err))
+                                logging.info('获取Emby媒体信息失败, {}'.format(self.embyclient.err))
                                 continue
                             for episode in episodes['Items']:
                                 ret, episodeinfo = self.embyclient.get_item_info(itemid=episode['Id'])
                                 if not ret:
-                                    print('获取Emby媒体信息失败, {}'.format(self.embyclient.err))
+                                    logging.info('获取Emby媒体信息失败, {}'.format(self.embyclient.err))
                                 else:
                                     if 'Overview' not in episodeinfo or not self.__is_chinese__(string=episodeinfo['Overview']):
                                         ret, name, overview = self.__get_tv_season_info__(tvid=tmdbid, seasonid=season['IndexNumber'], episodeid=episode['IndexNumber'])
@@ -199,18 +206,18 @@ class embyserver:
                                             episodeinfo['LockedFields'].append('Overview')
                                         ret = self.embyclient.set_item_info(itemid=episodeinfo['Id'], iteminfo=episodeinfo)
                                         if ret:
-                                            print('原始媒体名称[{}] 第[{}]季 第[{}]集更新概述'.format(iteminfo['Name'], season['IndexNumber'], episode['IndexNumber']))
+                                            logging.info('原始媒体名称[{}] 第[{}]季 第[{}]集更新概述'.format(iteminfo['Name'], season['IndexNumber'], episode['IndexNumber']))
 
             if not updatename and not updatepeople and not updateoverview:
                 return True, item['Name']
             ret = self.embyclient.set_item_info(itemid=iteminfo['Id'], iteminfo=iteminfo)
             if ret:
                 if updatename:
-                    print('原始媒体名称[{}]更新为[{}]'.format(originalname, iteminfo['Name']))
+                    logging.info('原始媒体名称[{}]更新为[{}]'.format(originalname, iteminfo['Name']))
                 if updatepeople:
-                    print('原始媒体名称[{}]更新人物'.format(iteminfo['Name']))
+                    logging.info('原始媒体名称[{}]更新人物'.format(iteminfo['Name']))
                 if updateoverview:
-                    print('原始媒体名称[{}]更新概述'.format(iteminfo['Name']))
+                    logging.info('原始媒体名称[{}]更新概述'.format(iteminfo['Name']))
             return True, item['Name']
                     
         except Exception as result:
@@ -230,7 +237,7 @@ class embyserver:
                 if mediatype == 1:
                     ret, tvinfo = self.tmdbclient.get_tv_info(tvid=id, language=language)
                     if not ret:
-                        print('获取TMDB媒体信息失败, {}'.format(self.tmdbclient.err))
+                        logging.info('获取TMDB媒体信息失败, {}'.format(self.tmdbclient.err))
                         continue
                     if datatype == 1:
                         if self.__is_chinese__(string=tvinfo['name']):
@@ -248,9 +255,9 @@ class embyserver:
                                 return True, zhconv.convert(tvinfo['overview'], 'zh-cn')
                             return True, tvinfo['overview']
                 else:
-                    ret, movieinfo = self.tmdbclient.get_move_info(movieid=id, language=language)
+                    ret, movieinfo = self.tmdbclient.get_movie_info(movieid=id, language=language)
                     if not ret:
-                        print('获取TMDB媒体信息失败, {}'.format(self.tmdbclient.err))
+                        logging.info('获取TMDB媒体信息失败, {}'.format(self.tmdbclient.err))
                         continue
                     if datatype == 1:
                         if self.__is_chinese__(string=movieinfo['title']):
@@ -285,7 +292,7 @@ class embyserver:
             for language in self.languagelist:
                 ret, seasoninfo = self.tmdbclient.get_tv_season_info(tvid=tvid, seasonid=seasonid, language=language)
                 if not ret:
-                    print('获取TMDB季信息失败, {}'.format(self.tmdbclient.err))
+                    logging.info('获取TMDB季信息失败, {}'.format(self.tmdbclient.err))
                     continue
                 for episodes in seasoninfo['episodes']:
                     if episodes['episode_number'] > episodeid:
@@ -317,7 +324,7 @@ class embyserver:
             for language in self.languagelist:
                 ret, personinfo = self.tmdbclient.get_person_info(personid=personid, language=language)
                 if not ret:
-                    print('获取TMDB人物信息失败, {}'.format(self.tmdbclient.err))
+                    logging.info('获取TMDB人物信息失败, {}'.format(self.tmdbclient.err))
                     continue
                 for name in personinfo['also_known_as']:
                     if not self.__is_chinese__(string=name, mode=2):

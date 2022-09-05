@@ -1,30 +1,35 @@
 import time
-from embyserver import embyserver
+from media import media
+import yaml
+import os
+import logging
 
-#EMBY 域名 包含http(s)和端口号后面不带/
-#例如https://xxx.xxx.xxx:8920
-embyhost = ''
-#EMBY 用户ID 进EMBY 用户点击管理员账号配置可以在网址上看到userId
-embyuserid = ''
-#EMBY APIKEY
-embykey = ''
-#TMDB APIKEY
-tmdbkey = ''
-#线程数量
-threadnum = 16
-#是否刷新人名
-updatepeople = True
-#是否更新概述
-updateoverview = True
-#每次刷新全部媒体间隔时间 [小时]
-updatetime = 1
 
 if __name__ == '__main__':
-    embymediaclient = embyserver(embyhost=embyhost, embyuserid=embyuserid, embykey=embykey, tmdbkey=tmdbkey, threadnum=threadnum, updatepeople=updatepeople, updateoverview=updateoverview)
-    while True:
-        try:
-            print('开始刷新媒体库元数据')
-            embymediaclient.update_media_name()
-            print('刷新媒体库元数据完成')
-        except Exception as reuslt:
-            print(reuslt)
+    try:
+        path = os.path.join(os.getcwd(), 'config', 'log.txt')
+        logging.basicConfig(filename=path, level=logging.INFO, format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+        logger = logging.getLogger()
+        streamhandler = logging.StreamHandler()
+        streamhandler.setLevel(logging.DEBUG)
+        logger.addHandler(streamhandler)
+        path = os.path.join(os.getcwd(), 'config', 'config.yaml')
+        # 打开文件
+        file = open(path, "r", encoding="utf-8")
+        if file:
+            config_data = yaml.load(file,Loader=yaml.FullLoader)
+        if not config_data:
+            logging.info('打开配置文件[{}]失败'.format(path))
+        else:
+            system_config = config_data['system']
+            mediaclient = media(embyhost=system_config['embyhost'], embyuserid=system_config['embyuserid'], embykey=system_config['embykey'], tmdbkey=system_config['tmdbkey'], doubankey=system_config['doubankey'], threadnum=system_config['threadnum'], updatepeople=system_config['updatepeople'], updateoverview=system_config['updateoverview'])
+            while True:
+                try:
+                    logging.info('开始刷新媒体库元数据')
+                    mediaclient.start_scan_media()
+                    logging.info('刷新媒体库元数据完成')
+                    time.sleep(system_config['updatetime'] * 3600)
+                except Exception as reuslt:
+                    logging.info(reuslt)
+    except Exception as reuslt:
+        logging.info(reuslt)

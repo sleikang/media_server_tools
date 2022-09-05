@@ -15,7 +15,7 @@ class tmdb:
     :param movieid
     :return True or False, iteminfo
     """
-    def get_move_info(self, movieid : str, language : str = 'zh-CN'):
+    def get_movie_info(self, movieid : str, language : str = 'zh-CN'):
         iteminfo = {}
         try:
             url = '{}/movie/{}?api_key={}&language={}&append_to_response=alternative_titles'.format(self.host, movieid, self.key, language)
