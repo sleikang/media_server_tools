@@ -4,6 +4,7 @@ ENV TZ=Asia/Shanghai
 
 RUN apk add --update --no-cache \
     python3-dev \
+    python3 \
     py3-pip \
     bash \
     tzdata && \
@@ -11,9 +12,6 @@ RUN apk add --update --no-cache \
     pip install requests && \
     pip install simplejson && \
     pip install pyyaml && \
-    python3 -m pip install --upgrade setupTools && \
-    python3 -m pip install --upgrade pip && \
-    pip install logging && \
     # 清理
     rm -rf /tmp/* /root/.cache /var/cache/apk/*
 
