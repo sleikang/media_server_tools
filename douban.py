@@ -71,6 +71,61 @@ class douban:
             self.err = "异常错误：{}".format(result)
             return False, iteminfo
 
+    def get_tv_info(self, tvid : str):
+        """
+        获取电视剧信息
+        :param tvid 电影ID
+        """
+        iteminfo = {}
+        try:
+            url = '{}/tv/{}?apikey={}'.format(self.host, tvid, self.key)
+            p = requests.get(url=url, headers=self.headers)
+            if p.status_code != 200:
+                self.err = p.text
+                return False, iteminfo
+            iteminfo = json.loads(p.text)
+            url = iteminfo['info_url']
+            p = requests.get(url=url, headers=self.headers)
+            if p.status_code != 200:
+                self.err = p.text
+                return False, iteminfo
+            text = html2text.html2text(html=p.text)
+            text = text.replace('/\n', '/ ').replace('# 影片信息\n\n', '')
+            infolist = re.findall(pattern='([\s\S]+?)\s*\|\s*([\s\S]+?)\n', string=text)
+            iteminfo['info'] = {}
+            for info in infolist:
+                if info[0] == '---':
+                    continue
+                valuelist = info[1].split(' / ')
+                if len(valuelist) > 1:
+                    iteminfo['info'][info[0]] = []
+                    for value in valuelist:
+                        iteminfo['info'][info[0]].append(re.sub(pattern='\s+', repl='', string=value))
+                else:
+                    iteminfo['info'][info[0]] = re.sub(pattern='\s+', repl='', string=info[1])
+            return True, iteminfo
+        except Exception as result:
+            self.err = "异常错误：{}".format(result)
+            return False, iteminfo
+
+    def get_tv_celebrities_info(self, tvid : str):
+        """
+        获取演员信息
+        :param tvid 电影ID
+        """
+        iteminfo = {}
+        try:
+            url = '{}/tv/{}/celebrities?apikey={}'.format(self.host, tvid, self.key)
+            p = requests.get(url=url, headers=self.headers)
+            if p.status_code != 200:
+                self.err = p.text
+                return False, iteminfo
+            iteminfo = json.loads(p.text)
+            return True, iteminfo
+        except Exception as result:
+            self.err = "异常错误：{}".format(result)
+            return False, iteminfo
+
     def get_celebrity_info(self, celebrityid : str):
         """
         获取人物信息

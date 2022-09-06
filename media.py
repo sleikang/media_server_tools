@@ -70,7 +70,10 @@ class media:
                         continue
                     self.__check_media_info__(itemlist=items)
                 else:
-                    if 'Series' in item['Type'] or 'Movie' in item['Type']:
+                    """if 'Series' in item['Type'] or 'Movie' in item['Type']:
+                        task = self.threadpool.submit(self.__to_deal_with_item__, item)
+                        self.tasklist.append(task)"""
+                    if 'Series' in item['Type']:
                         task = self.threadpool.submit(self.__to_deal_with_item__, item)
                         self.tasklist.append(task)
 
@@ -180,8 +183,11 @@ class media:
                                 else:
                                     ret, doubancelebritiesinfo = self.__get_media_celebrities_douban_info__(mediatype=2, id=doubanmediainfo['id'])
                             
-                            haspeople = False
+                            
                             for celebrities in doubancelebritiesinfo['directors']:
+                                if 'info' not in celebrities:
+                                    continue
+                                haspeople = False
                                 for imdb in celebrities['info']['extra']['info']:
                                     if imdb[0] != 'IMDb编号':
                                         continue
@@ -193,8 +199,11 @@ class media:
                                     name = celebrities['name']
                                     break
                             
-                            if not haspeople:
+                            if not name:
                                 for celebrities in doubancelebritiesinfo['actors']:
+                                    if 'info' not in celebrities:
+                                        continue
+                                    haspeople = False
                                     for imdb in celebrities['info']['extra']['info']:
                                         if imdb[0] != 'IMDb编号':
                                             continue
@@ -233,6 +242,8 @@ class media:
                             if peopleimdbid and doubanmediainfo and doubancelebritiesinfo:
                                 if people['Type'] == 'Director':
                                     for celebrities in doubancelebritiesinfo['directors']:
+                                        if 'info' not in celebrities:
+                                            continue
                                         haspeople = False
                                         for imdb in celebrities['info']['extra']['info']:
                                             if imdb[0] != 'IMDb编号':
@@ -249,6 +260,9 @@ class media:
                                 
                                 if people['Type'] == 'Actor':
                                     for celebrities in doubancelebritiesinfo['actors']:
+                                        if 'info' not in celebrities:
+                                            continue
+                                        haspeople = False
                                         for imdb in celebrities['info']['extra']['info']:
                                             if imdb[0] != 'IMDb编号':
                                                 continue
@@ -348,7 +362,9 @@ class media:
         :return True or False, celebritiesinfo
         """
         try:
-            if mediatype == 2:
+            if mediatype == 1:
+                ret, celebritiesinfo = self.doubanclient.get_tv_celebrities_info(tvid=id)
+            else:
                 ret, celebritiesinfo = self.doubanclient.get_movie_celebrities_info(movieid=id)
             if not ret:
                 log.info('获取豆瓣媒体演员信息失败, {}'.format(self.doubanclient.err))
@@ -391,6 +407,8 @@ class media:
                         continue
                 if item['target_type'] == 'movie':
                     ret, mediainfo = self.doubanclient.get_movie_info(movieid=item['target_id'])
+                else:
+                    ret, mediainfo = self.doubanclient.get_tv_info(tvid=item['target_id'])
                 if not ret:
                     log.info('获取豆瓣媒体信息失败, {}'.format(self.doubanclient.err))
                     return False, None
