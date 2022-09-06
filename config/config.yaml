@@ -9,7 +9,7 @@ system:
   #TMDB APIKEY
   tmdbkey: ''
   #豆瓣 APIKEY
-  doubankey: ''
+  doubankey: '0ac44ae016490db2204ce0a042db2916'
   #线程数量
   threadnum: 2
   #是否刷新人名

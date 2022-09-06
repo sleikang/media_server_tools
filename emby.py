@@ -10,17 +10,22 @@ class emby:
 
 
     def __init__(self, host : str, userid : str, key : str) -> None:
+        """
+        :param host
+        :param userid
+        :param key
+        """
         self.host = host
         self.userid = userid
         self.key = key
     
 
-    """
-    获取项目列表
-    :param parentid 父文件夹ID
-    :return True or False, items
-    """
     def get_items(self, parentid : str = ''):
+        """
+        获取项目列表
+        :param parentid 父文件夹ID
+        :return True or False, items
+        """
         items = {}
         try:
             if len(parentid):
@@ -37,12 +42,12 @@ class emby:
             self.err = "异常错误：{}".format(result)
             return False, items
 
-    """
-    获取项目
-    :param itemid 项目ID
-    :return True or False, iteminfo
-    """
     def get_item_info(self, itemid : str):
+        """
+        获取项目
+        :param itemid 项目ID
+        :return True or False, iteminfo
+        """
         iteminfo = {}
         try:
             url = '{}/emby/Users/{}/Items/{}?Fields=ChannelMappingInfo&api_key={}'.format(self.host, self.userid, itemid, self.key)
@@ -56,12 +61,12 @@ class emby:
             self.err = "异常错误：{}".format(result)
             return False, iteminfo
 
-    """
-    更新项目
-    :param iteminfo 项目信息
-    :return True or False, iteminfo
-    """
     def set_item_info(self, itemid : str, iteminfo):
+        """
+        更新项目
+        :param iteminfo 项目信息
+        :return True or False, iteminfo
+        """
         try:
             url = '{}/emby/Items/{}?api_key={}'.format(self.host, itemid, self.key)
             headers = {'Content-Type':'application/json'}

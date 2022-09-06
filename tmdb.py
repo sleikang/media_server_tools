@@ -7,15 +7,18 @@ class tmdb:
     err = None
 
     def __init__(self, key : str) -> None:
+        """
+        :param key apikey
+        """
         self.host = 'https://api.themoviedb.org/3'
         self.key = key
 
-    """
-    获取电影信息
-    :param movieid
-    :return True or False, iteminfo
-    """
     def get_movie_info(self, movieid : str, language : str = 'zh-CN'):
+        """
+        获取电影信息
+        :param movieid
+        :return True or False, iteminfo
+        """
         iteminfo = {}
         try:
             url = '{}/movie/{}?api_key={}&language={}&append_to_response=alternative_titles'.format(self.host, movieid, self.key, language)
@@ -29,12 +32,13 @@ class tmdb:
             self.err = "异常错误：{}".format(result)
             return False, iteminfo
 
-    """
-    获取tv信息
-    :param tvid
-    :return True or False, iteminfo
-    """
+
     def get_tv_info(self, tvid : str, language : str = 'zh-CN'):
+        """
+        获取tv信息
+        :param tvid
+        :return True or False, iteminfo
+        """
         iteminfo = {}
         try:
             url = '{}/tv/{}?api_key={}&language={}&append_to_response=alternative_titles'.format(self.host, tvid, self.key, language)
@@ -48,12 +52,12 @@ class tmdb:
             self.err = "异常错误：{}".format(result)
             return False, iteminfo
 
-    """
-    获取tv季信息
-    :param tvid
-    :return True or False, iteminfo
-    """
     def get_tv_season_info(self, tvid : str, seasonid : str, language : str = 'zh-CN'):
+        """
+        获取tv季信息
+        :param tvid
+        :return True or False, iteminfo
+        """
         iteminfo = {}
         try:
             url = '{}/tv/{}/season/{}?api_key={}&language={}&append_to_response=alternative_titles'.format(self.host, tvid, seasonid, self.key, language)
@@ -67,12 +71,12 @@ class tmdb:
             self.err = "异常错误：{}".format(result)
             return False, iteminfo
     
-    """
-    获取人物信息
-    :param personid 人物ID
-    :return True or False, personinfo
-    """
     def get_person_info(self, personid : str, language : str = 'zh-CN'):
+        """
+        获取人物信息
+        :param personid 人物ID
+        :return True or False, personinfo
+        """
         personinfo = {}
         try:
             url = '{}/person/{}?api_key={}&language={}'.format(self.host, personid, self.key, language)
