@@ -1,5 +1,5 @@
 # EmbyChineseNameSynchronous
-Emby 英文媒体标题自动同步中文标题和中文人名
+Emby 媒体标题自动同步中文标题、中文概述、中文人名、中文扮演
 
 
 *  注意使用本工具需要emby本身刮削了tmdb的完整数据，工具只是获取原有的数据进行替换
@@ -11,6 +11,7 @@ Emby 英文媒体标题自动同步中文标题和中文人名
 *  pip install json
 *  pip install yaml
 *  pip install logging
+*  pip install html2text
 
 ![image](https://user-images.githubusercontent.com/23020770/188265314-73610b4e-264d-4b8c-9750-e707512f7fef.png)
 ![image](https://user-images.githubusercontent.com/23020770/188306989-c722673e-2dac-4c79-8cb1-1a4eb3a35aa2.png)
