@@ -14,7 +14,7 @@ RUN apk add --update --no-cache \
     pip install simplejson && \
     pip install pyyaml && \
     pip install html2text && \
-    cp /opt/config/config.yaml /home/config.yaml
+    cp /opt/config/config.yaml /home/config.yaml && \
     # 清理
     rm -rf /tmp/* /root/.cache /var/cache/apk/*
 
