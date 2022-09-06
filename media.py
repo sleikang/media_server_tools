@@ -231,22 +231,23 @@ class media:
                                     ret, doubancelebritiesinfo = self.__get_media_celebrities_douban_info__(mediatype=2, id=doubanmediainfo['id'])
 
                             if peopleimdbid and doubanmediainfo and doubancelebritiesinfo:
-                                haspeople = False
-                                for celebrities in doubancelebritiesinfo['directors']:
-                                    for imdb in celebrities['info']['extra']['info']:
-                                        if imdb[0] != 'IMDb编号':
-                                            continue
-                                        if imdb[1] == peopleimdbid:
+                                if people['Type'] == 'Director':
+                                    for celebrities in doubancelebritiesinfo['directors']:
+                                        haspeople = False
+                                        for imdb in celebrities['info']['extra']['info']:
+                                            if imdb[0] != 'IMDb编号':
+                                                continue
+                                            if imdb[1] == peopleimdbid:
+                                                haspeople = True
+                                                break
+                                        
+                                        if haspeople:
+                                            people['Role'] = re.sub(pattern='饰\s+', repl='', string=celebrities['character'])
+                                            updatepeople = True
                                             haspeople = True
                                             break
-                                    
-                                    if haspeople:
-                                        people['Role'] = re.sub(pattern='饰\s+', repl='', string=celebrities['character'])
-                                        updatepeople = True
-                                        haspeople = True
-                                        break
                                 
-                                if not haspeople:
+                                if people['Type'] == 'Actor':
                                     for celebrities in doubancelebritiesinfo['actors']:
                                         for imdb in celebrities['info']['extra']['info']:
                                             if imdb[0] != 'IMDb编号':
