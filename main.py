@@ -2,7 +2,7 @@ import time
 from media import media
 import yaml
 import os
-import log
+from log import log
 
 
 if __name__ == '__main__':
