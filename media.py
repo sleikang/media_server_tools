@@ -70,10 +70,7 @@ class media:
                         continue
                     self.__check_media_info__(itemlist=items)
                 else:
-                    """if 'Series' in item['Type'] or 'Movie' in item['Type']:
-                        task = self.threadpool.submit(self.__to_deal_with_item__, item)
-                        self.tasklist.append(task)"""
-                    if 'Series' in item['Type']:
+                    if 'Series' in item['Type'] or 'Movie' in item['Type']:
                         task = self.threadpool.submit(self.__to_deal_with_item__, item)
                         self.tasklist.append(task)
 
