@@ -6,15 +6,17 @@ import re
 class douban:
     host = None
     key = None
-    useragent = None
-    headers = None
+    mobileheaders = None
+    pcheaders = None
+    cookie = None
     err = None
 
-    def __init__(self, key : str) -> None:
+    def __init__(self, key : str, cookie : str) -> None:
         self.host = 'https://frodo.douban.com/api/v2'
         self.key = key
-        self.useragent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.27(0x18001b33) NetType/WIFI Language/zh_CN'
-        self.headers = {'User-Agent':self.useragent, 'Referer': 'https://servicewechat.com/wx2f9b06c1de1ccfca/85/page-frame.html', 'content-type': 'application/json', 'Authorization': 'Bearer 4c287a1f8cbc64b3e4796e5ea6352e19', 'Connection': 'keep-alive'}
+        self.cookie = cookie
+        self.mobileheaders = {'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.27(0x18001b33) NetType/WIFI Language/zh_CN', 'Referer': 'https://servicewechat.com/wx2f9b06c1de1ccfca/85/page-frame.html', 'content-type': 'application/json', 'Authorization': 'Bearer 4c287a1f8cbc64b3e4796e5ea6352e19', 'Connection': 'keep-alive'}
+        self.pcheaders = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 Edg/105.0.1343.27', 'Referer': 'https://movie.douban.com/', 'Cookie': self.cookie, 'Connection': 'keep-alive'}
 
     def get_movie_info(self, movieid : str):
         """
@@ -24,13 +26,13 @@ class douban:
         iteminfo = {}
         try:
             url = '{}/movie/{}?apikey={}'.format(self.host, movieid, self.key)
-            p = requests.get(url=url, headers=self.headers)
+            p = requests.get(url=url, headers=self.mobileheaders)
             if p.status_code != 200:
                 self.err = json.loads(p.text)['localized_message']
                 return False, iteminfo
             iteminfo = json.loads(p.text)
             url = iteminfo['info_url']
-            p = requests.get(url=url, headers=self.headers)
+            p = requests.get(url=url, headers=self.mobileheaders)
             if p.status_code != 200:
                 self.err = json.loads(p.text)['localized_message']
                 return False, iteminfo
@@ -61,7 +63,7 @@ class douban:
         iteminfo = {}
         try:
             url = '{}/movie/{}/celebrities?apikey={}'.format(self.host, movieid, self.key)
-            p = requests.get(url=url, headers=self.headers)
+            p = requests.get(url=url, headers=self.mobileheaders)
             if p.status_code != 200:
                 self.err = json.loads(p.text)['localized_message']
                 return False, iteminfo
@@ -79,13 +81,13 @@ class douban:
         iteminfo = {}
         try:
             url = '{}/tv/{}?apikey={}'.format(self.host, tvid, self.key)
-            p = requests.get(url=url, headers=self.headers)
+            p = requests.get(url=url, headers=self.mobileheaders)
             if p.status_code != 200:
                 self.err = json.loads(p.text)['localized_message']
                 return False, iteminfo
             iteminfo = json.loads(p.text)
             url = iteminfo['info_url']
-            p = requests.get(url=url, headers=self.headers)
+            p = requests.get(url=url, headers=self.mobileheaders)
             if p.status_code != 200:
                 self.err = json.loads(p.text)['localized_message']
                 return False, iteminfo
@@ -116,7 +118,7 @@ class douban:
         iteminfo = {}
         try:
             url = '{}/tv/{}/celebrities?apikey={}'.format(self.host, tvid, self.key)
-            p = requests.get(url=url, headers=self.headers)
+            p = requests.get(url=url, headers=self.mobileheaders)
             if p.status_code != 200:
                 self.err = json.loads(p.text)['localized_message']
                 return False, iteminfo
@@ -135,7 +137,7 @@ class douban:
         iteminfo = {}
         try:
             url = '{}/celebrity/{}?apikey={}'.format(self.host, celebrityid, self.key)
-            p = requests.get(url=url, headers=self.headers)
+            p = requests.get(url=url, headers=self.mobileheaders)
             if p.status_code != 200:
                 self.err = json.loads(p.text)['localized_message']
                 return False, iteminfo
@@ -145,19 +147,28 @@ class douban:
             self.err = "异常错误：{}".format(result)
             return False, iteminfo
 
-    def search_movie(self, title : str):
+    def search_media_pc(self, title : str):
         """
         搜索电影信息
         :param title 标题
         """
         iteminfo = {}
         try:
-            url = '{}/search/movie?q={}&start=0&count=2&apikey={}'.format(self.host, title, self.key)
-            p = requests.get(url=url, headers=self.headers)
+            url = 'https://movie.douban.com/j/subject_suggest?q={}'.format(title)
+            p = requests.get(url=url, headers=self.pcheaders)
             if p.status_code != 200:
-                self.err = json.loads(p.text)['localized_message']
+                self.err = p.text
                 return False, iteminfo
-            iteminfo = json.loads(p.text)
+            medialist = json.loads(p.text)
+            for media in medialist:
+                if re.search(pattern='第[\s\S]+季', string=media['title']):
+                    media['target_type'] = 'tv'
+                else:
+                    media['target_type'] = media['type']
+                media['target_id'] = media['id']
+                media.pop('type')
+                media.pop('id')
+            iteminfo['items'] = medialist
             return True, iteminfo
         except Exception as result:
             self.err = "异常错误：{}".format(result)
@@ -165,13 +176,31 @@ class douban:
 
     def search_media(self, title : str):
         """
+        搜索电影信息
+        :param title 标题
+        """
+        iteminfo = {}
+        try:
+            url = '{}/search/movie?q={}&start=0&count=2&apikey={}'.format(self.host, title, self.key)
+            p = requests.get(url=url, headers=self.mobileheaders)
+            if p.status_code != 200:
+                self.err = json.loads(p.text)['localized_message']
+                return False, iteminfo
+            iteminfo = json.loads(p.text)
+            return True, iteminfo
+        except Exception as result:
+            self.err = "异常错误：{}".format(result)
+            return False, iteminfo
+
+    def search_media_weixin(self, title : str):
+        """
         搜索媒体信息
         :param title 标题
         """
         iteminfo = {}
         try:
             url = '{}/search/weixin?q={}&start=0&count=3&apikey={}'.format(self.host, title, self.key)
-            p = requests.get(url=url, headers=self.headers)
+            p = requests.get(url=url, headers=self.mobileheaders)
             if p.status_code != 200:
                 self.err = json.loads(p.text)['localized_message']
                 return False, iteminfo

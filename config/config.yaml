@@ -10,6 +10,8 @@ system:
   tmdbkey: ''
   #豆瓣 APIKEY
   doubankey: '0ac44ae016490db2204ce0a042db2916'
+  #豆瓣PC cookie
+  doubancookie: ''
   #线程数量 豆瓣API有请求频率限制建议线程数量不要过多
   threadnum: 1
   #是否刷新人名

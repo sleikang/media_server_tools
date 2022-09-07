@@ -29,7 +29,7 @@ class media:
             self.configload = False
             self.embyclient = emby(host=configinfo.systemdata['embyhost'], userid=configinfo.systemdata['embyuserid'], key=configinfo.systemdata['embykey'])
             self.tmdbclient = tmdb(key=configinfo.systemdata['tmdbkey'])
-            self.doubanclient = douban(key=configinfo.systemdata['doubankey'])
+            self.doubanclient = douban(key=configinfo.systemdata['doubankey'], cookie=configinfo.systemdata['doubancookie'])
             self.languagelist = ['zh-CN', 'zh-SG', 'zh-TW', 'zh-HK']
             self.threadpool = ThreadPoolExecutor(max_workers=configinfo.systemdata['threadnum'])
             self.tasklist = []
@@ -429,9 +429,11 @@ class media:
         :return True or False, mediainfo
         """
         try:
-            ret, items = self.doubanclient.search_movie(name)
+            ret, items = self.doubanclient.search_media_pc(name)
             if not ret:
                 ret, items = self.doubanclient.search_media(name)
+            if not ret:
+                ret, items = self.doubanclient.search_media_weixin(name)
             if not ret:
                 log.info('豆瓣搜索媒体[{}]失败, {}'.format(name, str(self.doubanclient.err)))
                 return False, None
