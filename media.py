@@ -59,7 +59,10 @@ class media:
         log.info('总媒体数量[{}]'.format(len(self.tasklist)))
         for task in as_completed(self.tasklist):
             ret, name = task.result()
-            log.info('媒体[{}]处理完成'.format(name))
+            if ret:
+                log.info('媒体[{}]处理完成'.format(name))
+            else:
+                log.info('媒体[{}]处理失败'.format(name))
         return ret
 
     def __check_media_info__(self, itemlist):
@@ -189,7 +192,7 @@ class media:
                             
                             if doubancelebritiesinfo:
                                 ret, celebrities = self.__get_people_info__(celebritiesinfo=doubancelebritiesinfo, people=people, imdbid=peopleimdbid)
-                                if ret:
+                                if ret and self.__is_chinese__(string=celebrities['name']):
                                     peoplename = celebrities['name']
                         if not peoplename:
                             if self.__is_chinese__(string=peopleinfo['Name'], mode=2):
@@ -227,7 +230,7 @@ class media:
                                 if ret:
                                     people['Role'] = re.sub(pattern='饰\s+', repl='', string=celebrities['character'])
                                     updatepeople = True
-                                    if people['Name'] != celebrities['name']:
+                                    if people['Name'] != celebrities['name'] and self.__is_chinese__(string=celebrities['name']):
                                         originalpeoplename = people['Name']
                                         peopleinfo['Name'] = celebrities['name']
                                         people['Name'] = celebrities['name']
@@ -451,8 +454,11 @@ class media:
                 if not ret:
                     log.info('获取豆瓣媒体信息失败, {}'.format(self.doubanclient.err))
                     return False, None
+                if 'IMDb' not in mediainfo['info']:
+                    continue
                 if mediainfo['info']['IMDb'] == id:
                     return True, mediainfo
+            return False, None
         except Exception as result:
             log.info("异常错误：{}".format(result))
             return False, None    
