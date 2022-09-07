@@ -10,8 +10,8 @@ Emby 媒体标题自动同步中文标题、中文概述、中文人名、中文
 *  pip install requests
 *  pip install json
 *  pip install yaml
-*  pip install logging
 *  pip install html2text
+4. 启动 cmd输入python main.py
 
 ![image](https://user-images.githubusercontent.com/23020770/188265314-73610b4e-264d-4b8c-9750-e707512f7fef.png)
 ![image](https://user-images.githubusercontent.com/23020770/188306989-c722673e-2dac-4c79-8cb1-1a4eb3a35aa2.png)
