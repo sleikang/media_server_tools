@@ -10,11 +10,13 @@ system:
   tmdbkey: ''
   #豆瓣 APIKEY
   doubankey: '0ac44ae016490db2204ce0a042db2916'
-  #线程数量
-  threadnum: 2
+  #线程数量 豆瓣API有请求频率限制建议线程数量不要过多
+  threadnum: 1
   #是否刷新人名
   updatepeople: True
   #是否更新概述
   updateoverview: True
   #每次刷新全部媒体间隔时间 [小时]
   updatetime: 1
+  #任务完成等待时间 [秒] 豆瓣API有请求频率限制建议时间可以设置长一点
+  taskdonespace: 1

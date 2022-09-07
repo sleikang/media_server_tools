@@ -26,13 +26,13 @@ class douban:
             url = '{}/movie/{}?apikey={}'.format(self.host, movieid, self.key)
             p = requests.get(url=url, headers=self.headers)
             if p.status_code != 200:
-                self.err = p.text
+                self.err = json.loads(p.text)['localized_message']
                 return False, iteminfo
             iteminfo = json.loads(p.text)
             url = iteminfo['info_url']
             p = requests.get(url=url, headers=self.headers)
             if p.status_code != 200:
-                self.err = p.text
+                self.err = json.loads(p.text)['localized_message']
                 return False, iteminfo
             text = html2text.html2text(html=p.text)
             text = text.replace('/\n', '/ ').replace('# 影片信息\n\n', '')
@@ -63,7 +63,7 @@ class douban:
             url = '{}/movie/{}/celebrities?apikey={}'.format(self.host, movieid, self.key)
             p = requests.get(url=url, headers=self.headers)
             if p.status_code != 200:
-                self.err = p.text
+                self.err = json.loads(p.text)['localized_message']
                 return False, iteminfo
             iteminfo = json.loads(p.text)
             return True, iteminfo
@@ -81,13 +81,13 @@ class douban:
             url = '{}/tv/{}?apikey={}'.format(self.host, tvid, self.key)
             p = requests.get(url=url, headers=self.headers)
             if p.status_code != 200:
-                self.err = p.text
+                self.err = json.loads(p.text)['localized_message']
                 return False, iteminfo
             iteminfo = json.loads(p.text)
             url = iteminfo['info_url']
             p = requests.get(url=url, headers=self.headers)
             if p.status_code != 200:
-                self.err = p.text
+                self.err = json.loads(p.text)['localized_message']
                 return False, iteminfo
             text = html2text.html2text(html=p.text)
             text = text.replace('/\n', '/ ').replace('# 影片信息\n\n', '')
@@ -118,7 +118,7 @@ class douban:
             url = '{}/tv/{}/celebrities?apikey={}'.format(self.host, tvid, self.key)
             p = requests.get(url=url, headers=self.headers)
             if p.status_code != 200:
-                self.err = p.text
+                self.err = json.loads(p.text)['localized_message']
                 return False, iteminfo
             iteminfo = json.loads(p.text)
             return True, iteminfo
@@ -137,7 +137,7 @@ class douban:
             url = '{}/celebrity/{}?apikey={}'.format(self.host, celebrityid, self.key)
             p = requests.get(url=url, headers=self.headers)
             if p.status_code != 200:
-                self.err = p.text
+                self.err = json.loads(p.text)['localized_message']
                 return False, iteminfo
             iteminfo = json.loads(p.text)
             return True, iteminfo
@@ -152,10 +152,10 @@ class douban:
         """
         iteminfo = {}
         try:
-            url = '{}/search/weixin?q={}&start=0&count=5&apikey={}'.format(self.host, title, self.key)
+            url = '{}/search/movie?q={}&start=0&count=2&apikey={}'.format(self.host, title, self.key)
             p = requests.get(url=url, headers=self.headers)
             if p.status_code != 200:
-                self.err = p.text
+                self.err = json.loads(p.text)['localized_message']
                 return False, iteminfo
             iteminfo = json.loads(p.text)
             return True, iteminfo
@@ -163,4 +163,20 @@ class douban:
             self.err = "异常错误：{}".format(result)
             return False, iteminfo
 
-    
+    def search_media(self, title : str):
+        """
+        搜索媒体信息
+        :param title 标题
+        """
+        iteminfo = {}
+        try:
+            url = '{}/search/weixin?q={}&start=0&count=3&apikey={}'.format(self.host, title, self.key)
+            p = requests.get(url=url, headers=self.headers)
+            if p.status_code != 200:
+                self.err = json.loads(p.text)['localized_message']
+                return False, iteminfo
+            iteminfo = json.loads(p.text)
+            return True, iteminfo
+        except Exception as result:
+            self.err = "异常错误：{}".format(result)
+            return False, iteminfo

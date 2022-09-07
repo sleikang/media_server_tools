@@ -16,7 +16,7 @@ if __name__ == '__main__':
             log.info('打开配置文件[{}]失败'.format(path))
         else:
             system_config = config_data['system']
-            mediaclient = media(embyhost=system_config['embyhost'], embyuserid=system_config['embyuserid'], embykey=system_config['embykey'], tmdbkey=system_config['tmdbkey'], doubankey=system_config['doubankey'], threadnum=system_config['threadnum'], updatepeople=system_config['updatepeople'], updateoverview=system_config['updateoverview'])
+            mediaclient = media(embyhost=system_config['embyhost'], embyuserid=system_config['embyuserid'], embykey=system_config['embykey'], tmdbkey=system_config['tmdbkey'], doubankey=system_config['doubankey'], threadnum=system_config['threadnum'], updatepeople=system_config['updatepeople'], updateoverview=system_config['updateoverview'], taskdonespace=system_config['taskdonespace'])
             while True:
                 try:
                     log.info('开始刷新媒体库元数据')

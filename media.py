@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import re
 import zhconv
 from log import log
+import time
 
 class media:
     embyclient = None
@@ -15,9 +16,10 @@ class media:
     tasklist = None
     updatepeople = None
     updateoverview = None
+    taskdonespace = None
     err = None
 
-    def __init__(self, embyhost : str, embyuserid : str, embykey : str, tmdbkey : str, doubankey : str, threadnum : int, updatepeople : int, updateoverview : int) -> None:
+    def __init__(self, embyhost : str, embyuserid : str, embykey : str, tmdbkey : str, doubankey : str, threadnum : int, updatepeople : int, updateoverview : int, taskdonespace : float) -> None:
         """
         :param embyhost Emby地址
         :param embyuserid Emby用户ID
@@ -27,6 +29,7 @@ class media:
         :param threadnum 线程数量 
         :param updatepeople 更新人物
         :param updateoverview 更新概述
+        :param taskdonespace 任务完成间隔
         """
         self.embyclient = emby(host=embyhost, userid=embyuserid, key=embykey)
         self.tmdbclient = tmdb(key=tmdbkey)
@@ -36,6 +39,7 @@ class media:
         self.tasklist = []
         self.updatepeople = updatepeople
         self.updateoverview = updateoverview
+        self.taskdonespace = taskdonespace
 
     def start_scan_media(self):
         """
@@ -143,7 +147,9 @@ class media:
                     if not ret:
                         log.info('获取Emby人物信息失败, {}'.format(self.embyclient.err))
                         continue
-
+                    
+                    peopleimdbid = None
+                    peopletmdbid = None
                     if 'Tmdb' in peopleinfo['ProviderIds']:
                         peopletmdbid = peopleinfo['ProviderIds']['Tmdb']
                     elif 'tmdb' in peopleinfo['ProviderIds']:
@@ -272,7 +278,25 @@ class media:
                                             updatepeople = True
                                             haspeople = True
                                             break 
-                                 
+                    time.sleep(0.1)
+                
+                directorpeoples = []
+                actorpeoples = []
+                peoples = []
+                for people in iteminfo['People']:
+                    if people['Type'] == 'Director':
+                        if people['Name'] not in directorpeoples:
+                            directorpeoples.append(people['Name'])
+                            peoples.append(people)
+                        else:
+                            updatepeople = True
+                    elif people['Type'] == 'Actor':
+                        if people['Name'] not in actorpeoples:
+                            actorpeoples.append(people['Name'])
+                            peoples.append(people)
+                        else:
+                            updatepeople = True
+                iteminfo['People'] = peoples
 
             if self.updateoverview:
                 if 'Overview' not in iteminfo or not self.__is_chinese__(string=iteminfo['Overview']):
@@ -345,6 +369,7 @@ class media:
                     log.info('原始媒体名称[{}]更新人物'.format(iteminfo['Name']))
                 if updateoverview:
                     log.info('原始媒体名称[{}]更新概述'.format(iteminfo['Name']))
+            time.sleep(self.taskdonespace)
             return True, item['Name']
                     
         except Exception as result:
@@ -394,6 +419,9 @@ class media:
         try:
             ret, items = self.doubanclient.search_movie(name)
             if not ret:
+                ret, items = self.doubanclient.search_media(name)
+            if not ret:
+                log.info('豆瓣搜索媒体[{}]失败, {}'.format(name, str(self.doubanclient.err)))
                 return False, None
             for item in items['items']:
                 if mediatype == 1:
