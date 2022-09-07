@@ -20,7 +20,6 @@ class media:
     taskdonespace = None
     delnotimagepeople = None
     configload = None
-    err = None
 
     def __init__(self, configinfo : config) -> None:
         """
@@ -85,7 +84,7 @@ class media:
 
             return True     
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            log.info("异常错误：{}".format(result))
             return False
         
     def __to_deal_with_item__(self, item):
@@ -208,7 +207,7 @@ class media:
                             if ret:
                                 log.info('原始人物名称[{}]更新为[{}]'.format(originalpeoplename, peoplename))
                                 updatepeople = True
-                    elif not self.__is_chinese__(string=people['Role'], mode=2):
+                    elif 'Role' not in people or not self.__is_chinese__(string=people['Role'], mode=2):
                         if imdbid:
                             if not doubanmediainfo:
                                 if 'Series' in item['Type']:
@@ -334,7 +333,7 @@ class media:
             return True, item['Name']
                     
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            log.info("异常错误：{}".format(result))
             return False, item['Name']
 
     def __get_people_info__(self, celebritiesinfo, people, imdbid):
@@ -385,7 +384,7 @@ class media:
             
             return False, None
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            log.info("异常错误：{}".format(result))
             return False, None   
 
     def __get_media_celebrities_douban_info__(self, mediatype : int, id : str):
@@ -417,7 +416,7 @@ class media:
                 celebrities['info'] = info
             return True, celebritiesinfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            log.info("异常错误：{}".format(result))
             return False, None   
 
     def __get_media_douban_info__(self, mediatype : int, name : str, id : str):
@@ -452,7 +451,7 @@ class media:
                 if mediainfo['info']['IMDb'] == id:
                     return True, mediainfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            log.info("异常错误：{}".format(result))
             return False, None    
 
     def __get_media_tmdb_name__(self, mediatype : int, datatype : int, id : str):
@@ -508,7 +507,7 @@ class media:
                     
             return False, None
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            log.info("异常错误：{}".format(result))
             return False, None
 
 
@@ -544,7 +543,7 @@ class media:
 
             return False, None, None
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            log.info("异常错误：{}".format(result))
             return False, None, None
 
     def __get_person_tmdb_name(self, personid):
@@ -568,7 +567,7 @@ class media:
                 break
             return False, None
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            log.info("异常错误：{}".format(result))
             return False, None
 
     def __alternative_name__(self, alternativetitles):
@@ -588,7 +587,7 @@ class media:
                     return True, zhconv.convert(title['title'], 'zh-cn')
                 return True, title['title']
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            log.info("异常错误：{}".format(result))
             return False, None
 
 
