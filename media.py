@@ -6,6 +6,7 @@ import re
 import zhconv
 from log import log
 import time
+from config import config
 
 class media:
     embyclient = None
@@ -17,35 +18,38 @@ class media:
     updatepeople = None
     updateoverview = None
     taskdonespace = None
+    delnotimagepeople = None
+    configload = None
     err = None
 
-    def __init__(self, embyhost : str, embyuserid : str, embykey : str, tmdbkey : str, doubankey : str, threadnum : int, updatepeople : int, updateoverview : int, taskdonespace : float) -> None:
+    def __init__(self, configinfo : config) -> None:
         """
-        :param embyhost Emby地址
-        :param embyuserid Emby用户ID
-        :param embykey Emby ApiKey
-        :param tmdbkey Tmdb ApiKey
-        :param doubankey 豆瓣 ApiKey
-        :param threadnum 线程数量 
-        :param updatepeople 更新人物
-        :param updateoverview 更新概述
-        :param taskdonespace 任务完成间隔
+        :param configinfo 配置
         """
-        self.embyclient = emby(host=embyhost, userid=embyuserid, key=embykey)
-        self.tmdbclient = tmdb(key=tmdbkey)
-        self.doubanclient = douban(key=doubankey)
-        self.languagelist = ['zh-CN', 'zh-SG', 'zh-TW', 'zh-HK']
-        self.threadpool = ThreadPoolExecutor(max_workers=threadnum)
-        self.tasklist = []
-        self.updatepeople = updatepeople
-        self.updateoverview = updateoverview
-        self.taskdonespace = taskdonespace
+        try:
+            self.configload = False
+            self.embyclient = emby(host=configinfo.systemdata['embyhost'], userid=configinfo.systemdata['embyuserid'], key=configinfo.systemdata['embykey'])
+            self.tmdbclient = tmdb(key=configinfo.systemdata['tmdbkey'])
+            self.doubanclient = douban(key=configinfo.systemdata['doubankey'])
+            self.languagelist = ['zh-CN', 'zh-SG', 'zh-TW', 'zh-HK']
+            self.threadpool = ThreadPoolExecutor(max_workers=configinfo.systemdata['threadnum'])
+            self.tasklist = []
+            self.updatepeople = configinfo.systemdata['updatepeople']
+            self.updateoverview = configinfo.systemdata['updateoverview']
+            self.taskdonespace = configinfo.systemdata['taskdonespace']
+            self.delnotimagepeople = configinfo.systemdata['delnotimagepeople']
+            self.configload = True
+        except Exception as reuslt:
+            log.info('配置异常错误, {}'.format(reuslt))
 
     def start_scan_media(self):
         """
         开始扫描媒体
         :return True or False
         """
+        if not self.configload:
+            log.info('配置未正常加载')
+            return False
         #获取媒体库根文件夹
         ret, itmes = self.embyclient.get_items()
         if not ret:
@@ -119,7 +123,7 @@ class media:
                 if not tmdbid and not imdbid:
                     log.info('Emby媒体[{}]Tmdb|Imdb不存在'.format(item['Id']))
                     return False
-
+                name = None
                 if tmdbid:
                     if 'Series' in item['Type']:
                         ret, name = self.__get_media_tmdb_name__(mediatype=1, datatype=1, id=tmdbid)
@@ -150,6 +154,7 @@ class media:
                     
                     peopleimdbid = None
                     peopletmdbid = None
+                    peoplename = None
                     if 'Tmdb' in peopleinfo['ProviderIds']:
                         peopletmdbid = peopleinfo['ProviderIds']['Tmdb']
                     elif 'tmdb' in peopleinfo['ProviderIds']:
@@ -167,13 +172,9 @@ class media:
                         if not peopletmdbid and not peopleimdbid:
                             log.info('Emby人物[{}]Tmdb|Imdb不存在'.format(peopleinfo['Id']))
                             continue
-                        if self.__is_chinese__(string=peopleinfo['Name'], mode=2):
-                            name = re.sub(pattern='\s+', repl='', string=name)
-                            name = zhconv.convert(peopleinfo['Name'], 'zh-cn')
-                        elif peopletmdbid:
-                            ret, name = self.__get_person_tmdb_name(personid=peopletmdbid)
 
-                        if peopleimdbid and imdbid and not name:
+
+                        if peopleimdbid and imdbid:
                             if not doubanmediainfo:
                                 if 'Series' in item['Type']:
                                     ret, doubanmediainfo = self.__get_media_douban_info__(mediatype=1, name=item['Name'], id=imdbid)
@@ -186,47 +187,26 @@ class media:
                                 else:
                                     ret, doubancelebritiesinfo = self.__get_media_celebrities_douban_info__(mediatype=2, id=doubanmediainfo['id'])
                             
-                            
-                            for celebrities in doubancelebritiesinfo['directors']:
-                                if 'info' not in celebrities:
-                                    continue
-                                haspeople = False
-                                for imdb in celebrities['info']['extra']['info']:
-                                    if imdb[0] != 'IMDb编号':
-                                        continue
-                                    if imdb[1] == peopleimdbid:
-                                        haspeople = True
-                                        break
-                                
-                                if haspeople:
-                                    name = celebrities['name']
-                                    break
-                            
-                            if not name:
-                                for celebrities in doubancelebritiesinfo['actors']:
-                                    if 'info' not in celebrities:
-                                        continue
-                                    haspeople = False
-                                    for imdb in celebrities['info']['extra']['info']:
-                                        if imdb[0] != 'IMDb编号':
-                                            continue
-                                        if imdb[1] == peopleimdbid:
-                                            haspeople = True
-                                            break
-                                    
-                                    if haspeople:
-                                        name = celebrities['name']
-                                        break
-                            
-                        if name:
+                            if doubancelebritiesinfo:
+                                ret, celebrities = self.__get_people_info__(celebritiesinfo=doubancelebritiesinfo, people=people, imdbid=peopleimdbid)
+                                if ret:
+                                    peoplename = celebrities['name']
+                        if not peoplename:
+                            if self.__is_chinese__(string=peopleinfo['Name'], mode=2):
+                                peoplename = re.sub(pattern='\s+', repl='', string=peopleinfo['Name'])
+                                peoplename = zhconv.convert(peopleinfo['Name'], 'zh-cn')
+                            elif peopletmdbid:
+                                ret, peoplename = self.__get_person_tmdb_name(personid=peopletmdbid)
+
+                        if peoplename:
                             originalpeoplename = people['Name']
-                            peopleinfo['Name'] = name
+                            peopleinfo['Name'] = peoplename
                             if 'Name' not in peopleinfo['LockedFields']:
                                 peopleinfo['LockedFields'].append('Name')
-                            people['Name'] = name
+                            people['Name'] = peoplename
                             ret = self.embyclient.set_item_info(itemid=peopleinfo['Id'], iteminfo=peopleinfo)
                             if ret:
-                                log.info('原始人物名称[{}]更新为[{}]'.format(originalpeoplename, name))
+                                log.info('原始人物名称[{}]更新为[{}]'.format(originalpeoplename, peoplename))
                                 updatepeople = True
                     elif not self.__is_chinese__(string=people['Role'], mode=2):
                         if imdbid:
@@ -243,47 +223,28 @@ class media:
                                     ret, doubancelebritiesinfo = self.__get_media_celebrities_douban_info__(mediatype=2, id=doubanmediainfo['id'])
 
                             if peopleimdbid and doubanmediainfo and doubancelebritiesinfo:
-                                if people['Type'] == 'Director':
-                                    for celebrities in doubancelebritiesinfo['directors']:
-                                        if 'info' not in celebrities:
-                                            continue
-                                        haspeople = False
-                                        for imdb in celebrities['info']['extra']['info']:
-                                            if imdb[0] != 'IMDb编号':
-                                                continue
-                                            if imdb[1] == peopleimdbid:
-                                                haspeople = True
-                                                break
-                                        
-                                        if haspeople:
-                                            people['Role'] = re.sub(pattern='饰\s+', repl='', string=celebrities['character'])
-                                            updatepeople = True
-                                            haspeople = True
-                                            break
+                                ret, celebrities = self.__get_people_info__(celebritiesinfo=doubancelebritiesinfo, people=people, imdbid=peopleimdbid)
+                                if ret:
+                                    people['Role'] = re.sub(pattern='饰\s+', repl='', string=celebrities['character'])
+                                    updatepeople = True
+                                    if people['Name'] != celebrities['name']:
+                                        originalpeoplename = people['Name']
+                                        peopleinfo['Name'] = celebrities['name']
+                                        people['Name'] = celebrities['name']
+                                        ret = self.embyclient.set_item_info(itemid=peopleinfo['Id'], iteminfo=peopleinfo)
+                                        if ret:
+                                            log.info('原始人物名称[{}]更新为[{}]'.format(originalpeoplename, people['Name']))
                                 
-                                if people['Type'] == 'Actor':
-                                    for celebrities in doubancelebritiesinfo['actors']:
-                                        if 'info' not in celebrities:
-                                            continue
-                                        haspeople = False
-                                        for imdb in celebrities['info']['extra']['info']:
-                                            if imdb[0] != 'IMDb编号':
-                                                continue
-                                            if imdb[1] == peopleimdbid:
-                                                haspeople = True
-                                                break
-                                        
-                                        if haspeople:
-                                            people['Role'] = re.sub(pattern='饰\s+', repl='', string=celebrities['character'])
-                                            updatepeople = True
-                                            haspeople = True
-                                            break 
                     time.sleep(0.1)
                 
                 directorpeoples = []
                 actorpeoples = []
                 peoples = []
                 for people in iteminfo['People']:
+                    if self.delnotimagepeople:
+                        if 'PrimaryImageTag' not in people:
+                            updatepeople = True
+                            continue
                     if people['Type'] == 'Director':
                         if people['Name'] not in directorpeoples:
                             directorpeoples.append(people['Name'])
@@ -374,7 +335,58 @@ class media:
                     
         except Exception as result:
             self.err = "异常错误：{}".format(result)
-            return False, item['Name']    
+            return False, item['Name']
+
+    def __get_people_info__(self, celebritiesinfo, people, imdbid):
+        """
+        获取人物信息
+        :param celebritiesinfo 演员信息
+        :param 人物信息
+        :param imdbid
+        """
+        try:
+            if people['Type'] == 'Director':
+                for celebrities in celebritiesinfo['directors']:
+                    if 'info' not in celebrities:
+                        continue
+                    haspeople = False
+                    for imdb in celebrities['info']['extra']['info']:
+                        if imdb[0] != 'IMDb编号':
+                            continue
+                        if imdb[1] == imdbid:
+                            haspeople = True
+                            break
+                                        
+                    if haspeople:
+                        return True, celebrities
+
+                for celebrities in celebritiesinfo['directors']:
+                    if people['Name'] == celebrities['name'] or people['Name'] == celebrities['latin_name']:
+                        return True, celebrities
+                                
+            if people['Type'] == 'Actor':
+                for celebrities in celebritiesinfo['actors']:
+                    if 'info' not in celebrities:
+                        continue
+                    haspeople = False
+                    for imdb in celebrities['info']['extra']['info']:
+                        if imdb[0] != 'IMDb编号':
+                            continue
+                        if imdb[1] == imdbid:
+                            haspeople = True
+                            break
+                                        
+                    if haspeople:
+                        return True, celebrities
+
+                for celebrities in celebritiesinfo['actors']:
+                    if people['Name'] == celebrities['name'] or people['Name'] == celebrities['latin_name']:
+                        return True, celebrities
+            
+            return False, None
+        except Exception as result:
+            self.err = "异常错误：{}".format(result)
+            return False, None   
 
     def __get_media_celebrities_douban_info__(self, mediatype : int, id : str):
         """

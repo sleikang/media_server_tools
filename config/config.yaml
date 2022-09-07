@@ -20,3 +20,5 @@ system:
   updatetime: 1
   #任务完成等待时间 [秒] 豆瓣API有请求频率限制建议时间可以设置长一点
   taskdonespace: 1
+  #删除没有头像的演员 强迫症患者福音
+  delnotimagepeople: True
