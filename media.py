@@ -100,10 +100,11 @@ class media:
             ret, iteminfo = self.embyclient.get_item_info(itemid=item['Id'])
             if not ret:
                 log.info('获取Emby媒体信息失败, {}'.format(self.embyclient.err))
-                return False
+                return False, item['Name']
             if 'LockedFields' not in iteminfo:
                 iteminfo['LockedFields'] = []
-
+            tmdbid = None
+            imdbid = None
             if 'Tmdb' in iteminfo['ProviderIds']:
                 tmdbid = iteminfo['ProviderIds']['Tmdb']
             elif 'tmdb' in iteminfo['ProviderIds']:
@@ -120,8 +121,8 @@ class media:
             if not self.__is_chinese__(string=item['Name']):                
 
                 if not tmdbid and not imdbid:
-                    log.info('Emby媒体[{}]Tmdb|Imdb不存在'.format(item['Id']))
-                    return False
+                    log.info('Emby媒体[{}]ID[{}]Tmdb|Imdb不存在'.format(item['Name'], item['Id']))
+                    return False, item['Name']
                 name = None
                 if tmdbid:
                     if 'Series' in item['Type']:
@@ -169,7 +170,7 @@ class media:
                             peopleinfo['LockedFields'] = []
 
                         if not peopletmdbid and not peopleimdbid:
-                            log.info('Emby人物[{}]Tmdb|Imdb不存在'.format(peopleinfo['Id']))
+                            log.info('Emby人物[{}]ID[{}]Tmdb|Imdb不存在'.format(peopleinfo['Name'], peopleinfo['Id']))
                             continue
 
 
@@ -261,8 +262,8 @@ class media:
             if self.updateoverview:
                 if 'Overview' not in iteminfo or not self.__is_chinese__(string=iteminfo['Overview']):
                     if not tmdbid and not imdbid:
-                        log.info('Emby媒体[{}]Tmdb|Imdb不存在'.format(item['Id']))
-                        return False
+                        log.info('Emby媒体[{}]ID[{}]Tmdb|Imdb不存在'.format(item['Name'], item['Id']))
+                        return False, item['Name']
                     ret = False
                     if tmdbid:
                         if 'Series' in item['Type']:
