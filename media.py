@@ -7,6 +7,7 @@ import zhconv
 from log import log
 import time
 from config import config
+from mediasql import mediasql
 
 class media:
     embyclient = None
@@ -20,6 +21,7 @@ class media:
     taskdonespace = None
     delnotimagepeople = None
     configload = None
+    sqlclient = None
 
     def __init__(self, configinfo : config) -> None:
         """
@@ -27,6 +29,7 @@ class media:
         """
         try:
             self.configload = False
+            self.sqlclient = mediasql()
             self.embyclient = emby(host=configinfo.systemdata['embyhost'], userid=configinfo.systemdata['embyuserid'], key=configinfo.systemdata['embykey'])
             self.tmdbclient = tmdb(key=configinfo.systemdata['tmdbkey'])
             self.doubanclient = douban(key=configinfo.systemdata['doubankey'], cookie=configinfo.systemdata['doubancookie'])
@@ -399,24 +402,39 @@ class media:
         :return True or False, celebritiesinfo
         """
         try:
-            if mediatype == 1:
-                ret, celebritiesinfo = self.doubanclient.get_tv_celebrities_info(tvid=id)
-            else:
-                ret, celebritiesinfo = self.doubanclient.get_movie_celebrities_info(movieid=id)
+            ret, celebritiesinfo = self.sqlclient.get_douban_celebrities_info(mediatype=mediatype, id=id)
             if not ret:
-                log.info('获取豆瓣媒体演员信息失败, {}'.format(self.doubanclient.err))
-                return False, None
-            for celebrities in  celebritiesinfo['directors']:
-                ret, info = self.doubanclient.get_celebrity_info(celebrityid=celebrities['id'])
+                if mediatype == 1:
+                    ret, celebritiesinfo = self.doubanclient.get_tv_celebrities_info(tvid=id)
+                else:
+                    ret, celebritiesinfo = self.doubanclient.get_movie_celebrities_info(movieid=id)
                 if not ret:
                     log.info('获取豆瓣媒体演员信息失败, {}'.format(self.doubanclient.err))
-                    continue
+                    return False, None
+                ret = self.sqlclient.write_douban_celebrities_info(mediatype=mediatype, id=id, iteminfo=celebritiesinfo)
+                if not ret:
+                    log.info('保存豆瓣媒体演员信息失败, {}'.format(self.sqlclient.err))
+            for celebrities in  celebritiesinfo['directors']:
+                ret, info = self.sqlclient.get_douban_people_info(id=celebrities['id'])
+                if not ret:
+                    ret, info = self.doubanclient.get_celebrity_info(celebrityid=celebrities['id'])
+                    if not ret:
+                        log.info('获取豆瓣媒体演员信息失败, {}'.format(self.doubanclient.err))
+                        continue
+                    ret = self.sqlclient.write_douban_people_info(id=celebrities['id'], iteminfo=info)
+                    if not ret:
+                        log.info('保存豆瓣媒体演员信息失败, {}'.format(self.sqlclient.err))
                 celebrities['info'] = info
             for celebrities in  celebritiesinfo['actors']:
-                ret, info = self.doubanclient.get_celebrity_info(celebrityid=celebrities['id'])
+                ret, info = self.sqlclient.get_douban_people_info(id=celebrities['id'])
                 if not ret:
-                    log.info('获取豆瓣媒体演员信息失败, {}'.format(self.doubanclient.err))
-                    continue
+                    ret, info = self.doubanclient.get_celebrity_info(celebrityid=celebrities['id'])
+                    if not ret:
+                        log.info('获取豆瓣演员信息失败, {}'.format(self.doubanclient.err))
+                        continue
+                    ret = self.sqlclient.write_douban_people_info(id=celebrities['id'], iteminfo=info)
+                    if not ret:
+                        log.info('保存豆瓣演员信息失败, {}'.format(self.sqlclient.err))
                 celebrities['info'] = info
             return True, celebritiesinfo
         except Exception as result:
@@ -432,31 +450,42 @@ class media:
         :return True or False, mediainfo
         """
         try:
-            ret, items = self.doubanclient.search_media_pc(name)
+            ret, items = self.sqlclient.search_douban_media(mediatype=mediatype, title=name)
             if not ret:
-                ret, items = self.doubanclient.search_media(name)
-            if not ret:
-                ret, items = self.doubanclient.search_media_weixin(name)
-            if not ret:
-                log.info('豆瓣搜索媒体[{}]失败, {}'.format(name, str(self.doubanclient.err)))
-                return False, None
+                ret, items = self.doubanclient.search_media_pc(name)
+                if not ret:
+                    ret, items = self.doubanclient.search_media(name)
+                if not ret:
+                    ret, items = self.doubanclient.search_media_weixin(name)
+                if not ret:
+                    log.info('豆瓣搜索媒体[{}]失败, {}'.format(name, str(self.doubanclient.err)))
+                    return False, None
+
             for item in items['items']:
                 if mediatype == 1:
-                    if item['target_type'] != 'tv':
+                    if 'target_type' in item and item['target_type'] != 'tv':
                         continue
                 elif mediatype == 2:
-                    if item['target_type'] != 'movie':
+                    if 'target_type' in item and item['target_type'] != 'movie':
                         continue
-                if item['target_type'] == 'movie':
-                    ret, mediainfo = self.doubanclient.get_movie_info(movieid=item['target_id'])
-                else:
-                    ret, mediainfo = self.doubanclient.get_tv_info(tvid=item['target_id'])
+                ret, mediainfo = self.sqlclient.get_douban_media_info(mediatype=mediatype, id=item['target_id'])
                 if not ret:
-                    log.info('获取豆瓣媒体信息失败, {}'.format(self.doubanclient.err))
-                    return False, None
+                    if mediatype == 2:
+                        ret, mediainfo = self.doubanclient.get_movie_info(movieid=item['target_id'])
+                    else:
+                        ret, mediainfo = self.doubanclient.get_tv_info(tvid=item['target_id'])
+                    if not ret:
+                        log.info('获取豆瓣媒体信息失败, {}'.format(self.doubanclient.err))
+                        return False, None
+                    ret = self.sqlclient.write_douban_media_info(mediatype=mediatype, id=item['target_id'], iteminfo=mediainfo)
+                    if not ret:
+                        log.info('保存豆瓣媒体信息失败, {}'.format(self.sqlclient.err))
                 if 'IMDb' not in mediainfo['info']:
                     continue
                 if mediainfo['info']['IMDb'] == id:
+                    ret = self.sqlclient.write_douban_media(mediatype=mediatype, id=item['target_id'], iteminfo=item)
+                    if not ret:
+                        log.info('保存豆瓣媒体信息失败, {}'.format(self.sqlclient.err))
                     return True, mediainfo
             return False, None
         except Exception as result:
@@ -474,10 +503,15 @@ class media:
         try:
             for language in self.languagelist:
                 if mediatype == 1:
-                    ret, tvinfo = self.tmdbclient.get_tv_info(tvid=id, language=language)
+                    ret, tvinfo = self.sqlclient.get_tmdb_media_info(mediatype=mediatype, id=id, language=language)
                     if not ret:
-                        log.info('获取TMDB媒体信息失败, {}'.format(self.tmdbclient.err))
-                        continue
+                        ret, tvinfo = self.tmdbclient.get_tv_info(tvid=id, language=language)
+                        if not ret:
+                            log.info('获取TMDB媒体信息失败, {}'.format(self.tmdbclient.err))
+                            continue
+                        ret = self.sqlclient.write_tmdb_media_info(mediatype=mediatype, id=id, language=language, iteminfo=tvinfo)
+                        if not ret:
+                            log.info('保存TMDB媒体信息失败, {}'.format(self.sqlclient.err))
                     if datatype == 1:
                         if self.__is_chinese__(string=tvinfo['name']):
                             if self.__is_chinese__(string=tvinfo['name'], mode=3):
@@ -494,10 +528,15 @@ class media:
                                 return True, zhconv.convert(tvinfo['overview'], 'zh-cn')
                             return True, tvinfo['overview']
                 else:
-                    ret, movieinfo = self.tmdbclient.get_movie_info(movieid=id, language=language)
+                    ret, movieinfo = self.sqlclient.get_tmdb_media_info(mediatype=mediatype, id=id, language=language)
                     if not ret:
-                        log.info('获取TMDB媒体信息失败, {}'.format(self.tmdbclient.err))
-                        continue
+                        ret, movieinfo = self.tmdbclient.get_movie_info(movieid=id, language=language)
+                        if not ret:
+                            log.info('获取TMDB媒体信息失败, {}'.format(self.tmdbclient.err))
+                            continue
+                        ret = self.sqlclient.write_tmdb_media_info(mediatype=mediatype, id=id, language=language, iteminfo=movieinfo)
+                        if not ret:
+                            log.info('保存TMDB媒体信息失败, {}'.format(self.sqlclient.err))
                     if datatype == 1:
                         if self.__is_chinese__(string=movieinfo['title']):
                             if self.__is_chinese__(string=movieinfo['title'], mode=3):
@@ -530,10 +569,15 @@ class media:
         """
         try:
             for language in self.languagelist:
-                ret, seasoninfo = self.tmdbclient.get_tv_season_info(tvid=tvid, seasonid=seasonid, language=language)
+                ret, seasoninfo = self.sqlclient.get_tmdb_season_info(id=tvid, language=language)
                 if not ret:
-                    log.info('获取TMDB季信息失败, {}'.format(self.tmdbclient.err))
-                    continue
+                    ret, seasoninfo = self.tmdbclient.get_tv_season_info(tvid=tvid, seasonid=seasonid, language=language)
+                    if not ret:
+                        log.info('获取TMDB季信息失败, {}'.format(self.tmdbclient.err))
+                        continue
+                    ret = self.sqlclient.write_tmdb_season_info(id=tvid, language=language, iteminfo=seasoninfo)
+                    if not ret:
+                        log.info('保存TMDB季信息失败, {}'.format(self.sqlclient.err))
                 for episodes in seasoninfo['episodes']:
                     if episodes['episode_number'] > episodeid:
                         break
@@ -563,10 +607,15 @@ class media:
         """
         try:
             for language in self.languagelist:
-                ret, personinfo = self.tmdbclient.get_person_info(personid=personid, language=language)
+                ret, personinfo = self.sqlclient.get_tmdb_people_info(id=personid, language=language)
                 if not ret:
-                    log.info('获取TMDB人物信息失败, {}'.format(self.tmdbclient.err))
-                    continue
+                    ret, personinfo = self.tmdbclient.get_person_info(personid=personid, language=language)
+                    if not ret:
+                        log.info('获取TMDB人物信息失败, {}'.format(self.tmdbclient.err))
+                        continue
+                    ret = self.sqlclient.write_tmdb_people_info(id=personid, language=language, iteminfo=personinfo)
+                    if not ret:
+                        log.info('保存TMDB人物信息失败, {}'.format(self.sqlclient.err))
                 for name in personinfo['also_known_as']:
                     if not self.__is_chinese__(string=name, mode=2):
                         continue

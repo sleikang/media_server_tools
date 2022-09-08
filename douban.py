@@ -151,6 +151,7 @@ class douban:
         """
         搜索电影信息
         :param title 标题
+        :return True or False, iteminfo
         """
         iteminfo = {}
         try:
@@ -163,11 +164,7 @@ class douban:
             for media in medialist:
                 if re.search(pattern='第[\s\S]+季', string=media['title']):
                     media['target_type'] = 'tv'
-                else:
-                    media['target_type'] = media['type']
                 media['target_id'] = media['id']
-                media.pop('type')
-                media.pop('id')
             iteminfo['items'] = medialist
             return True, iteminfo
         except Exception as result:
@@ -178,6 +175,7 @@ class douban:
         """
         搜索电影信息
         :param title 标题
+        :return True or False, iteminfo
         """
         iteminfo = {}
         try:
@@ -196,6 +194,7 @@ class douban:
         """
         搜索媒体信息
         :param title 标题
+        :return True or False, iteminfo
         """
         iteminfo = {}
         try:
@@ -209,3 +208,4 @@ class douban:
         except Exception as result:
             self.err = "异常错误：{}".format(result)
             return False, iteminfo
+            
