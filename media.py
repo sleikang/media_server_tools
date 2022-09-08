@@ -231,8 +231,9 @@ class media:
                             if peopleimdbid and doubanmediainfo and doubancelebritiesinfo:
                                 ret, celebrities = self.__get_people_info__(celebritiesinfo=doubancelebritiesinfo, people=people, imdbid=peopleimdbid)
                                 if ret:
-                                    people['Role'] = re.sub(pattern='饰\s+', repl='', string=celebrities['character'])
-                                    updatepeople = True
+                                    if self.__is_chinese__(string=re.sub(pattern='饰\s+', repl='', string=celebrities['character'])):
+                                        people['Role'] = re.sub(pattern='饰\s+', repl='', string=celebrities['character'])
+                                        updatepeople = True
                                     if people['Name'] != celebrities['name'] and self.__is_chinese__(string=celebrities['name']):
                                         originalpeoplename = people['Name']
                                         peopleinfo['Name'] = celebrities['name']
@@ -240,6 +241,7 @@ class media:
                                         ret = self.embyclient.set_item_info(itemid=peopleinfo['Id'], iteminfo=peopleinfo)
                                         if ret:
                                             log.info('原始人物名称[{}]更新为[{}]'.format(originalpeoplename, people['Name']))
+                                            updatepeople = True
                                 
                     time.sleep(0.1)
                 
