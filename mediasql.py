@@ -1,8 +1,14 @@
+from functools import cache
 from sql import sql
 import json
 import datetime
 
 class mediasql(sql):
+    cachefailtime = None
+    
+    def __init__(self, cachefailtime : int) -> None:
+        super().__init__()
+        self.cachefailtime = cachefailtime
 
     def search_douban_media(self, mediatype : int, title : str):
         """
@@ -20,6 +26,11 @@ class mediasql(sql):
             if not ret or not len(datalist):
                 return False, None
             for data in datalist:
+                datatime = datetime.datetime.strptime(data[-1], '%Y-%m-%d %H:%M:%S')
+                nowtime = datetime.datetime.now()
+                day = (nowtime - datatime).days
+                if day > self.cachefailtime:
+                    continue
                 iteminfo['items'].append(json.loads(data[3]))
             return True, iteminfo
         except Exception as result:
@@ -73,6 +84,11 @@ class mediasql(sql):
             if not ret or not len(datalist):
                 return False, None
             for data in datalist:
+                datatime = datetime.datetime.strptime(data[-1], '%Y-%m-%d %H:%M:%S')
+                nowtime = datetime.datetime.now()
+                day = (nowtime - datatime).days
+                if day > self.cachefailtime:
+                    continue
                 iteminfo = json.loads(data[4])
             return True, iteminfo
         except Exception as result:
@@ -126,6 +142,11 @@ class mediasql(sql):
             if not ret or not len(datalist):
                 return False, None
             for data in datalist:
+                datatime = datetime.datetime.strptime(data[-1], '%Y-%m-%d %H:%M:%S')
+                nowtime = datetime.datetime.now()
+                day = (nowtime - datatime).days
+                if day > self.cachefailtime:
+                    continue
                 iteminfo = json.loads(data[5])
             return True, iteminfo
         except Exception as result:
@@ -176,6 +197,11 @@ class mediasql(sql):
             if not ret or not len(datalist):
                 return False, None
             for data in datalist:
+                datatime = datetime.datetime.strptime(data[-1], '%Y-%m-%d %H:%M:%S')
+                nowtime = datetime.datetime.now()
+                day = (nowtime - datatime).days
+                if day > self.cachefailtime:
+                    continue
                 iteminfo = json.loads(data[3])
             return True, iteminfo
         except Exception as result:
@@ -231,7 +257,11 @@ class mediasql(sql):
                     item = data[6]   
                 if not item:
                     return False, None
-                
+                datatime = datetime.datetime.strptime(data[-1], '%Y-%m-%d %H:%M:%S')
+                nowtime = datetime.datetime.now()
+                day = (nowtime - datatime).days
+                if day > self.cachefailtime:
+                    continue
                 return True, json.loads(item)
                     
         except Exception as result:
@@ -304,7 +334,11 @@ class mediasql(sql):
                     item = data[10]   
                 if not item:
                     return False, None
-                
+                datatime = datetime.datetime.strptime(data[-1], '%Y-%m-%d %H:%M:%S')
+                nowtime = datetime.datetime.now()
+                day = (nowtime - datatime).days
+                if day > self.cachefailtime:
+                    continue
                 return True, json.loads(item)
                     
         except Exception as result:
@@ -367,7 +401,11 @@ class mediasql(sql):
                     item = data[6]   
                 if not item:
                     return False, None
-                
+                datatime = datetime.datetime.strptime(data[-1], '%Y-%m-%d %H:%M:%S')
+                nowtime = datetime.datetime.now()
+                day = (nowtime - datatime).days
+                if day > self.cachefailtime:
+                    continue
                 return True, json.loads(item)
                     
         except Exception as result:

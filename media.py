@@ -29,7 +29,7 @@ class media:
         """
         try:
             self.configload = False
-            self.sqlclient = mediasql()
+            self.sqlclient = mediasql(cachefailtime=configinfo.systemdata['cachefailtime'])
             self.embyclient = emby(host=configinfo.systemdata['embyhost'], userid=configinfo.systemdata['embyuserid'], key=configinfo.systemdata['embykey'])
             self.tmdbclient = tmdb(key=configinfo.systemdata['tmdbkey'])
             self.doubanclient = douban(key=configinfo.systemdata['doubankey'], cookie=configinfo.systemdata['doubancookie'])
@@ -171,7 +171,7 @@ class media:
                     elif 'imdb' in peopleinfo['ProviderIds']:
                         peopleimdbid = peopleinfo['ProviderIds']['imdb']
 
-                    if not self.__is_chinese__(string=people['Name'], mode=2) or self.__is_chinese__(string=people['Name'], mode=3):
+                    if not self.__is_chinese__(string=people['Name'], mode=1):
                         if 'LockedFields' not in peopleinfo:
                             peopleinfo['LockedFields'] = []
 

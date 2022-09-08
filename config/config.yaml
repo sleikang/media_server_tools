@@ -24,3 +24,5 @@ system:
   taskdonespace: 1
   #删除没有头像的演员 强迫症患者福音
   delnotimagepeople: True
+  #豆瓣|TMDB数据缓存失效时间 [天]
+  cachefailtime: 30
