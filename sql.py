@@ -1,6 +1,5 @@
 import sqlite3
 import os
-from log import log
 import threading
 
 class sql:
