@@ -143,7 +143,8 @@ class media:
                     else:
                         ret, doubanmediainfo = self.__get_douban_media_info__(mediatype=2, name=item['Name'], id=imdbid)
                     if ret:
-                        name = doubanmediainfo['title']
+                        if self.__is_chinese__(string=doubanmediainfo['title'], mode=2):
+                            name = doubanmediainfo['title']
                 
                 if name:
                     originalname = iteminfo['Name']
