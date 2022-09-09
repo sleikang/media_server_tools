@@ -18,6 +18,7 @@ class media:
     tasklist = None
     updatepeople = None
     updateoverview = None
+    updateseasongroup = None
     taskdonespace = None
     delnotimagepeople = None
     configload = None
@@ -40,6 +41,7 @@ class media:
             self.updateoverview = configinfo.systemdata['updateoverview']
             self.taskdonespace = configinfo.systemdata['taskdonespace']
             self.delnotimagepeople = configinfo.systemdata['delnotimagepeople']
+            self.updateseasongroup = configinfo.systemdata['updateseasongroup']
             self.configload = True
         except Exception as reuslt:
             log.info('配置异常错误, {}'.format(reuslt))
@@ -132,14 +134,14 @@ class media:
                 name = None
                 if tmdbid:
                     if 'Series' in item['Type']:
-                        ret, name = self.__get_media_tmdb_name__(mediatype=1, datatype=1, id=tmdbid)
+                        ret, name = self.__get_tmdb_media_name__(mediatype=1, datatype=1, id=tmdbid)
                     else:
-                        ret, name = self.__get_media_tmdb_name__(mediatype=2, datatype=1, id=tmdbid)
+                        ret, name = self.__get_tmdb_media_name__(mediatype=2, datatype=1, id=tmdbid)
                 if imdbid and not name:
                     if 'Series' in item['Type']:
-                        ret, doubanmediainfo = self.__get_media_douban_info__(mediatype=1, name=item['Name'], id=imdbid)
+                        ret, doubanmediainfo = self.__get_douban_media_info__(mediatype=1, name=item['Name'], id=imdbid)
                     else:
-                        ret, doubanmediainfo = self.__get_media_douban_info__(mediatype=2, name=item['Name'], id=imdbid)
+                        ret, doubanmediainfo = self.__get_douban_media_info__(mediatype=2, name=item['Name'], id=imdbid)
                     if ret:
                         name = doubanmediainfo['title']
                 
@@ -183,15 +185,15 @@ class media:
                         if peopleimdbid and imdbid:
                             if not doubanmediainfo:
                                 if 'Series' in item['Type']:
-                                    ret, doubanmediainfo = self.__get_media_douban_info__(mediatype=1, name=item['Name'], id=imdbid)
+                                    ret, doubanmediainfo = self.__get_douban_media_info__(mediatype=1, name=item['Name'], id=imdbid)
                                 else:
-                                    ret, doubanmediainfo = self.__get_media_douban_info__(mediatype=2, name=item['Name'], id=imdbid)
+                                    ret, doubanmediainfo = self.__get_douban_media_info__(mediatype=2, name=item['Name'], id=imdbid)
 
                             if doubanmediainfo and not doubancelebritiesinfo:
                                 if 'Series' in item['Type']:
-                                    ret, doubancelebritiesinfo = self.__get_media_celebrities_douban_info__(mediatype=1, id=doubanmediainfo['id'])
+                                    ret, doubancelebritiesinfo = self.__get_douban_media_celebrities_info__(mediatype=1, id=doubanmediainfo['id'])
                                 else:
-                                    ret, doubancelebritiesinfo = self.__get_media_celebrities_douban_info__(mediatype=2, id=doubanmediainfo['id'])
+                                    ret, doubancelebritiesinfo = self.__get_douban_media_celebrities_info__(mediatype=2, id=doubanmediainfo['id'])
                             
                             if doubancelebritiesinfo:
                                 ret, celebrities = self.__get_people_info__(celebritiesinfo=doubancelebritiesinfo, people=people, imdbid=peopleimdbid)
@@ -202,7 +204,7 @@ class media:
                                 peoplename = re.sub(pattern='\s+', repl='', string=peopleinfo['Name'])
                                 peoplename = zhconv.convert(peopleinfo['Name'], 'zh-cn')
                             elif peopletmdbid:
-                                ret, peoplename = self.__get_person_tmdb_name(personid=peopletmdbid)
+                                ret, peoplename = self.__get_tmdb_person_name(personid=peopletmdbid)
 
                         if peoplename:
                             originalpeoplename = people['Name']
@@ -218,15 +220,15 @@ class media:
                         if imdbid:
                             if not doubanmediainfo:
                                 if 'Series' in item['Type']:
-                                    ret, doubanmediainfo = self.__get_media_douban_info__(mediatype=1, name=item['Name'], id=imdbid)
+                                    ret, doubanmediainfo = self.__get_douban_media_info__(mediatype=1, name=item['Name'], id=imdbid)
                                 else:
-                                    ret, doubanmediainfo = self.__get_media_douban_info__(mediatype=2, name=item['Name'], id=imdbid)
+                                    ret, doubanmediainfo = self.__get_douban_media_info__(mediatype=2, name=item['Name'], id=imdbid)
                             
                             if doubanmediainfo and not doubancelebritiesinfo:
                                 if 'Series' in item['Type']:
-                                    ret, doubancelebritiesinfo = self.__get_media_celebrities_douban_info__(mediatype=1, id=doubanmediainfo['id'])
+                                    ret, doubancelebritiesinfo = self.__get_douban_media_celebrities_info__(mediatype=1, id=doubanmediainfo['id'])
                                 else:
-                                    ret, doubancelebritiesinfo = self.__get_media_celebrities_douban_info__(mediatype=2, id=doubanmediainfo['id'])
+                                    ret, doubancelebritiesinfo = self.__get_douban_media_celebrities_info__(mediatype=2, id=doubanmediainfo['id'])
 
                             if peopleimdbid and doubanmediainfo and doubancelebritiesinfo:
                                 ret, celebrities = self.__get_people_info__(celebritiesinfo=doubancelebritiesinfo, people=people, imdbid=peopleimdbid)
@@ -275,9 +277,9 @@ class media:
                     ret = False
                     if tmdbid:
                         if 'Series' in item['Type']:
-                            ret, overview = self.__get_media_tmdb_name__(mediatype=1, datatype=2, id=tmdbid)
+                            ret, overview = self.__get_tmdb_media_name__(mediatype=1, datatype=2, id=tmdbid)
                         else:
-                            ret, overview = self.__get_media_tmdb_name__(mediatype=2, datatype=2, id=tmdbid)
+                            ret, overview = self.__get_tmdb_media_name__(mediatype=2, datatype=2, id=tmdbid)
                     if ret:
                         iteminfo['Overview'] = overview
                         if 'Overview' not in iteminfo['LockedFields']:
@@ -286,9 +288,9 @@ class media:
                     elif imdbid:
                         if not doubanmediainfo:
                             if 'Series' in item['Type']:
-                                ret, doubanmediainfo = self.__get_media_douban_info__(mediatype=1, name=item['Name'], id=imdbid)
+                                ret, doubanmediainfo = self.__get_douban_media_info__(mediatype=1, name=item['Name'], id=imdbid)
                             else:
-                                ret, doubanmediainfo = self.__get_media_douban_info__(mediatype=2, name=item['Name'], id=imdbid)
+                                ret, doubanmediainfo = self.__get_douban_media_info__(mediatype=2, name=item['Name'], id=imdbid)
                         if doubanmediainfo:
                             if doubanmediainfo['intro']:
                                 iteminfo['Overview'] = doubanmediainfo['intro']
@@ -302,6 +304,18 @@ class media:
                     if not ret:
                         log.info('获取Emby媒体[{}]ID[{}]信息失败, {}'.format(item['Name'], item['Id'], self.embyclient.err))
                     else:
+                        tvinfo = None
+                        seasongroupinfo = None
+                        seasonserr = False
+                        seasonnum = 0
+                        if tmdbid and self.updateseasongroup:
+                            ret, tvinfo = self.__get_tmdb_media_info__(mediatype=1, id=tmdbid)
+                            for season in seasons['Items']:
+                                if season['IndexNumber'] <= 0:
+                                    continue
+                                seasonnum += 1
+                            if ret and seasonnum != tvinfo['number_of_seasons']:
+                                seasonserr = True
                         for season in seasons['Items']:
                             ret, episodes = self.embyclient.get_items(parentid=season['Id'])
                             if not ret:
@@ -312,21 +326,54 @@ class media:
                                 if not ret:
                                     log.info('获取Emby媒体[{}]ID[{}]信息失败, {}'.format(episode['Name'], episode['Id'], self.embyclient.err))
                                 else:
-                                    if 'Overview' not in episodeinfo or not self.__is_chinese__(string=episodeinfo['Overview']):
-                                        ret, name, overview = self.__get_tv_season_info__(tvid=tmdbid, seasonid=season['IndexNumber'], episodeid=episode['IndexNumber'])
-                                        if not ret:
+                                    imageurl = None
+                                    name = None
+                                    overview = None
+                                    if not seasonserr:
+                                        if 'Overview' not in episodeinfo or not self.__is_chinese__(string=episodeinfo['Overview']):
+                                            ret, name, overview = self.__get_tmdb_tv_season_info__(tvid=tmdbid, seasonid=season['IndexNumber'], episodeid=episode['IndexNumber'])
+                                            if not ret:
+                                                continue
+                                    else:
+                                        if not seasongroupinfo:
+                                            if not tvinfo:
+                                                continue
+                                            if 'episode_groups' not in tvinfo or 'results' not in tvinfo['episode_groups']:
+                                                log.info('媒体[{}]ID[{}]季数量异常, TMDB查找剧集组数据失败', item['Name'], item['Id'])
+                                                continue
+                                            ret, seasongroupinfo = self.__get_tmdb_tv_season_group_info__(seasongroup=tvinfo['episode_groups']['results'], seasonnum=seasonnum)
+                                            if not ret:
+                                                continue
+                                        if int(season['IndexNumber']) <= 0 or int(season['IndexNumber']) > len(seasongroupinfo['groups']):
                                             continue
-                                        if 'LockedFields' not in episodeinfo:
-                                            episodeinfo['LockedFields'] = []
-                                        episodeinfo['Name'] = name
-                                        episodeinfo['Overview'] = overview
-                                        if 'Name' not in episodeinfo['LockedFields']:
-                                            episodeinfo['LockedFields'].append('Name')
-                                        if 'Overview' not in episodeinfo['LockedFields']:
-                                            episodeinfo['LockedFields'].append('Overview')
-                                        ret = self.embyclient.set_item_info(itemid=episodeinfo['Id'], iteminfo=episodeinfo)
+                                        seasoninfo = seasongroupinfo['groups'][int(season['IndexNumber']) - 1]
+                                        if int(episode['IndexNumber']) <= 0 or int(episode['IndexNumber']) > len(seasoninfo['episodes']):
+                                            continue
+                                        tmdbepisodeinfo = seasoninfo['episodes'][int(episode['IndexNumber']) - 1]
+                                        if tmdbepisodeinfo['name'] != episodeinfo['Name']:
+                                            name = tmdbepisodeinfo['name']
+                                        if 'Overview' not in episodeinfo or tmdbepisodeinfo['overview'] != episodeinfo['Overview']:
+                                            overview = tmdbepisodeinfo['overview']
+                                        if 'still_path' in tmdbepisodeinfo and len(tmdbepisodeinfo['still_path']):
+                                            imageurl = 'https://www.themoviedb.org/t/p/original{}'.format(tmdbepisodeinfo['still_path'])
+                                        
+                                    if not name or not overview:
+                                        continue
+                                    if 'LockedFields' not in episodeinfo:
+                                        episodeinfo['LockedFields'] = []
+                                    episodeinfo['Name'] = name
+                                    episodeinfo['Overview'] = overview
+                                    if 'Name' not in episodeinfo['LockedFields']:
+                                        episodeinfo['LockedFields'].append('Name')
+                                    if 'Overview' not in episodeinfo['LockedFields']:
+                                        episodeinfo['LockedFields'].append('Overview')
+                                    ret = self.embyclient.set_item_info(itemid=episodeinfo['Id'], iteminfo=episodeinfo)
+                                    if ret:
+                                        log.info('原始媒体名称[{}] 第[{}]季 第[{}]集更新概述'.format(iteminfo['Name'], season['IndexNumber'], episode['IndexNumber']))
+                                    if imageurl:
+                                        ret = self.embyclient.set_item_image(itemid=episodeinfo['Id'], imageurl=imageurl)
                                         if ret:
-                                            log.info('原始媒体名称[{}] 第[{}]季 第[{}]集更新概述'.format(iteminfo['Name'], season['IndexNumber'], episode['IndexNumber']))
+                                            log.info('原始媒体名称[{}] 第[{}]季 第[{}]集更新图片'.format(iteminfo['Name'], season['IndexNumber'], episode['IndexNumber']))
 
             if not updatename and not updatepeople and not updateoverview:
                 return True, item['Name']
@@ -396,9 +443,9 @@ class media:
             log.info("异常错误：{}".format(result))
             return False, None   
 
-    def __get_media_celebrities_douban_info__(self, mediatype : int, id : str):
+    def __get_douban_media_celebrities_info__(self, mediatype : int, id : str):
         """
-        获取媒体演员豆瓣信息
+        获取豆瓣媒体演员信息
         :param mediatype 媒体类型 1TV 2电影
         :id id 媒体ID
         :return True or False, celebritiesinfo
@@ -443,9 +490,9 @@ class media:
             log.info("异常错误：{}".format(result))
             return False, None   
 
-    def __get_media_douban_info__(self, mediatype : int, name : str, id : str):
+    def __get_douban_media_info__(self, mediatype : int, name : str, id : str):
         """
-        获取媒体豆瓣信息
+        获取豆瓣媒体信息
         :param mediatype 媒体类型 1TV 2电影
         :name name 媒体名称
         :id imdb
@@ -494,9 +541,45 @@ class media:
             log.info("异常错误：{}".format(result))
             return False, None    
 
-    def __get_media_tmdb_name__(self, mediatype : int, datatype : int, id : str):
+    def __get_tmdb_media_info__(self, mediatype : int, id : str, language : str = 'zh-CN'):
         """
-        获取媒体tmdb中文
+        获取tmdb媒体信息
+        :param mediatype 媒体类型 1TV 2电影
+        :param id tmdbid
+        :return True or False, name
+        """
+        try:
+            iteminfo = None
+            if mediatype == 1:
+                ret, iteminfo = self.sqlclient.get_tmdb_media_info(mediatype=mediatype, id=id, language=language)
+                if not ret:
+                    ret, iteminfo = self.tmdbclient.get_tv_info(tvid=id, language=language)
+                    if not ret:
+                        log.info('获取TMDB媒体ID[{}]信息失败, {}'.format(id, self.tmdbclient.err))
+                        return False, None
+                    ret = self.sqlclient.write_tmdb_media_info(mediatype=mediatype, id=id, language=language, iteminfo=iteminfo)
+                    if not ret:
+                        log.info('保存TMDB媒体ID[{}]信息失败, {}'.format(id, self.tmdbclient.err))
+                return True, iteminfo
+            else:
+                ret, iteminfo = self.sqlclient.get_tmdb_media_info(mediatype=mediatype, id=id, language=language)
+                if not ret:
+                    ret, iteminfo = self.tmdbclient.get_movie_info(movieid=id, language=language)
+                    if not ret:
+                        log.info('获取TMDB媒体ID[{}]信息失败, {}'.format(id, self.tmdbclient.err))
+                        return False, None
+                    ret = self.sqlclient.write_tmdb_media_info(mediatype=mediatype, id=id, language=language, iteminfo=iteminfo)
+                    if not ret:
+                        log.info('保存TMDB媒体ID[{}]信息失败, {}'.format(id, self.tmdbclient.err))
+                return True, iteminfo
+            return False, iteminfo
+        except Exception as result:
+            log.info("异常错误：{}".format(result))
+            return False, None
+
+    def __get_tmdb_media_name__(self, mediatype : int, datatype : int, id : str):
+        """
+        获取tmdb媒体中文名称
         :param mediatype 媒体类型 1TV 2电影
         :param datatype 数据类型 1名字 2概述
         :param id tmdbid
@@ -505,15 +588,9 @@ class media:
         try:
             for language in self.languagelist:
                 if mediatype == 1:
-                    ret, tvinfo = self.sqlclient.get_tmdb_media_info(mediatype=mediatype, id=id, language=language)
+                    ret, tvinfo = self.__get_tmdb_media_info__(mediatype=mediatype, id=id, language=language)
                     if not ret:
-                        ret, tvinfo = self.tmdbclient.get_tv_info(tvid=id, language=language)
-                        if not ret:
-                            log.info('获取TMDB媒体ID[{}]信息失败, {}'.format(id, self.tmdbclient.err))
-                            continue
-                        ret = self.sqlclient.write_tmdb_media_info(mediatype=mediatype, id=id, language=language, iteminfo=tvinfo)
-                        if not ret:
-                            log.info('保存TMDB媒体ID[{}]信息失败, {}'.format(id, self.tmdbclient.err))
+                        continue
                     if datatype == 1:
                         if self.__is_chinese__(string=tvinfo['name']):
                             if self.__is_chinese__(string=tvinfo['name'], mode=3):
@@ -530,15 +607,9 @@ class media:
                                 return True, zhconv.convert(tvinfo['overview'], 'zh-cn')
                             return True, tvinfo['overview']
                 else:
-                    ret, movieinfo = self.sqlclient.get_tmdb_media_info(mediatype=mediatype, id=id, language=language)
+                    ret, movieinfo = self.__get_tmdb_media_info__(mediatype=mediatype, id=id, language=language)
                     if not ret:
-                        ret, movieinfo = self.tmdbclient.get_movie_info(movieid=id, language=language)
-                        if not ret:
-                            log.info('获取TMDB媒体ID[{}]信息失败, {}'.format(id, self.tmdbclient.err))
-                            continue
-                        ret = self.sqlclient.write_tmdb_media_info(mediatype=mediatype, id=id, language=language, iteminfo=movieinfo)
-                        if not ret:
-                            log.info('保存TMDB媒体ID[{}]信息失败, {}'.format(id, self.tmdbclient.err))
+                        continue
                     if datatype == 1:
                         if self.__is_chinese__(string=movieinfo['title']):
                             if self.__is_chinese__(string=movieinfo['title'], mode=3):
@@ -560,10 +631,31 @@ class media:
             log.info("异常错误：{}".format(result))
             return False, None
 
-
-    def __get_tv_season_info__(self, tvid : str, seasonid : str, episodeid : int):
+    def __get_tmdb_tv_season_group_info__(self, seasongroup, seasonnum : int):
         """
-        获取季tmdb中文
+        获取TMDB电视剧季组信息
+        :param seasongroup 组信息
+        :param seasonnum 季数量
+        :return True or False, iteminfo
+        """
+        try:
+            for season in seasongroup:
+                if int(season['group_count']) != seasonnum:
+                    continue
+                for language in self.languagelist:
+                    ret, iteminfo = self.tmdbclient.get_tv_season_group(groupid=season['id'], language=language)
+                    if not ret:
+                        log.info('获取TMDB剧集组ID[{}]信息失败, {}', season['id'], self.tmdbclient.err)
+                        continue
+                    return True, iteminfo
+            return False, None
+        except Exception as result:
+            log.info("异常错误：{}".format(result))
+            return False, None
+
+    def __get_tmdb_tv_season_info__(self, tvid : str, seasonid : str, episodeid : int):
+        """
+        获取tmdb季中文
         :param tvid tmdbid
         :param seasonid 季ID
         :param episodeid 集ID
@@ -601,9 +693,9 @@ class media:
             log.info("异常错误：{}".format(result))
             return False, None, None
 
-    def __get_person_tmdb_name(self, personid):
+    def __get_tmdb_person_name(self, personid):
         """
-        获取人物tmdb中文
+        获取tmdb人物中文
         :param personid 人物ID
         :return True or False, name
         """
@@ -665,8 +757,9 @@ class media:
                 if '\u4e00' <= ch <= '\u9FFF':
                     return True
             elif mode == 2:
-                if '\u4e00' <= ch <= '\u9FA5':
-                    return True
+                if '\u4e00' <= ch <= '\u9FFF':
+                    if zhconv.convert(ch, 'zh-cn') == ch:
+                        return True
             elif mode == 3:
                 if '\u4e00' <= ch <= '\u9FFF':
                     if zhconv.convert(ch, 'zh-cn') != ch:
