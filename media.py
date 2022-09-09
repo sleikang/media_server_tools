@@ -315,7 +315,7 @@ class media:
                                 if season['IndexNumber'] <= 0:
                                     continue
                                 seasonnum += 1
-                            if ret and seasonnum != tvinfo['number_of_seasons']:
+                            if ret and seasonnum > tvinfo['number_of_seasons']:
                                 seasonserr = True
                         for season in seasons['Items']:
                             ret, episodes = self.embyclient.get_items(parentid=season['Id'])
