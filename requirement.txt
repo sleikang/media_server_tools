@@ -1,5 +1,5 @@
 zhconv
 requests
-json
-yaml
+pyjson
+pyyaml
 html2text
