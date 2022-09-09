@@ -199,7 +199,7 @@ class media:
                             if doubancelebritiesinfo:
                                 ret, celebrities = self.__get_people_info__(celebritiesinfo=doubancelebritiesinfo, people=people, imdbid=peopleimdbid)
                                 if ret and self.__is_chinese__(string=celebrities['name']):
-                                    peoplename = celebrities['name']
+                                    peoplename = re.sub(pattern='\s+', repl='', string=celebrities['name'])
                         if not peoplename:
                             if self.__is_chinese__(string=peopleinfo['Name'], mode=2):
                                 peoplename = re.sub(pattern='\s+', repl='', string=peopleinfo['Name'])
@@ -237,10 +237,11 @@ class media:
                                     if self.__is_chinese__(string=re.sub(pattern='饰\s+', repl='', string=celebrities['character'])):
                                         people['Role'] = re.sub(pattern='饰\s+', repl='', string=celebrities['character'])
                                         updatepeople = True
-                                    if people['Name'] != celebrities['name'] and self.__is_chinese__(string=celebrities['name']):
+                                    doubanname = re.sub(pattern='\s+', repl='', string=celebrities['name'])
+                                    if people['Name'] != doubanname and self.__is_chinese__(string=doubanname):
                                         originalpeoplename = people['Name']
-                                        peopleinfo['Name'] = celebrities['name']
-                                        people['Name'] = celebrities['name']
+                                        peopleinfo['Name'] = doubanname
+                                        people['Name'] = doubanname
                                         ret = self.embyclient.set_item_info(itemid=peopleinfo['Id'], iteminfo=peopleinfo)
                                         if ret:
                                             log.info('原始人物名称[{}]更新为[{}]'.format(originalpeoplename, people['Name']))
