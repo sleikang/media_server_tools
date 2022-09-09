@@ -12,11 +12,7 @@ RUN apk add --update --no-cache \
     su-exec \
     git \
     tzdata && \
-    pip install zhconv && \
-    pip install requests && \
-    pip install simplejson && \
-    pip install pyyaml && \
-    pip install html2text && \
+    pip install -r https://raw.githubusercontent.com/DDS-Derek/EmbyChineseNameSynchronous/main/requirement.txt && \
     git clone https://github.com/DDS-Derek/EmbyChineseNameSynchronous.git /opt && \
     chmod -R 755 /opt && \
     rm -rf /tmp/* /root/.cache /var/cache/apk/*
