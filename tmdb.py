@@ -41,7 +41,7 @@ class tmdb:
         """
         iteminfo = {}
         try:
-            url = '{}/tv/{}?api_key={}&language={}&append_to_response=alternative_titles'.format(self.host, tvid, self.key, language)
+            url = '{}/tv/{}?api_key={}&language={}&append_to_response=alternative_titles,episode_groups'.format(self.host, tvid, self.key, language)
             p = requests.get(url)
             if p.status_code != 200:
                 self.err = json.loads(p.text)['status_message']
@@ -51,6 +51,26 @@ class tmdb:
         except Exception as result:
             self.err = "异常错误：{}".format(result)
             return False, iteminfo
+
+    def get_tv_season_group(self, groupid : str, language : str = 'zh-CN'):
+        """
+        获取tv季组
+        :param groupid 组id
+        :return True or False, iteminfo
+        """
+        iteminfo = {}
+        try:
+            url = '{}/tv/episode_group/{}?api_key={}&language={}&append_to_response=alternative_titles'.format(self.host, groupid, self.key, language)
+            p = requests.get(url)
+            if p.status_code != 200:
+                self.err = json.loads(p.text)['status_message']
+                return False, iteminfo
+            iteminfo = json.loads(p.text)
+            return True, iteminfo
+        except Exception as result:
+            self.err = "异常错误：{}".format(result)
+            return False, iteminfo
+
 
     def get_tv_season_info(self, tvid : str, seasonid : str, language : str = 'zh-CN'):
         """

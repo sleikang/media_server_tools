@@ -6,6 +6,7 @@ class emby:
     host = None
     userid = None
     key = None
+    headers = None
     err = None
 
 
@@ -18,6 +19,7 @@ class emby:
         self.host = host
         self.userid = userid
         self.key = key
+        self.headers = {'Content-Type':'application/json'}
     
 
     def get_items(self, parentid : str = ''):
@@ -69,9 +71,26 @@ class emby:
         """
         try:
             url = '{}/emby/Items/{}?api_key={}'.format(self.host, itemid, self.key)
-            headers = {'Content-Type':'application/json'}
             data = json.dumps(iteminfo)
-            p = requests.post(url=url, headers=headers, data=data)
+            p = requests.post(url=url, headers=self.headers, data=data)
+            if p.status_code != 200 and p.status_code != 204:
+                self.err = p.text
+                return False
+            return True
+        except Exception as result:
+            self.err = "异常错误：{}".format(result)
+            return False
+
+    def set_item_image(self, itemid : str, imageurl : str):
+        """
+        更新项目
+        :param iteminfo 项目信息
+        :return True or False, iteminfo
+        """
+        try:
+            url = '{}/emby/Items/{}/Images/Primary/0/Url?api_key={}'.format(self.host, itemid, self.key)
+            data = json.dumps({'Url': imageurl})
+            p = requests.post(url=url, headers=self.headers, data=data)
             if p.status_code != 200 and p.status_code != 204:
                 self.err = p.text
                 return False
