@@ -1,0 +1,30 @@
+system:
+  #EMBY 域名 包含http(s)和端口号后面不带/
+  #例如https://xxx.xxx.xxx:8920
+  embyhost: ''
+  #EMBY 用户ID 进EMBY 用户点击管理员账号配置可以在网址上看到userId
+  embyuserid: ''
+  #EMBY APIKEY
+  embykey: ''
+  #TMDB APIKEY
+  tmdbkey: ''
+  #豆瓣 APIKEY
+  doubankey: '0ac44ae016490db2204ce0a042db2916'
+  #豆瓣PC cookie
+  doubancookie: ''
+  #线程数量 豆瓣API有请求频率限制建议线程数量不要过多
+  threadnum: 1
+  #是否刷新人名
+  updatepeople: True
+  #是否更新概述
+  updateoverview: True
+  #是否更新剧集组 在TMDB有些剧集会有剧集组, EMBY只能刮削初始播放日期的剧集, 例如纸房子是有5季, EMBY只能刮削初始播放日期3季的版本, 启用后会判断当前剧集季数量和TMDB默认季数量不一样则匹配剧集组的数据
+  updateseasongroup: True
+  #每次刷新全部媒体间隔时间 [小时]
+  updatetime: 1
+  #任务完成等待时间 [秒] 豆瓣API有请求频率限制建议时间可以设置长一点
+  taskdonespace: 1
+  #删除没有头像的演员 强迫症患者福音
+  delnotimagepeople: True
+  #豆瓣|TMDB数据缓存失效时间 [天]
+  cachefailtime: 30
