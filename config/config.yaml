@@ -18,7 +18,7 @@ system:
   updatepeople: True
   #是否更新概述
   updateoverview: True
-  #是否更新剧集组 在TMDB有些剧集会有剧集组, EMBY只能刮削初始播放日期的剧集, 例如纸房子是有5季, EMBY只能刮削初始播放日期3季的版本, 启用后会判断当前剧集季数量和TMDB默认季数量不一样则匹配剧集组的数据
+  #是否更新剧集组, 在TMDB有些剧集会有剧集组, EMBY只能刮削初始播放日期的剧集, 例如纸房子是有5季, EMBY只能刮削初始播放日期3季的版本, 启用后会判断当前剧集季数量和TMDB默认季数量不一样则匹配剧集组的数据
   updateseasongroup: True
   #每次刷新全部媒体间隔时间 [小时]
   updatetime: 1
@@ -28,3 +28,10 @@ system:
   delnotimagepeople: True
   #豆瓣|TMDB数据缓存失效时间 [天]
   cachefailtime: 30
+  #剧集组配置, 在启用更新剧集组后有效
+  #例如
+  #seasongroup:
+  #- EMBY媒体名称|TMDB episode_group剧集组ID
+  #- "纸房子|62ed7ac87d5504007e4ab046"
+  seasongroup:
+  - "纸房子|62ed7ac87d5504007e4ab046"

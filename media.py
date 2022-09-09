@@ -23,6 +23,7 @@ class media:
     delnotimagepeople = None
     configload = None
     sqlclient = None
+    configinfo = None
 
     def __init__(self, configinfo : config) -> None:
         """
@@ -30,6 +31,7 @@ class media:
         """
         try:
             self.configload = False
+            self.configinfo = configinfo
             self.sqlclient = mediasql(cachefailtime=configinfo.systemdata['cachefailtime'])
             self.embyclient = emby(host=configinfo.systemdata['embyhost'], userid=configinfo.systemdata['embyuserid'], key=configinfo.systemdata['embykey'])
             self.tmdbclient = tmdb(key=configinfo.systemdata['tmdbkey'])
@@ -306,18 +308,16 @@ class media:
                     if not ret:
                         log.info('获取Emby媒体[{}]ID[{}]信息失败, {}'.format(item['Name'], item['Id'], self.embyclient.err))
                     else:
-                        tvinfo = None
                         seasongroupinfo = None
-                        seasonserr = False
-                        seasonnum = 0
-                        if tmdbid and self.updateseasongroup:
-                            ret, tvinfo = self.__get_tmdb_media_info__(mediatype=1, id=tmdbid)
-                            for season in seasons['Items']:
-                                if season['IndexNumber'] <= 0:
+                        groupid = None
+                        if self.updateseasongroup:
+                            for groupinfo in self.configinfo.systemdata['seasongroup']:
+                                infolist = groupinfo.split('|')
+                                if len(infolist) < 2:
                                     continue
-                                seasonnum += 1
-                            if ret and seasonnum > tvinfo['number_of_seasons']:
-                                seasonserr = True
+                                if infolist[0] == item['Name']:
+                                    groupid = infolist[1]
+                                    break
                         for season in seasons['Items']:
                             ret, episodes = self.embyclient.get_items(parentid=season['Id'])
                             if not ret:
@@ -331,33 +331,37 @@ class media:
                                     imageurl = None
                                     name = None
                                     overview = None
-                                    if not seasonserr:
+                                    ommunityrating = None
+                                    if not groupid:
                                         if 'Overview' not in episodeinfo or not self.__is_chinese__(string=episodeinfo['Overview']):
                                             ret, name, overview = self.__get_tmdb_tv_season_info__(tvid=tmdbid, seasonid=season['IndexNumber'], episodeid=episode['IndexNumber'])
                                             if not ret:
                                                 continue
                                     else:
                                         if not seasongroupinfo:
-                                            if not tvinfo:
-                                                continue
-                                            if 'episode_groups' not in tvinfo or 'results' not in tvinfo['episode_groups']:
-                                                log.info('媒体[{}]ID[{}]季数量异常, TMDB查找剧集组数据失败', item['Name'], item['Id'])
-                                                continue
-                                            ret, seasongroupinfo = self.__get_tmdb_tv_season_group_info__(seasongroup=tvinfo['episode_groups']['results'], seasonnum=seasonnum)
+                                            ret, seasongroupinfo = self.__get_tmdb_tv_season_group_info__(groupid=groupid)
                                             if not ret:
                                                 continue
-                                        if int(season['IndexNumber']) <= 0 or int(season['IndexNumber']) > len(seasongroupinfo['groups']):
-                                            continue
-                                        seasoninfo = seasongroupinfo['groups'][int(season['IndexNumber']) - 1]
-                                        if int(episode['IndexNumber']) <= 0 or int(episode['IndexNumber']) > len(seasoninfo['episodes']):
-                                            continue
-                                        tmdbepisodeinfo = seasoninfo['episodes'][int(episode['IndexNumber']) - 1]
+                                        tmdbepisodeinfo = None
+                                        for seasondata in seasongroupinfo['groups']:
+                                            if seasondata['order'] != season['IndexNumber']:
+                                                continue
+                                            for episodedata in seasondata['episodes']:
+                                                if episodedata['episode_number'] != episode['IndexNumber']:
+                                                    continue
+                                                tmdbepisodeinfo = episodedata
+                                                break
+                                            if tmdbepisodeinfo:
+                                                break
+                                        if not tmdbepisodeinfo:
+                                            log.info('原始媒体名称[{}] 第[{}]季 第[{}]集未匹配到TMDB剧集组数据'.format(iteminfo['Name'], season['IndexNumber'], episode['IndexNumber']))
                                         if tmdbepisodeinfo['name'] != episodeinfo['Name']:
                                             name = tmdbepisodeinfo['name']
                                         if 'Overview' not in episodeinfo or tmdbepisodeinfo['overview'] != episodeinfo['Overview']:
                                             overview = tmdbepisodeinfo['overview']
                                         if 'still_path' in tmdbepisodeinfo and len(tmdbepisodeinfo['still_path']):
                                             imageurl = 'https://www.themoviedb.org/t/p/original{}'.format(tmdbepisodeinfo['still_path'])
+                                        ommunityrating = tmdbepisodeinfo['vote_average']
                                         
                                     if not name or not overview:
                                         continue
@@ -365,6 +369,8 @@ class media:
                                         episodeinfo['LockedFields'] = []
                                     episodeinfo['Name'] = name
                                     episodeinfo['Overview'] = overview
+                                    if not ommunityrating:
+                                        episodeinfo['CommunityRating'] = ommunityrating
                                     if 'Name' not in episodeinfo['LockedFields']:
                                         episodeinfo['LockedFields'].append('Name')
                                     if 'Overview' not in episodeinfo['LockedFields']:
@@ -633,23 +639,19 @@ class media:
             log.info("异常错误：{}".format(result))
             return False, None
 
-    def __get_tmdb_tv_season_group_info__(self, seasongroup, seasonnum : int):
+    def __get_tmdb_tv_season_group_info__(self, groupid):
         """
         获取TMDB电视剧季组信息
-        :param seasongroup 组信息
-        :param seasonnum 季数量
+        :param groupid 组ID
         :return True or False, iteminfo
         """
         try:
-            for season in seasongroup:
-                if int(season['group_count']) != seasonnum:
+            for language in self.languagelist:
+                ret, iteminfo = self.tmdbclient.get_tv_season_group(groupid=groupid, language=language)
+                if not ret:
+                    log.info('获取TMDB剧集组ID[{}]信息失败, {}', groupid, self.tmdbclient.err)
                     continue
-                for language in self.languagelist:
-                    ret, iteminfo = self.tmdbclient.get_tv_season_group(groupid=season['id'], language=language)
-                    if not ret:
-                        log.info('获取TMDB剧集组ID[{}]信息失败, {}', season['id'], self.tmdbclient.err)
-                        continue
-                    return True, iteminfo
+                return True, iteminfo
             return False, None
         except Exception as result:
             log.info("异常错误：{}".format(result))
