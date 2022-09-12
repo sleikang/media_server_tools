@@ -2,7 +2,7 @@ name: Build EmbyChineseNameSynchronous Nightly
 
 on:
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '0 0 * * *'
 
 jobs:
   push:
