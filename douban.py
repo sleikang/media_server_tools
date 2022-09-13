@@ -15,7 +15,7 @@ class douban:
         self.host = 'https://frodo.douban.com/api/v2'
         self.key = key
         self.cookie = cookie
-        self.mobileheaders = {'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.27(0x18001b33) NetType/WIFI Language/zh_CN', 'Referer': 'https://servicewechat.com/wx2f9b06c1de1ccfca/85/page-frame.html', 'content-type': 'application/json', 'Authorization': 'Bearer 4c287a1f8cbc64b3e4796e5ea6352e19', 'Connection': 'keep-alive'}
+        self.mobileheaders = {'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.27(0x18001b33) NetType/WIFI Language/zh_CN', 'Referer': 'https://servicewechat.com/wx2f9b06c1de1ccfca/85/page-frame.html', 'content-type': 'application/json', 'Connection': 'keep-alive'}
         self.pcheaders = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 Edg/105.0.1343.27', 'Referer': 'https://movie.douban.com/', 'Cookie': self.cookie, 'Connection': 'keep-alive'}
 
     def get_movie_info(self, movieid : str):
