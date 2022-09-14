@@ -1,13 +1,20 @@
 from sql import sql
 import json
 import datetime
+from config import config
 
 class mediasql(sql):
-    cachefailtime = None
+    tmdbmediacachefailtime = None
+    tmdbpeoplecachefailtime = None
+    doubanmediacachefailtime = None
+    doubanpeoplecachefailtime = None
     
-    def __init__(self, cachefailtime : int) -> None:
+    def __init__(self, configinfo : config) -> None:
         super().__init__()
-        self.cachefailtime = cachefailtime
+        self.tmdbmediacachefailtime = configinfo.systemdata['tmdbmediacachefailtime']
+        self.tmdbpeoplecachefailtime = configinfo.systemdata['tmdbpeoplecachefailtime']
+        self.doubanmediacachefailtime = configinfo.systemdata['doubanmediacachefailtime']
+        self.doubanpeoplecachefailtime = configinfo.systemdata['doubanpeoplecachefailtime']
 
     def search_douban_media(self, mediatype : int, title : str):
         """
@@ -28,10 +35,11 @@ class mediasql(sql):
                 datatime = datetime.datetime.strptime(data[-1], '%Y-%m-%d %H:%M:%S')
                 nowtime = datetime.datetime.now()
                 day = (nowtime - datatime).days
-                if day > self.cachefailtime:
+                if day > self.doubanmediacachefailtime:
                     continue
                 iteminfo['items'].append(json.loads(data[3]))
-            return True, iteminfo
+                return True, iteminfo
+            return False, None
         except Exception as result:
             self.err = "异常错误：{}".format(result)
             return False, iteminfo
@@ -86,10 +94,11 @@ class mediasql(sql):
                 datatime = datetime.datetime.strptime(data[-1], '%Y-%m-%d %H:%M:%S')
                 nowtime = datetime.datetime.now()
                 day = (nowtime - datatime).days
-                if day > self.cachefailtime:
+                if day > self.doubanmediacachefailtime:
                     continue
                 iteminfo = json.loads(data[4])
-            return True, iteminfo
+                return True, iteminfo
+            return False, None
         except Exception as result:
             self.err = "异常错误：{}".format(result)
             return False, iteminfo
@@ -144,10 +153,11 @@ class mediasql(sql):
                 datatime = datetime.datetime.strptime(data[-1], '%Y-%m-%d %H:%M:%S')
                 nowtime = datetime.datetime.now()
                 day = (nowtime - datatime).days
-                if day > self.cachefailtime:
+                if day > self.doubanmediacachefailtime:
                     continue
                 iteminfo = json.loads(data[5])
-            return True, iteminfo
+                return True, iteminfo
+            return False, None
         except Exception as result:
             self.err = "异常错误：{}".format(result)
             return False, iteminfo
@@ -199,10 +209,11 @@ class mediasql(sql):
                 datatime = datetime.datetime.strptime(data[-1], '%Y-%m-%d %H:%M:%S')
                 nowtime = datetime.datetime.now()
                 day = (nowtime - datatime).days
-                if day > self.cachefailtime:
+                if day > self.doubanpeoplecachefailtime:
                     continue
                 iteminfo = json.loads(data[3])
-            return True, iteminfo
+                return True, iteminfo
+            return False, None
         except Exception as result:
             self.err = "异常错误：{}".format(result)
             return False, iteminfo
@@ -259,10 +270,10 @@ class mediasql(sql):
                 datatime = datetime.datetime.strptime(data[-1], '%Y-%m-%d %H:%M:%S')
                 nowtime = datetime.datetime.now()
                 day = (nowtime - datatime).days
-                if day > self.cachefailtime:
+                if day > self.tmdbmediacachefailtime:
                     continue
                 return True, json.loads(item)
-                    
+            return False, None       
         except Exception as result:
             self.err = "异常错误：{}".format(result)
             return False, None
@@ -336,10 +347,10 @@ class mediasql(sql):
                 datatime = datetime.datetime.strptime(data[-1], '%Y-%m-%d %H:%M:%S')
                 nowtime = datetime.datetime.now()
                 day = (nowtime - datatime).days
-                if day > self.cachefailtime:
+                if day > self.tmdbmediacachefailtime:
                     continue
                 return True, json.loads(item)
-                    
+            return False, None        
         except Exception as result:
             self.err = "异常错误：{}".format(result)
             return False, None
@@ -403,10 +414,10 @@ class mediasql(sql):
                 datatime = datetime.datetime.strptime(data[-1], '%Y-%m-%d %H:%M:%S')
                 nowtime = datetime.datetime.now()
                 day = (nowtime - datatime).days
-                if day > self.cachefailtime:
+                if day > self.tmdbpeoplecachefailtime:
                     continue
                 return True, json.loads(item)
-                    
+            return False, None        
         except Exception as result:
             self.err = "异常错误：{}".format(result)
             return False, None

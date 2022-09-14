@@ -14,7 +14,7 @@ class config:
             if not os.path.exists(path=self.path):
                 log.info('配置文件[{}]不存在, 开始生成默认配置文件'.format(self.path))
                 file = open(self.path, "w", encoding="utf-8")
-                data = {'system':{'embyhost':'', 'embyuserid':'', 'embykey':'', 'tmdbkey':'', 'doubankey':'0ac44ae016490db2204ce0a042db2916', 'doubancookie':'', 'threadnum':1, 'updatepeople':True, 'updateoverview':True, 'updateseasongroup':False, 'updatetime':1, 'taskdonespace':1, 'delnotimagepeople':False, 'cachefailtime':30, 'seasongroup':['纸房子|62ed7ac87d5504007e4ab046']}}
+                data = {'system':{'embyhost':'', 'embyuserid':'', 'embykey':'', 'tmdbkey':'', 'doubankey':'0ac44ae016490db2204ce0a042db2916', 'doubancookie':'', 'threadnum':1, 'updatepeople':True, 'updateoverview':True, 'updateseasongroup':False, 'updatetime':1, 'taskdonespace':1, 'delnotimagepeople':False, 'tmdbmediacachefailtime':1, 'tmdbpeoplecachefailtime':10, 'doubanmediacachefailtime':30, 'doubanpeoplecachefailtime':120, 'seasongroup':['纸房子|62ed7ac87d5504007e4ab046']}}
                 yaml.dump(data=data, stream=file)
                 log.info('生成默认配置文件[{}]完成'.format(self.path))
                 file.close()
@@ -35,7 +35,10 @@ class config:
             self.__config_check__('updatetime', 1)
             self.__config_check__('taskdonespace', 1)
             self.__config_check__('delnotimagepeople', False)
-            self.__config_check__('cachefailtime', 30)
+            self.__config_check__('tmdbmediacachefailtime', 1)
+            self.__config_check__('tmdbpeoplecachefailtime', 10)
+            self.__config_check__('doubanmediacachefailtime', 30)
+            self.__config_check__('doubanpeoplecachefailtime', 120)
             self.__config_check__('seasongroup', ['纸房子|62ed7ac87d5504007e4ab046'])
         except Exception as reuslt:
             log.info('配置异常错误, {}'.format(reuslt))

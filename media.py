@@ -32,7 +32,7 @@ class media:
         try:
             self.configload = False
             self.configinfo = configinfo
-            self.sqlclient = mediasql(cachefailtime=configinfo.systemdata['cachefailtime'])
+            self.sqlclient = mediasql(configinfo=configinfo)
             self.embyclient = emby(host=configinfo.systemdata['embyhost'], userid=configinfo.systemdata['embyuserid'], key=configinfo.systemdata['embykey'])
             self.tmdbclient = tmdb(key=configinfo.systemdata['tmdbkey'])
             self.doubanclient = douban(key=configinfo.systemdata['doubankey'], cookie=configinfo.systemdata['doubancookie'])
@@ -334,7 +334,7 @@ class media:
                                     ommunityrating = None
                                     if not groupid:
                                         if 'Overview' not in episodeinfo or not self.__is_chinese__(string=episodeinfo['Overview']):
-                                            ret, name, overview = self.__get_tmdb_tv_season_info__(tvid=tmdbid, seasonid=season['IndexNumber'], episodeid=episode['IndexNumber'])
+                                            ret, name, overview, ommunityrating, imageurl = self.__get_tmdb_tv_season_info__(tvid=tmdbid, seasonid=season['IndexNumber'], episodeid=episode['IndexNumber'])
                                             if not ret:
                                                 continue
                                     else:
@@ -347,7 +347,7 @@ class media:
                                             if seasondata['order'] != season['IndexNumber']:
                                                 continue
                                             for episodedata in seasondata['episodes']:
-                                                if episodedata['episode_number'] != episode['IndexNumber']:
+                                                if episodedata['order'] + 1 != episode['IndexNumber']:
                                                     continue
                                                 tmdbepisodeinfo = episodedata
                                                 break
@@ -355,21 +355,25 @@ class media:
                                                 break
                                         if not tmdbepisodeinfo:
                                             log.info('原始媒体名称[{}] 第[{}]季 第[{}]集未匹配到TMDB剧集组数据'.format(iteminfo['Name'], season['IndexNumber'], episode['IndexNumber']))
+                                            continue
                                         if tmdbepisodeinfo['name'] != episodeinfo['Name']:
                                             name = tmdbepisodeinfo['name']
                                         if 'Overview' not in episodeinfo or tmdbepisodeinfo['overview'] != episodeinfo['Overview']:
                                             overview = tmdbepisodeinfo['overview']
-                                        if 'still_path' in tmdbepisodeinfo and len(tmdbepisodeinfo['still_path']):
+                                        if 'still_path' in tmdbepisodeinfo and tmdbepisodeinfo['still_path']:
                                             imageurl = 'https://www.themoviedb.org/t/p/original{}'.format(tmdbepisodeinfo['still_path'])
-                                        ommunityrating = tmdbepisodeinfo['vote_average']
+                                        if 'CommunityRating' not in episodeinfo or episodeinfo['CommunityRating'] != tmdbepisodeinfo['vote_average']:
+                                            ommunityrating = tmdbepisodeinfo['vote_average']
                                         
-                                    if not name or not overview:
+                                    if not name and not overview and not ommunityrating:
                                         continue
                                     if 'LockedFields' not in episodeinfo:
                                         episodeinfo['LockedFields'] = []
-                                    episodeinfo['Name'] = name
-                                    episodeinfo['Overview'] = overview
-                                    if not ommunityrating:
+                                    if name:
+                                        episodeinfo['Name'] = name
+                                    if overview:
+                                        episodeinfo['Overview'] = overview
+                                    if ommunityrating:
                                         episodeinfo['CommunityRating'] = ommunityrating
                                     if 'Name' not in episodeinfo['LockedFields']:
                                         episodeinfo['LockedFields'].append('Name')
@@ -377,7 +381,10 @@ class media:
                                         episodeinfo['LockedFields'].append('Overview')
                                     ret = self.embyclient.set_item_info(itemid=episodeinfo['Id'], iteminfo=episodeinfo)
                                     if ret:
-                                        log.info('原始媒体名称[{}] 第[{}]季 第[{}]集更新概述'.format(iteminfo['Name'], season['IndexNumber'], episode['IndexNumber']))
+                                        if overview:
+                                            log.info('原始媒体名称[{}] 第[{}]季 第[{}]集更新概述'.format(iteminfo['Name'], season['IndexNumber'], episode['IndexNumber']))
+                                        if ommunityrating:
+                                            log.info('原始媒体名称[{}] 第[{}]季 第[{}]集更新评分'.format(iteminfo['Name'], season['IndexNumber'], episode['IndexNumber']))
                                     if imageurl:
                                         ret = self.embyclient.set_item_image(itemid=episodeinfo['Id'], imageurl=imageurl)
                                         if ret:
@@ -663,7 +670,7 @@ class media:
         :param tvid tmdbid
         :param seasonid 季ID
         :param episodeid 集ID
-        :return True or False, name, overview
+        :return True or False, name, overview, ommunityrating, imageurl
         """
         try:
             for language in self.languagelist:
@@ -682,6 +689,10 @@ class media:
                     if episodes['episode_number'] != episodeid:
                         continue
                     if self.__is_chinese__(string=episodes['overview']):
+                        name = None
+                        overview = None
+                        ommunityrating = None
+                        imageurl = None
                         if self.__is_chinese__(string=episodes['name'], mode=3):
                             name = zhconv.convert(episodes['name'], 'zh-cn')
                         else:
@@ -690,12 +701,16 @@ class media:
                             overview = zhconv.convert(episodes['overview'], 'zh-cn')
                         else:
                             overview = episodes['overview']
-                        return True, name, overview
+                        if episodes['vote_average'] > 0:
+                            ommunityrating = episodes['vote_average']
+                        if 'still_path' in episodes and episodes['still_path']:
+                            imageurl = 'https://www.themoviedb.org/t/p/original{}'.format(episodes['still_path'])
+                        return True, name, overview, ommunityrating, imageurl
 
-            return False, None, None
+            return False, None, None, None, None
         except Exception as result:
             log.info("异常错误：{}".format(result))
-            return False, None, None
+            return False, None, None, None, None
 
     def __get_tmdb_person_name(self, personid):
         """

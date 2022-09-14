@@ -26,8 +26,14 @@ system:
   taskdonespace: 1
   #删除没有头像的演员 强迫症患者福音
   delnotimagepeople: True
-  #豆瓣|TMDB数据缓存失效时间 [天]
-  cachefailtime: 30
+  #TMDB媒体数据缓存失效时间 [天]
+  tmdbmediacachefailtime: 1
+  #TMDB人物数据缓存失效时间 [天]
+  tmdbpeoplecachefailtime: 10
+  #豆瓣媒体数据缓存失效时间 [天]
+  doubanmediacachefailtime: 30
+  #豆瓣人物数据缓存失效时间 [天]
+  doubanpeoplecachefailtime: 120
   #剧集组配置, 在启用更新剧集组后有效
   #例如
   #seasongroup:
