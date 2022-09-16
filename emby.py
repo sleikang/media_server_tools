@@ -83,9 +83,9 @@ class emby:
 
     def set_item_image(self, itemid : str, imageurl : str):
         """
-        更新项目
-        :param iteminfo 项目信息
-        :return True or False, iteminfo
+        更新项目图片
+        :param imageurl 图片URL
+        :return True or False
         """
         try:
             url = '{}/emby/Items/{}/Images/Primary/0/Url?api_key={}'.format(self.host, itemid, self.key)
