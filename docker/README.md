@@ -8,6 +8,7 @@ docker run -itd \
   -e PUID=1000 \
   -e PGID=1000 \
   -e UMASK=022 \
+  --net=host \
   ddsderek/embychinesenamesynchronous:latest
 ```
 
@@ -25,5 +26,6 @@ services:
             - PUID=1000
             - PGID=1000
             - UMASK=022
+        network_mode: host
         image: 'ddsderek/embychinesenamesynchronous:latest'
 ```
