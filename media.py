@@ -1,3 +1,4 @@
+from unittest import result
 from emby import emby
 from tmdb import tmdb
 from douban import douban
@@ -15,7 +16,6 @@ class media:
     doubanclient = None
     languagelist = None
     threadpool = None
-    tasklist = None
     updatepeople = None
     updateoverview = None
     updateseasongroup = None
@@ -24,6 +24,7 @@ class media:
     configload = None
     sqlclient = None
     configinfo = None
+    threadnum = None
 
     def __init__(self, configinfo : config) -> None:
         """
@@ -37,8 +38,8 @@ class media:
             self.tmdbclient = tmdb(key=configinfo.systemdata['tmdbkey'])
             self.doubanclient = douban(key=configinfo.systemdata['doubankey'], cookie=configinfo.systemdata['doubancookie'])
             self.languagelist = ['zh-CN', 'zh-SG', 'zh-TW', 'zh-HK']
+            self.threadnum = configinfo.systemdata['threadnum']
             self.threadpool = ThreadPoolExecutor(max_workers=configinfo.systemdata['threadnum'])
-            self.tasklist = []
             self.updatepeople = configinfo.systemdata['updatepeople']
             self.updateoverview = configinfo.systemdata['updateoverview']
             self.taskdonespace = configinfo.systemdata['taskdonespace']
@@ -61,15 +62,33 @@ class media:
         if not ret:
             log.info('获取Emby媒体总列表失败, {}'.format(self.embyclient.err))
             return False
-        self.tasklist = []
-        ret = self.__check_media_info__(itemlist=itmes)
-        log.info('总媒体数量[{}]'.format(len(self.tasklist)))
-        for task in as_completed(self.tasklist):
-            ret, name = task.result()
-            if ret:
-                log.info('媒体[{}]处理完成'.format(name))
-            else:
-                log.info('媒体[{}]处理失败'.format(name))
+        ret, iteminfo = self.embyclient.get_items_count()
+        log.info('总媒体数量[{}]'.format(iteminfo['MovieCount'] + iteminfo['SeriesCount']))
+        if not ret:
+            log.info('获取Emby媒体数量失败, {}'.format(self.embyclient.err))
+            return False
+        
+        tasklist = []
+        for item in self.__check_media_info__(itemlist=itmes):
+            if not item:
+                continue
+            task = self.threadpool.submit(self.__to_deal_with_item__, item)
+            tasklist.append(task)
+            if len(tasklist) >= self.threadnum:
+                for task in as_completed(tasklist):
+                    ret, name = task.result()
+                    if ret:
+                        log.info('媒体[{}]处理完成'.format(name))
+                    else:
+                        log.info('媒体[{}]处理失败'.format(name))
+                tasklist = []
+        if len(tasklist) > 0:
+            for task in as_completed(tasklist):
+                ret, name = task.result()
+                if ret:
+                    log.info('媒体[{}]处理完成'.format(name))
+                else:
+                    log.info('媒体[{}]处理失败'.format(name))
         return ret
 
     def __check_media_info__(self, itemlist):
@@ -85,17 +104,16 @@ class media:
                     if not ret:
                         log.info('获取Emby媒体[{}]ID[{}]列表失败, {}'.format(item['Name'], item['Id'], self.embyclient.err))
                         continue
-                    self.__check_media_info__(itemlist=items)
+                    for tmpitem in self.__check_media_info__(itemlist=items):
+                        yield tmpitem
                 else:
                     if 'Series' in item['Type'] or 'Movie' in item['Type']:
-                        task = self.threadpool.submit(self.__to_deal_with_item__, item)
-                        self.tasklist.append(task)
+                        yield item
 
-
-            return True     
         except Exception as result:
             log.info("异常错误：{}".format(result))
-            return False
+        
+        yield {}
         
     def __to_deal_with_item__(self, item):
         """
@@ -126,7 +144,6 @@ class media:
                 imdbid = iteminfo['ProviderIds']['imdb']
             
             doubanmediainfo = None
-            doubancelebritiesinfo = None  
 
             if not self.__is_chinese__(string=item['Name']):                
 
@@ -157,121 +174,29 @@ class media:
 
       
             if self.updatepeople and 'People' in iteminfo:
-                for people in iteminfo['People']:
-                    ret, peopleinfo = self.embyclient.get_item_info(itemid=people['Id'])
+                updateoverview = self.__update_people__(item=item, iteminfo=iteminfo, imdbid=imdbid)
+
+                if 'Series' in item['Type']:
+                    ret, seasons = self.embyclient.get_items(parentid=item['Id'])
                     if not ret:
-                        log.info('获取Emby人物信息失败, {}'.format(self.embyclient.err))
-                        continue
-                    
-                    peopleimdbid = None
-                    peopletmdbid = None
-                    peoplename = None
-                    if 'Tmdb' in peopleinfo['ProviderIds']:
-                        peopletmdbid = peopleinfo['ProviderIds']['Tmdb']
-                    elif 'tmdb' in peopleinfo['ProviderIds']:
-                        peopletmdbid = peopleinfo['ProviderIds']['tmdb']
-
-                    if 'Imdb' in peopleinfo['ProviderIds']:
-                        peopleimdbid = peopleinfo['ProviderIds']['Imdb']
-                    elif 'imdb' in peopleinfo['ProviderIds']:
-                        peopleimdbid = peopleinfo['ProviderIds']['imdb']
-
-                    if not self.__is_chinese__(string=people['Name'], mode=1):
-                        if 'LockedFields' not in peopleinfo:
-                            peopleinfo['LockedFields'] = []
-
-                        if not peopletmdbid and not peopleimdbid:
-                            log.info('Emby人物[{}]ID[{}]Tmdb|Imdb不存在'.format(peopleinfo['Name'], peopleinfo['Id']))
-                            continue
-
-
-                        if peopleimdbid and imdbid:
-                            if not doubanmediainfo:
-                                if 'Series' in item['Type']:
-                                    ret, doubanmediainfo = self.__get_douban_media_info__(mediatype=1, name=item['Name'], id=imdbid)
+                        log.info('获取Emby媒体[{}]ID[{}]信息失败, {}'.format(item['Name'], item['Id'], self.embyclient.err))
+                    else:
+                        for season in seasons['Items']:
+                            ret, episodes = self.embyclient.get_items(parentid=season['Id'])
+                            if not ret:
+                                log.info('获取Emby媒体[{}]ID[{}]信息失败, {}'.format(season['Name'], season['Id'], self.embyclient.err))
+                                continue
+                            for episode in episodes['Items']:
+                                ret, episodeinfo = self.embyclient.get_item_info(itemid=episode['Id'])
+                                if not ret:
+                                    log.info('获取Emby媒体[{}]ID[{}]信息失败, {}'.format(episode['Name'], episode['Id'], self.embyclient.err))
                                 else:
-                                    ret, doubanmediainfo = self.__get_douban_media_info__(mediatype=2, name=item['Name'], id=imdbid)
-
-                            if doubanmediainfo and not doubancelebritiesinfo:
-                                if 'Series' in item['Type']:
-                                    ret, doubancelebritiesinfo = self.__get_douban_media_celebrities_info__(mediatype=1, id=doubanmediainfo['id'])
-                                else:
-                                    ret, doubancelebritiesinfo = self.__get_douban_media_celebrities_info__(mediatype=2, id=doubanmediainfo['id'])
-                            
-                            if doubancelebritiesinfo:
-                                ret, celebrities = self.__get_people_info__(celebritiesinfo=doubancelebritiesinfo, people=people, imdbid=peopleimdbid)
-                                if ret and self.__is_chinese__(string=celebrities['name']):
-                                    peoplename = re.sub(pattern='\s+', repl='', string=celebrities['name'])
-                        if not peoplename:
-                            if self.__is_chinese__(string=peopleinfo['Name'], mode=2):
-                                peoplename = re.sub(pattern='\s+', repl='', string=peopleinfo['Name'])
-                                peoplename = zhconv.convert(peopleinfo['Name'], 'zh-cn')
-                            elif peopletmdbid:
-                                ret, peoplename = self.__get_tmdb_person_name(personid=peopletmdbid)
-
-                        if peoplename:
-                            originalpeoplename = people['Name']
-                            peopleinfo['Name'] = peoplename
-                            if 'Name' not in peopleinfo['LockedFields']:
-                                peopleinfo['LockedFields'].append('Name')
-                            people['Name'] = peoplename
-                            ret = self.embyclient.set_item_info(itemid=peopleinfo['Id'], iteminfo=peopleinfo)
-                            if ret:
-                                log.info('原始人物名称[{}]更新为[{}]'.format(originalpeoplename, peoplename))
-                                updatepeople = True
-                    elif 'Role' not in people or not self.__is_chinese__(string=people['Role'], mode=2):
-                        if imdbid:
-                            if not doubanmediainfo:
-                                if 'Series' in item['Type']:
-                                    ret, doubanmediainfo = self.__get_douban_media_info__(mediatype=1, name=item['Name'], id=imdbid)
-                                else:
-                                    ret, doubanmediainfo = self.__get_douban_media_info__(mediatype=2, name=item['Name'], id=imdbid)
-                            
-                            if doubanmediainfo and not doubancelebritiesinfo:
-                                if 'Series' in item['Type']:
-                                    ret, doubancelebritiesinfo = self.__get_douban_media_celebrities_info__(mediatype=1, id=doubanmediainfo['id'])
-                                else:
-                                    ret, doubancelebritiesinfo = self.__get_douban_media_celebrities_info__(mediatype=2, id=doubanmediainfo['id'])
-
-                            if peopleimdbid and doubanmediainfo and doubancelebritiesinfo:
-                                ret, celebrities = self.__get_people_info__(celebritiesinfo=doubancelebritiesinfo, people=people, imdbid=peopleimdbid)
-                                if ret:
-                                    if self.__is_chinese__(string=re.sub(pattern='饰\s+', repl='', string=celebrities['character'])):
-                                        people['Role'] = re.sub(pattern='饰\s+', repl='', string=celebrities['character'])
-                                        updatepeople = True
-                                    doubanname = re.sub(pattern='\s+', repl='', string=celebrities['name'])
-                                    if people['Name'] != doubanname and self.__is_chinese__(string=doubanname):
-                                        originalpeoplename = people['Name']
-                                        peopleinfo['Name'] = doubanname
-                                        people['Name'] = doubanname
-                                        ret = self.embyclient.set_item_info(itemid=peopleinfo['Id'], iteminfo=peopleinfo)
-                                        if ret:
-                                            log.info('原始人物名称[{}]更新为[{}]'.format(originalpeoplename, people['Name']))
-                                            updatepeople = True
-                                
-                    time.sleep(0.1)
-                
-                directorpeoples = []
-                actorpeoples = []
-                peoples = []
-                for people in iteminfo['People']:
-                    if self.delnotimagepeople:
-                        if 'PrimaryImageTag' not in people:
-                            updatepeople = True
-                            continue
-                    if people['Type'] == 'Director':
-                        if people['Name'] not in directorpeoples:
-                            directorpeoples.append(people['Name'])
-                            peoples.append(people)
-                        else:
-                            updatepeople = True
-                    elif people['Type'] == 'Actor':
-                        if people['Name'] not in actorpeoples:
-                            actorpeoples.append(people['Name'])
-                            peoples.append(people)
-                        else:
-                            updatepeople = True
-                iteminfo['People'] = peoples
+                                    ret = self.__update_people__(item=episode, iteminfo=episodeinfo, imdbid=imdbid)
+                                    if not ret:
+                                        continue
+                                    ret = self.embyclient.set_item_info(itemid=episodeinfo['Id'], iteminfo=episodeinfo)
+                                    if ret:
+                                        log.info('原始媒体名称[{}] 第[{}]季 第[{}]集更新人物'.format(iteminfo['Name'], season['IndexNumber'], episode['IndexNumber']))
 
             if self.updateoverview:
                 if 'Overview' not in iteminfo or not self.__is_chinese__(string=iteminfo['Overview']):
@@ -407,12 +332,136 @@ class media:
             log.info("异常错误：{}".format(result))
             return False, item['Name']
 
+    def __update_people__(self, item, iteminfo, imdbid):
+        """
+        更新人物
+        :param item 项目
+        :param iteminfo 项目信息
+        :param imdbid IMDB ID
+        :return True of False
+        """
+        updatepeople = False
+        try:
+            doubanmediainfo = None
+            doubancelebritiesinfo = None
+            for people in iteminfo['People']:
+                ret, peopleinfo = self.embyclient.get_item_info(itemid=people['Id'])
+                if not ret:
+                    log.info('获取Emby人物信息失败, {}'.format(self.embyclient.err))
+                    continue
+                
+                peopleimdbid = None
+                peopletmdbid = None
+                peoplename = None
+                if 'Tmdb' in peopleinfo['ProviderIds']:
+                    peopletmdbid = peopleinfo['ProviderIds']['Tmdb']
+                elif 'tmdb' in peopleinfo['ProviderIds']:
+                    peopletmdbid = peopleinfo['ProviderIds']['tmdb']
+
+                if 'Imdb' in peopleinfo['ProviderIds']:
+                    peopleimdbid = peopleinfo['ProviderIds']['Imdb']
+                elif 'imdb' in peopleinfo['ProviderIds']:
+                    peopleimdbid = peopleinfo['ProviderIds']['imdb']
+
+                if not self.__is_chinese__(string=people['Name'], mode=1):
+                    if 'LockedFields' not in peopleinfo:
+                        peopleinfo['LockedFields'] = []
+
+                    if not peopletmdbid and not peopleimdbid:
+                        log.info('Emby人物[{}]ID[{}]Tmdb|Imdb不存在'.format(peopleinfo['Name'], peopleinfo['Id']))
+                        continue
+
+
+                    if peopleimdbid and imdbid:
+                        if not doubanmediainfo:
+                            if 'Series' in item['Type']:
+                                ret, doubanmediainfo = self.__get_douban_media_info__(mediatype=1, name=item['Name'], id=imdbid)
+                            else:
+                                ret, doubanmediainfo = self.__get_douban_media_info__(mediatype=2, name=item['Name'], id=imdbid)
+
+                        if doubanmediainfo and not doubancelebritiesinfo:
+                            if 'Series' in item['Type']:
+                                ret, doubancelebritiesinfo = self.__get_douban_media_celebrities_info__(mediatype=1, id=doubanmediainfo['id'])
+                            else:
+                                ret, doubancelebritiesinfo = self.__get_douban_media_celebrities_info__(mediatype=2, id=doubanmediainfo['id'])
+                        
+                        if doubancelebritiesinfo:
+                            ret, celebrities = self.__get_people_info__(celebritiesinfo=doubancelebritiesinfo, people=people, imdbid=peopleimdbid)
+                            if ret and self.__is_chinese__(string=celebrities['name']):
+                                peoplename = re.sub(pattern='\s+', repl='', string=celebrities['name'])
+                    if not peoplename:
+                        if self.__is_chinese__(string=peopleinfo['Name'], mode=2):
+                            peoplename = re.sub(pattern='\s+', repl='', string=peopleinfo['Name'])
+                            peoplename = zhconv.convert(peopleinfo['Name'], 'zh-cn')
+                        elif peopletmdbid:
+                            ret, peoplename = self.__get_tmdb_person_name(personid=peopletmdbid)
+
+                    if peoplename:
+                        originalpeoplename = people['Name']
+                        peopleinfo['Name'] = peoplename
+                        if 'Name' not in peopleinfo['LockedFields']:
+                            peopleinfo['LockedFields'].append('Name')
+                        people['Name'] = peoplename
+                        ret = self.embyclient.set_item_info(itemid=peopleinfo['Id'], iteminfo=peopleinfo)
+                        if ret:
+                            log.info('原始人物名称[{}]更新为[{}]'.format(originalpeoplename, peoplename))
+                            updatepeople = True
+                elif 'Role' not in people or not self.__is_chinese__(string=people['Role'], mode=2):
+                    if imdbid:
+                        if not doubanmediainfo:
+                            if 'Series' in item['Type']:
+                                ret, doubanmediainfo = self.__get_douban_media_info__(mediatype=1, name=item['Name'], id=imdbid)
+                            else:
+                                ret, doubanmediainfo = self.__get_douban_media_info__(mediatype=2, name=item['Name'], id=imdbid)
+                        
+                        if doubanmediainfo and not doubancelebritiesinfo:
+                            if 'Series' in item['Type']:
+                                ret, doubancelebritiesinfo = self.__get_douban_media_celebrities_info__(mediatype=1, id=doubanmediainfo['id'])
+                            else:
+                                ret, doubancelebritiesinfo = self.__get_douban_media_celebrities_info__(mediatype=2, id=doubanmediainfo['id'])
+
+                        if peopleimdbid and doubanmediainfo and doubancelebritiesinfo:
+                            ret, celebrities = self.__get_people_info__(celebritiesinfo=doubancelebritiesinfo, people=people, imdbid=peopleimdbid)
+                            if ret:
+                                if self.__is_chinese__(string=re.sub(pattern='饰\s+', repl='', string=celebrities['character'])):
+                                    people['Role'] = re.sub(pattern='饰\s+', repl='', string=celebrities['character'])
+                                    updatepeople = True
+                                doubanname = re.sub(pattern='\s+', repl='', string=celebrities['name'])
+                                if people['Name'] != doubanname and self.__is_chinese__(string=doubanname):
+                                    originalpeoplename = people['Name']
+                                    peopleinfo['Name'] = doubanname
+                                    people['Name'] = doubanname
+                                    ret = self.embyclient.set_item_info(itemid=peopleinfo['Id'], iteminfo=peopleinfo)
+                                    if ret:
+                                        log.info('原始人物名称[{}]更新为[{}]'.format(originalpeoplename, people['Name']))
+                                        updatepeople = True
+                            
+                time.sleep(0.1)
+            
+            peoplelist = []
+            peoples = []
+            for people in iteminfo['People']:
+                if self.delnotimagepeople:
+                    if 'PrimaryImageTag' not in people:
+                        updatepeople = True
+                        continue
+                if people['Name'] + people['Type'] not in peoplelist:
+                    peoplelist.append(people['Name'] + people['Type'])
+                    peoples.append(people)
+                else:
+                    updatepeople = True
+            iteminfo['People'] = peoples
+        except Exception as result:
+            log.info("异常错误: {}".format(result))
+        return updatepeople
+
     def __get_people_info__(self, celebritiesinfo, people, imdbid):
         """
         获取人物信息
         :param celebritiesinfo 演员信息
         :param 人物信息
         :param imdbid
+        :return True of False, celebrities
         """
         try:
             if people['Type'] == 'Director':

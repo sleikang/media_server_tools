@@ -44,6 +44,24 @@ class emby:
             self.err = "异常错误：{}".format(result)
             return False, items
 
+    def get_items_count(self):
+        """
+        获取项目数量
+        :return True or False, iteminfo
+        """
+        iteminfo = {}
+        try:
+            url = '{}/emby/Items/Counts?api_key={}'.format(self.host, self.key)
+            p = requests.get(url)
+            if p.status_code != 200:
+                self.err = p.text
+                return False, iteminfo
+            iteminfo = json.loads(p.text)
+            return True, iteminfo
+        except Exception as result:
+            self.err = "异常错误：{}".format(result)
+            return False, iteminfo
+
     def get_item_info(self, itemid : str):
         """
         获取项目
