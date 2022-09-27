@@ -1,8 +1,8 @@
-from unittest import result
 from emby import emby
 from tmdb import tmdb
 from douban import douban
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from threading import BoundedSemaphore
 import re
 import zhconv
 from log import log
@@ -25,6 +25,7 @@ class media:
     sqlclient = None
     configinfo = None
     threadnum = None
+    semaphore = None
 
     def __init__(self, configinfo : config) -> None:
         """
@@ -39,7 +40,8 @@ class media:
             self.doubanclient = douban(key=configinfo.systemdata['doubankey'], cookie=configinfo.systemdata['doubancookie'])
             self.languagelist = ['zh-CN', 'zh-SG', 'zh-TW', 'zh-HK']
             self.threadnum = configinfo.systemdata['threadnum']
-            self.threadpool = ThreadPoolExecutor(max_workers=configinfo.systemdata['threadnum'])
+            self.semaphore = BoundedSemaphore(self.threadnum)
+            self.threadpool = ThreadPoolExecutor(max_workers=self.threadnum)
             self.updatepeople = configinfo.systemdata['updatepeople']
             self.updateoverview = configinfo.systemdata['updateoverview']
             self.taskdonespace = configinfo.systemdata['taskdonespace']
@@ -68,28 +70,33 @@ class media:
             log.info('获取Emby媒体数量失败, {}'.format(self.embyclient.err))
             return False
         
-        tasklist = []
         for item in self.__check_media_info__(itemlist=itmes):
             if not item:
                 continue
-            task = self.threadpool.submit(self.__to_deal_with_item__, item)
-            tasklist.append(task)
-            if len(tasklist) >= self.threadnum:
-                for task in as_completed(tasklist):
-                    ret, name = task.result()
-                    if ret:
-                        log.info('媒体[{}]处理完成'.format(name))
-                    else:
-                        log.info('媒体[{}]处理失败'.format(name))
-                tasklist = []
-        if len(tasklist) > 0:
-            for task in as_completed(tasklist):
-                ret, name = task.result()
-                if ret:
-                    log.info('媒体[{}]处理完成'.format(name))
-                else:
-                    log.info('媒体[{}]处理失败'.format(name))
+            self.__submit_task__(item=item)
         return ret
+
+    def __submit_task__(self, item):
+        """
+        提交任务
+        :param item
+        """
+        self.semaphore.acquire()
+        self.threadpool.submit(self.__start_task__, item)
+        
+    
+    def __start_task__(self, item):
+        """
+        开始任务
+        :param item
+        """
+        ret, name = self.__to_deal_with_item__(item=item)
+        if ret:
+            log.info('媒体[{}]处理完成'.format(name))
+        else:
+            log.info('媒体[{}]处理失败'.format(name))
+        self.semaphore.release()
+        
 
     def __check_media_info__(self, itemlist):
         """
@@ -436,7 +443,6 @@ class media:
                                         log.info('原始人物名称[{}]更新为[{}]'.format(originalpeoplename, people['Name']))
                                         updatepeople = True
                             
-                time.sleep(0.1)
             
             peoplelist = []
             peoples = []

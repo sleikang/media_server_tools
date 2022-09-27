@@ -1,10 +1,12 @@
-import requests
+from network import network
 import json
+
 
 class tmdb:
     host = None
     key = None
     err = None
+    client = None
 
     def __init__(self, key : str) -> None:
         """
@@ -12,6 +14,7 @@ class tmdb:
         """
         self.host = 'https://api.themoviedb.org/3'
         self.key = key
+        self.client = network(maxnumconnect=10, maxnumcache=20)
 
     def get_movie_info(self, movieid : str, language : str = 'zh-CN'):
         """
@@ -22,7 +25,9 @@ class tmdb:
         iteminfo = {}
         try:
             url = '{}/movie/{}?api_key={}&language={}&append_to_response=alternative_titles'.format(self.host, movieid, self.key, language)
-            p = requests.get(url)
+            p, self.err = self.client.get(url)
+            if not p:
+                return False, iteminfo
             if p.status_code != 200:
                 self.err = json.loads(p.text)['status_message']
                 return False, iteminfo
@@ -42,7 +47,9 @@ class tmdb:
         iteminfo = {}
         try:
             url = '{}/tv/{}?api_key={}&language={}&append_to_response=alternative_titles,episode_groups'.format(self.host, tvid, self.key, language)
-            p = requests.get(url)
+            p, self.err = self.client.get(url)
+            if not p:
+                return False, iteminfo
             if p.status_code != 200:
                 self.err = json.loads(p.text)['status_message']
                 return False, iteminfo
@@ -61,7 +68,9 @@ class tmdb:
         iteminfo = {}
         try:
             url = '{}/tv/episode_group/{}?api_key={}&language={}&append_to_response=alternative_titles'.format(self.host, groupid, self.key, language)
-            p = requests.get(url)
+            p, self.err = self.client.get(url)
+            if not p:
+                return False, iteminfo
             if p.status_code != 200:
                 self.err = json.loads(p.text)['status_message']
                 return False, iteminfo
@@ -81,7 +90,9 @@ class tmdb:
         iteminfo = {}
         try:
             url = '{}/tv/{}/season/{}?api_key={}&language={}&append_to_response=alternative_titles'.format(self.host, tvid, seasonid, self.key, language)
-            p = requests.get(url)
+            p, self.err = self.client.get(url)
+            if not p:
+                return False, iteminfo
             if p.status_code != 200:
                 self.err = json.loads(p.text)['status_message']
                 return False, iteminfo
@@ -100,7 +111,9 @@ class tmdb:
         personinfo = {}
         try:
             url = '{}/person/{}?api_key={}&language={}'.format(self.host, personid, self.key, language)
-            p = requests.get(url)
+            p, self.err = self.client.get(url)
+            if not p:
+                return False, personinfo
             if p.status_code != 200:
                 self.err = json.loads(p.text)['status_message']
                 return False, personinfo
