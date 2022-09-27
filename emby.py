@@ -36,8 +36,9 @@ class emby:
                 url = '{}/emby/Users/{}/Items?ParentId={}&api_key={}'.format(self.host, self.userid, parentid, self.key)
             else:
                 url = '{}/emby/Users/{}/Items?api_key={}'.format(self.host, self.userid, self.key)
-            p, self.err = self.client.get(url)
-            if not p:
+            p, err = self.client.get(url)
+            if p == None:
+                self.err = err
                 return False, items
             if p.status_code != 200:
                 self.err = p.text
@@ -56,8 +57,9 @@ class emby:
         iteminfo = {}
         try:
             url = '{}/emby/Items/Counts?api_key={}'.format(self.host, self.key)
-            p, self.err = self.client.get(url)
-            if not p:
+            p, err = self.client.get(url)
+            if p == None:
+                self.err = err
                 return False, iteminfo
             if p.status_code != 200:
                 self.err = p.text
@@ -77,8 +79,9 @@ class emby:
         iteminfo = {}
         try:
             url = '{}/emby/Users/{}/Items/{}?Fields=ChannelMappingInfo&api_key={}'.format(self.host, self.userid, itemid, self.key)
-            p, self.err = self.client.get(url)
-            if not p:
+            p, err = self.client.get(url)
+            if p == None:
+                self.err = err
                 return False, iteminfo
             if p.status_code != 200:
                 self.err = p.text
@@ -98,8 +101,9 @@ class emby:
         try:
             url = '{}/emby/Items/{}?api_key={}'.format(self.host, itemid, self.key)
             data = json.dumps(iteminfo)
-            p, self.err = self.client.post(url=url, headers=self.headers, data=data)
-            if not p:
+            p, err = self.client.post(url=url, headers=self.headers, data=data)
+            if p == None:
+                self.err = err
                 return False, iteminfo
             if p.status_code != 200 and p.status_code != 204:
                 self.err = p.text
@@ -118,8 +122,9 @@ class emby:
         try:
             url = '{}/emby/Items/{}/Images/Primary/0/Url?api_key={}'.format(self.host, itemid, self.key)
             data = json.dumps({'Url': imageurl})
-            p, self.err = self.client.post(url=url, headers=self.headers, data=data)
-            if not p:
+            p, err = self.client.post(url=url, headers=self.headers, data=data)
+            if p == None:
+                self.err = err
                 return False
             if p.status_code != 200 and p.status_code != 204:
                 self.err = p.text

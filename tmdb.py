@@ -25,8 +25,9 @@ class tmdb:
         iteminfo = {}
         try:
             url = '{}/movie/{}?api_key={}&language={}&append_to_response=alternative_titles'.format(self.host, movieid, self.key, language)
-            p, self.err = self.client.get(url)
-            if not p:
+            p, err = self.client.get(url)
+            if p == None:
+                self.err = err
                 return False, iteminfo
             if p.status_code != 200:
                 self.err = json.loads(p.text)['status_message']
@@ -47,8 +48,9 @@ class tmdb:
         iteminfo = {}
         try:
             url = '{}/tv/{}?api_key={}&language={}&append_to_response=alternative_titles,episode_groups'.format(self.host, tvid, self.key, language)
-            p, self.err = self.client.get(url)
-            if not p:
+            p, err = self.client.get(url)
+            if p == None:
+                self.err = err
                 return False, iteminfo
             if p.status_code != 200:
                 self.err = json.loads(p.text)['status_message']
@@ -68,8 +70,9 @@ class tmdb:
         iteminfo = {}
         try:
             url = '{}/tv/episode_group/{}?api_key={}&language={}&append_to_response=alternative_titles'.format(self.host, groupid, self.key, language)
-            p, self.err = self.client.get(url)
-            if not p:
+            p, err = self.client.get(url)
+            if p == None:
+                self.err = err
                 return False, iteminfo
             if p.status_code != 200:
                 self.err = json.loads(p.text)['status_message']
@@ -90,8 +93,9 @@ class tmdb:
         iteminfo = {}
         try:
             url = '{}/tv/{}/season/{}?api_key={}&language={}&append_to_response=alternative_titles'.format(self.host, tvid, seasonid, self.key, language)
-            p, self.err = self.client.get(url)
-            if not p:
+            p, err = self.client.get(url)
+            if p == None:
+                self.err = err
                 return False, iteminfo
             if p.status_code != 200:
                 self.err = json.loads(p.text)['status_message']
@@ -111,8 +115,9 @@ class tmdb:
         personinfo = {}
         try:
             url = '{}/person/{}?api_key={}&language={}'.format(self.host, personid, self.key, language)
-            p, self.err = self.client.get(url)
-            if not p:
+            p, err = self.client.get(url)
+            if p == None:
+                self.err = err
                 return False, personinfo
             if p.status_code != 200:
                 self.err = json.loads(p.text)['status_message']

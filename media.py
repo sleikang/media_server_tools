@@ -510,7 +510,7 @@ class media:
             
             return False, None
         except Exception as result:
-            log.info("异常错误：{}".format(result))
+            log.info("异常错误: {}".format(result))
             return False, None   
 
     def __get_douban_media_celebrities_info__(self, mediatype : int, id : str):
@@ -711,7 +711,7 @@ class media:
             for language in self.languagelist:
                 ret, iteminfo = self.tmdbclient.get_tv_season_group(groupid=groupid, language=language)
                 if not ret:
-                    log.info('获取TMDB剧集组ID[{}]信息失败, {}', groupid, self.tmdbclient.err)
+                    log.info('获取TMDB剧集组ID[{}]信息失败, {}'.format(groupid, self.tmdbclient.err))
                     continue
                 return True, iteminfo
             return False, None
