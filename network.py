@@ -33,10 +33,7 @@ class network:
         p = None
         ret, num, err = self.__getclient__()
         if ret:
-            try:
-                p = self.clientlist[num].client.get(url=url)
-            except Exception as result:
-                err = "异常错误：{}".format(result)
+            p, err = self.clientlist[num].get(url=url)
             self.__releasecache__(num=num)
         return p, err
 
@@ -51,10 +48,7 @@ class network:
         p = None
         ret, num, err = self.__getclient__()
         if ret:
-            try:
-                p = self.clientlist[num].client.post(url=url, headers=headers, data=data)
-            except Exception as result:
-                err = "异常错误：{}".format(result)
+            p, err = self.clientlist[num].post(url=url, headers=headers, data=data)
             self.__releasecache__(num=num)
         return p, err
 
