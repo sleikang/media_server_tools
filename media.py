@@ -1,7 +1,7 @@
 from emby import emby
 from tmdb import tmdb
 from douban import douban
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from threading import BoundedSemaphore
 import re
 import zhconv
@@ -9,6 +9,7 @@ from log import log
 import time
 from config import config
 from mediasql import mediasql
+
 
 class media:
     embyclient = None
@@ -74,6 +75,8 @@ class media:
             if not item:
                 continue
             self.__submit_task__(item=item)
+        while self.semaphore._value != self.threadnum:
+            time.sleep(0.1)
         return ret
 
     def __submit_task__(self, item):
