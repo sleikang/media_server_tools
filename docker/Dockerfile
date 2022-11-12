@@ -1,6 +1,8 @@
 FROM alpine:3.16
 
-ENV TZ=Asia/Shanghai \
+ENV LANG="C.UTF-8" \
+    PS1="\u@\h:\w \$ " \
+    TZ=Asia/Shanghai \
     PUID=1000 \
     PGID=1000 \
     UMASK=022
