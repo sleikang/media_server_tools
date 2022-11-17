@@ -144,34 +144,34 @@ class media:
                 tmdbid = iteminfo['ProviderIds']['Tmdb']
             elif 'tmdb' in iteminfo['ProviderIds']:
                 tmdbid = iteminfo['ProviderIds']['tmdb']
-            name = iteminfo['FileName']
+            name = re.sub(pattern='\.\S{1,4}$', repl='', string=iteminfo['FileName'])
             year = None
             redata = re.search(pattern='\((\d{4})\)', string=name)
             if redata:
                 year = redata.group(1)
             if item['Name'] in name and (year and year in str(iteminfo['ProductionYear'])):
                 return True
-            ret, mediainfo = self.nastoolsclient.name_test(name=name)
+            mediatype = 'MOV'
+            if 'Movie' in item['Type']:
+                mediatype = 'MOV'
+            else:
+                mediatype = 'TV'
+            ret, mediainfo = self.nastoolsclient.media_info(name=name, year=year, type=mediatype)
             if not ret:
                 log().info('NasTools识别媒体[{}]失败, {}'.format(name, self.nastoolsclient.err))
                 return False
             testtmdbid = None
-            if year and year != mediainfo['data']['data']['year']:
+            if year and year != mediainfo['year']:
                 return False
-            if mediainfo['data']['data']['tmdbid'] > 0:
-                testtmdbid = str(mediainfo['data']['data']['tmdbid'])
+            if mediainfo['tmdbid'] > 0:
+                testtmdbid = str(mediainfo['tmdbid'])
             if not testtmdbid or tmdbid == testtmdbid:
                 return True
-            if 'Movie' in item['Type']:
-                if '电影' not in mediainfo['data']['data']['type']:
-                    return False
-            else:
-                if '电影' in mediainfo['data']['data']['type']:
-                    return False
-                ret, tvinfo = self.__get_tmdb_media_info__(mediatype=1, id=testtmdbid)
+            if 'Series' in item['Type']:
+                ret, tvinfo = self.__get_tmdb_media_info__(mediatype=1, name=item['Name'], id=testtmdbid)
                 if not ret:
                     return False
-                if len(tvinfo['seasons']) != iteminfo['ChildCount']:
+                if len(tvinfo['seasons']) < iteminfo['ChildCount']:
                     return False
                 
 
@@ -235,9 +235,9 @@ class media:
                 name = None
                 if tmdbid:
                     if 'Series' in item['Type']:
-                        ret, name = self.__get_tmdb_media_name__(mediatype=1, datatype=1, id=tmdbid)
+                        ret, name = self.__get_tmdb_media_name__(mediatype=1, datatype=1, name=item['Name'], id=tmdbid)
                     else:
-                        ret, name = self.__get_tmdb_media_name__(mediatype=2, datatype=1, id=tmdbid)
+                        ret, name = self.__get_tmdb_media_name__(mediatype=2, datatype=1, name=item['Name'], id=tmdbid)
                 if imdbid and not name:
                     if 'Series' in item['Type']:
                         ret, doubanmediainfo = self.__get_douban_media_info__(mediatype=1, name=item['Name'], id=imdbid)
@@ -288,9 +288,9 @@ class media:
                     ret = False
                     if tmdbid:
                         if 'Series' in item['Type']:
-                            ret, overview = self.__get_tmdb_media_name__(mediatype=1, datatype=2, id=tmdbid)
+                            ret, overview = self.__get_tmdb_media_name__(mediatype=1, datatype=2, name=item['Name'], id=tmdbid)
                         else:
-                            ret, overview = self.__get_tmdb_media_name__(mediatype=2, datatype=2, id=tmdbid)
+                            ret, overview = self.__get_tmdb_media_name__(mediatype=2, datatype=2, name=item['Name'], id=tmdbid)
                     if ret:
                         iteminfo['Overview'] = overview
                         if 'Overview' not in iteminfo['LockedFields']:
@@ -341,7 +341,7 @@ class media:
                                     ommunityrating = None
                                     if not groupid:
                                         if 'Overview' not in episodeinfo or not self.__is_chinese__(string=episodeinfo['Overview']):
-                                            ret, name, overview, ommunityrating, imageurl = self.__get_tmdb_tv_season_info__(tvid=tmdbid, seasonid=season['IndexNumber'], episodeid=episode['IndexNumber'])
+                                            ret, name, overview, ommunityrating, imageurl = self.__get_tmdb_tv_season_info__(name=season['Name'], tvid=tmdbid, seasonid=season['IndexNumber'], episodeid=episode['IndexNumber'])
                                             if not ret:
                                                 continue
                                     else:
@@ -686,12 +686,13 @@ class media:
             log().info("异常错误：{}".format(result))
             return False, None    
 
-    def __get_tmdb_media_info__(self, mediatype : int, id : str, language : str = 'zh-CN'):
+    def __get_tmdb_media_info__(self, mediatype : int, name : str, id : str, language : str = 'zh-CN'):
         """
         获取tmdb媒体信息
         :param mediatype 媒体类型 1TV 2电影
+        :name name 媒体名称
         :param id tmdbid
-        :return True or False, name
+        :return True or False, iteminfo
         """
         try:
             iteminfo = None
@@ -700,40 +701,41 @@ class media:
                 if not ret:
                     ret, iteminfo = self.tmdbclient.get_tv_info(tvid=id, language=language)
                     if not ret:
-                        log().info('获取TMDB媒体ID[{}]信息失败, {}'.format(id, self.tmdbclient.err))
+                        log().info('获取TMDB媒体[{}]ID[{}]信息失败, {}'.format(name, id, self.tmdbclient.err))
                         return False, None
                     ret = self.sqlclient.write_tmdb_media_info(mediatype=mediatype, id=id, language=language, iteminfo=iteminfo)
                     if not ret:
-                        log().info('保存TMDB媒体ID[{}]信息失败, {}'.format(id, self.tmdbclient.err))
+                        log().info('保存TMDB媒体[{}]ID[{}]信息失败, {}'.format(name, id, self.tmdbclient.err))
                 return True, iteminfo
             else:
                 ret, iteminfo = self.sqlclient.get_tmdb_media_info(mediatype=mediatype, id=id, language=language)
                 if not ret:
                     ret, iteminfo = self.tmdbclient.get_movie_info(movieid=id, language=language)
                     if not ret:
-                        log().info('获取TMDB媒体ID[{}]信息失败, {}'.format(id, self.tmdbclient.err))
+                        log().info('获取TMDB媒体[{}]ID[{}]信息失败, {}'.format(name, id, self.tmdbclient.err))
                         return False, None
                     ret = self.sqlclient.write_tmdb_media_info(mediatype=mediatype, id=id, language=language, iteminfo=iteminfo)
                     if not ret:
-                        log().info('保存TMDB媒体ID[{}]信息失败, {}'.format(id, self.tmdbclient.err))
+                        log().info('保存TMDB媒体[{}]ID[{}]信息失败, {}'.format(name, id, self.tmdbclient.err))
                 return True, iteminfo
-            return False, iteminfo
+
         except Exception as result:
             log().info("异常错误：{}".format(result))
-            return False, None
+        return False, None
 
-    def __get_tmdb_media_name__(self, mediatype : int, datatype : int, id : str):
+    def __get_tmdb_media_name__(self, mediatype : int, datatype : int, name : str, id : str):
         """
         获取tmdb媒体中文名称
         :param mediatype 媒体类型 1TV 2电影
         :param datatype 数据类型 1名字 2概述
+        :name name 媒体名称
         :param id tmdbid
         :return True or False, name
         """
         try:
             for language in self.languagelist:
                 if mediatype == 1:
-                    ret, tvinfo = self.__get_tmdb_media_info__(mediatype=mediatype, id=id, language=language)
+                    ret, tvinfo = self.__get_tmdb_media_info__(mediatype=mediatype, name=name, id=id, language=language)
                     if not ret:
                         continue
                     if datatype == 1:
@@ -752,7 +754,7 @@ class media:
                                 return True, zhconv.convert(tvinfo['overview'], 'zh-cn')
                             return True, tvinfo['overview']
                 else:
-                    ret, movieinfo = self.__get_tmdb_media_info__(mediatype=mediatype, id=id, language=language)
+                    ret, movieinfo = self.__get_tmdb_media_info__(mediatype=mediatype, name=name, id=id, language=language)
                     if not ret:
                         continue
                     if datatype == 1:
@@ -794,9 +796,10 @@ class media:
             log().info("异常错误：{}".format(result))
             return False, None
 
-    def __get_tmdb_tv_season_info__(self, tvid : str, seasonid : str, episodeid : int):
+    def __get_tmdb_tv_season_info__(self, name : str, tvid : str, seasonid : str, episodeid : int):
         """
         获取tmdb季中文
+        :param name 媒体名称
         :param tvid tmdbid
         :param seasonid 季ID
         :param episodeid 集ID
@@ -808,11 +811,11 @@ class media:
                 if not ret:
                     ret, seasoninfo = self.tmdbclient.get_tv_season_info(tvid=tvid, seasonid=seasonid, language=language)
                     if not ret:
-                        log().info('获取TMDB媒体ID[{}]季ID[{}]信息失败, {}'.format(tvid, seasonid, self.tmdbclient.err))
+                        log().info('获取TMDB媒体[{}]ID[{}]季ID[{}]信息失败, {}'.format(name, tvid, seasonid, self.tmdbclient.err))
                         continue
                     ret = self.sqlclient.write_tmdb_season_info(id=tvid, language=language, iteminfo=seasoninfo)
                     if not ret:
-                        log().info('保存TMDB媒体ID[{}]季ID[{}]信息失败, {}'.format(tvid, seasonid, self.tmdbclient.err))
+                        log().info('保存TMDB媒体[{}]ID[{}]季ID[{}]信息失败, {}'.format(name, tvid, seasonid, self.tmdbclient.err))
                 for episodes in seasoninfo['episodes']:
                     if episodes['episode_number'] > episodeid:
                         break
