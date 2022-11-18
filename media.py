@@ -341,12 +341,12 @@ class media:
                                     ommunityrating = None
                                     if not groupid:
                                         if 'Overview' not in episodeinfo or not self.__is_chinese__(string=episodeinfo['Overview']):
-                                            ret, name, overview, ommunityrating, imageurl = self.__get_tmdb_tv_season_info__(name=season['Name'], tvid=tmdbid, seasonid=season['IndexNumber'], episodeid=episode['IndexNumber'])
+                                            ret, name, overview, ommunityrating, imageurl = self.__get_tmdb_tv_season_info__(name=item['Name'], tvid=tmdbid, seasonid=season['IndexNumber'], episodeid=episode['IndexNumber'])
                                             if not ret:
                                                 continue
                                     else:
                                         if not seasongroupinfo:
-                                            ret, seasongroupinfo = self.__get_tmdb_tv_season_group_info__(groupid=groupid)
+                                            ret, seasongroupinfo = self.__get_tmdb_tv_season_group_info__(name=item['Name'], groupid=groupid)
                                             if not ret:
                                                 continue
                                         tmdbepisodeinfo = None
@@ -463,9 +463,9 @@ class media:
 
                         if doubanmediainfo and not doubancelebritiesinfo:
                             if 'Series' in item['Type']:
-                                ret, doubancelebritiesinfo = self.__get_douban_media_celebrities_info__(mediatype=1, id=doubanmediainfo['id'])
+                                ret, doubancelebritiesinfo = self.__get_douban_media_celebrities_info__(mediatype=1, name=item['Name'], id=doubanmediainfo['id'])
                             else:
-                                ret, doubancelebritiesinfo = self.__get_douban_media_celebrities_info__(mediatype=2, id=doubanmediainfo['id'])
+                                ret, doubancelebritiesinfo = self.__get_douban_media_celebrities_info__(mediatype=2, name=item['Name'], id=doubanmediainfo['id'])
                         
                         if doubancelebritiesinfo:
                             ret, celebrities = self.__get_people_info__(celebritiesinfo=doubancelebritiesinfo, people=people, imdbid=peopleimdbid)
@@ -476,7 +476,7 @@ class media:
                             peoplename = re.sub(pattern='\s+', repl='', string=peopleinfo['Name'])
                             peoplename = zhconv.convert(peopleinfo['Name'], 'zh-cn')
                         elif peopletmdbid:
-                            ret, peoplename = self.__get_tmdb_person_name(personid=peopletmdbid)
+                            ret, peoplename = self.__get_tmdb_person_name(name=peopleinfo['Name'], personid=peopletmdbid)
 
                     if peoplename:
                         originalpeoplename = people['Name']
@@ -498,9 +498,9 @@ class media:
                         
                         if doubanmediainfo and not doubancelebritiesinfo:
                             if 'Series' in item['Type']:
-                                ret, doubancelebritiesinfo = self.__get_douban_media_celebrities_info__(mediatype=1, id=doubanmediainfo['id'])
+                                ret, doubancelebritiesinfo = self.__get_douban_media_celebrities_info__(mediatype=1, name=item['Name'], id=doubanmediainfo['id'])
                             else:
-                                ret, doubancelebritiesinfo = self.__get_douban_media_celebrities_info__(mediatype=2, id=doubanmediainfo['id'])
+                                ret, doubancelebritiesinfo = self.__get_douban_media_celebrities_info__(mediatype=2, name=item['Name'], id=doubanmediainfo['id'])
 
                         if peopleimdbid and doubanmediainfo and doubancelebritiesinfo:
                             ret, celebrities = self.__get_people_info__(celebritiesinfo=doubancelebritiesinfo, people=people, imdbid=peopleimdbid)
@@ -588,10 +588,11 @@ class media:
             log().info("异常错误: {}".format(result))
             return False, None   
 
-    def __get_douban_media_celebrities_info__(self, mediatype : int, id : str):
+    def __get_douban_media_celebrities_info__(self, mediatype : int, name : str, id : str):
         """
         获取豆瓣媒体演员信息
         :param mediatype 媒体类型 1TV 2电影
+        :name name 媒体名称
         :id id 媒体ID
         :return True or False, celebritiesinfo
         """
@@ -603,32 +604,32 @@ class media:
                 else:
                     ret, celebritiesinfo = self.doubanclient.get_movie_celebrities_info(movieid=id)
                 if not ret:
-                    log().info('获取豆瓣媒体ID[{}]演员信息失败, {}'.format(id, self.doubanclient.err))
+                    log().info('获取豆瓣媒体[{}]ID[{}]演员信息失败, {}'.format(name, id, self.doubanclient.err))
                     return False, None
                 ret = self.sqlclient.write_douban_celebrities_info(mediatype=mediatype, id=id, iteminfo=celebritiesinfo)
                 if not ret:
-                    log().info('保存豆瓣媒体ID[{}]演员信息失败, {}'.format(id, self.doubanclient.err))
+                    log().info('保存豆瓣媒体[{}]ID[{}]演员信息失败, {}'.format(name, id, self.doubanclient.err))
             for celebrities in  celebritiesinfo['directors']:
                 ret, info = self.sqlclient.get_douban_people_info(id=celebrities['id'])
                 if not ret:
                     ret, info = self.doubanclient.get_celebrity_info(celebrityid=celebrities['id'])
                     if not ret:
-                        log().info('获取豆瓣媒体ID[{}]演员信息失败, {}'.format(id, self.doubanclient.err))
+                        log().info('获取豆瓣媒体[{}]ID[{}]演员信息失败, {}'.format(name, id, self.doubanclient.err))
                         continue
                     ret = self.sqlclient.write_douban_people_info(id=celebrities['id'], iteminfo=info)
                     if not ret:
-                        log().info('获取豆瓣媒体ID[{}]演员信息失败, {}'.format(id, self.doubanclient.err))
+                        log().info('获取豆瓣媒体[{}]ID[{}]演员信息失败, {}'.format(name, id, self.doubanclient.err))
                 celebrities['info'] = info
             for celebrities in  celebritiesinfo['actors']:
                 ret, info = self.sqlclient.get_douban_people_info(id=celebrities['id'])
                 if not ret:
                     ret, info = self.doubanclient.get_celebrity_info(celebrityid=celebrities['id'])
                     if not ret:
-                        log().info('获取豆瓣媒体ID[{}]演员[{}]ID[{}]信息失败, {}'.format(id, celebrities['name'], celebrities['id'], self.doubanclient.err))
+                        log().info('获取豆瓣媒体[{}]ID[{}]演员[{}]ID[{}]信息失败, {}'.format(name, id, celebrities['name'], celebrities['id'], self.doubanclient.err))
                         continue
                     ret = self.sqlclient.write_douban_people_info(id=celebrities['id'], iteminfo=info)
                     if not ret:
-                        log().info('保存豆瓣媒体ID[{}]演员[{}]ID[{}]信息失败, {}'.format(id, celebrities['name'], celebrities['id'], self.doubanclient.err))
+                        log().info('保存豆瓣媒体[{}]ID[{}]演员[{}]ID[{}]信息失败, {}'.format(name, id, celebrities['name'], celebrities['id'], self.doubanclient.err))
                 celebrities['info'] = info
             return True, celebritiesinfo
         except Exception as result:
@@ -778,9 +779,10 @@ class media:
             log().info("异常错误：{}".format(result))
             return False, None
 
-    def __get_tmdb_tv_season_group_info__(self, groupid):
+    def __get_tmdb_tv_season_group_info__(self, name, groupid):
         """
         获取TMDB电视剧季组信息
+        :param name 媒体名称
         :param groupid 组ID
         :return True or False, iteminfo
         """
@@ -788,7 +790,7 @@ class media:
             for language in self.languagelist:
                 ret, iteminfo = self.tmdbclient.get_tv_season_group(groupid=groupid, language=language)
                 if not ret:
-                    log().info('获取TMDB剧集组ID[{}]信息失败, {}'.format(groupid, self.tmdbclient.err))
+                    log().info('获取TMDB剧集[{}]组ID[{}]信息失败, {}'.format(name, groupid, self.tmdbclient.err))
                     continue
                 return True, iteminfo
             return False, None
@@ -845,9 +847,10 @@ class media:
             log().info("异常错误：{}".format(result))
             return False, None, None, None, None
 
-    def __get_tmdb_person_name(self, personid):
+    def __get_tmdb_person_name(self, name, personid):
         """
         获取tmdb人物中文
+        :param name 人物名称
         :param personid 人物ID
         :return True or False, name
         """
@@ -857,11 +860,11 @@ class media:
                 if not ret:
                     ret, personinfo = self.tmdbclient.get_person_info(personid=personid, language=language)
                     if not ret:
-                        log().info('获取TMDB人物ID[{}]信息失败, {}'.format(personid, self.tmdbclient.err))
+                        log().info('获取TMDB人物[{}]ID[{}]信息失败, {}'.format(name, personid, self.tmdbclient.err))
                         continue
                     ret = self.sqlclient.write_tmdb_people_info(id=personid, language=language, iteminfo=personinfo)
                     if not ret:
-                        log().info('保存TMDB人物ID[{}]信息失败, {}'.format(personid, self.tmdbclient.err))
+                        log().info('保存TMDB人物[{}]ID[{}]信息失败, {}'.format(name, personid, self.tmdbclient.err))
                 for name in personinfo['also_known_as']:
                     if not self.__is_chinese__(string=name, mode=2):
                         continue
