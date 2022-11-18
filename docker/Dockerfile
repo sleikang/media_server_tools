@@ -1,12 +1,12 @@
 FROM alpine:3.16
 
-ENV LANG="C.UTF-8" \
+ENV WORK_DIR=/ecns \
+    LANG="C.UTF-8" \
     PS1="\u@\h:\w \$ " \
     TZ=Asia/Shanghai \
     PUID=1000 \
     PGID=1000 \
-    UMASK=022 \
-    WORK_DIR=/ecns
+    UMASK=022
 
 RUN \
     # 软件包安装
