@@ -68,7 +68,11 @@ class nastools:
     def __login__(self):
         try:
             if self.token:
-                return True
+                url = "{}/api/v1/user/info".format(self.host)
+                data = "username={}".format(self.username, self.passwd)
+                p, err = self.client.post(url=url, data=data, headers=self.headers)
+                if self.__get_status__(p=p, err=err):
+                    return True
             url = "{}/api/v1/user/login".format(self.host)
             data = "username={}&password={}".format(self.username, self.passwd)
             p, err = self.client.post(url=url, data=data, headers=self.headers)
