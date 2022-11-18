@@ -10,7 +10,7 @@ Emby 媒体标题自动同步
 
 
 *  注意使用本工具需要emby本身刮削了tmdb的完整数据，工具只是获取原有的数据进行替换
-
+*  设置了`ECNS_AUTO_UPDATE`=true，重启容器即可自动更新EmbyChineseNameSynchronous程序
 **docker-cli**
 
 ```
@@ -21,6 +21,7 @@ docker run -itd \
   -e PUID=1000 \
   -e PGID=1000 \
   -e UMASK=022 \
+  -e ECNS_AUTO_UPDATE=true \
   --net=host \
   ddsderek/embychinesenamesynchronous:latest
 ```
@@ -39,6 +40,7 @@ services:
             - PUID=1000
             - PGID=1000
             - UMASK=022
+            - ECNS_AUTO_UPDATE=true # 自动更新
         network_mode: host
         image: 'ddsderek/embychinesenamesynchronous:latest'
 ```
