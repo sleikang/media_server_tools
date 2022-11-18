@@ -27,6 +27,8 @@ if [ "$ECNS_AUTO_UPDATE" = "true" ]; then
         sha256sum docker/package_list.txt > /tmp/package_list.txt.sha256sum
     fi
     echo "更新程序..."
+    mkdir -p /tmp/config
+    rm -rf /tmp/config/*
     cp -r /ecns/config/* /tmp/config
     git remote set-url origin ${REPO_URL} &>/dev/null
     git clean -dffx
