@@ -16,7 +16,7 @@ Emby 媒体标题自动同步
 ```
 docker run -itd \
   --name EmbyChineseNameSynchronous \
-  -v ./config:/opt/config \
+  -v ./config:/ecns/config \
   -e TZ=Asia/Shanghai \
   -e PUID=1000 \
   -e PGID=1000 \
@@ -33,7 +33,7 @@ services:
     embychinesenamesynchronous:
         container_name: EmbyChineseNameSynchronous
         volumes:
-            - './config:/opt/config'
+            - './config:/ecns/config'
         environment:
             - TZ=Asia/Shanghai
             - PUID=1000
