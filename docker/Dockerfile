@@ -23,7 +23,8 @@ RUN \
     pip install -r \
         https://raw.githubusercontent.com/DDS-Derek/EmbyChineseNameSynchronous/main/requirement.txt
 
-RUN git clone ${REPO_URL} ${WORK_DIR} && \
+RUN git config --global pull.ff only && \
+    git clone -b main ${REPO_URL} ${WORK_DIR} --recurse-submodule && \
     git config --global --add safe.directory ${WORK_DIR} && \
     chmod -R 755 ${WORK_DIR} && \
     rm -rf \
