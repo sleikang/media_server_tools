@@ -5,9 +5,10 @@ ENV LANG="C.UTF-8" \
     TZ=Asia/Shanghai \
     PUID=1000 \
     PGID=1000 \
-    UMASK=022
+    UMASK=022 \
+    WORK_DIR=/ecns
 
-RUN apk add --update --no-cache \
+RUN apk add --no-cache \
     python3-dev \
     py3-pip \
     bash \
