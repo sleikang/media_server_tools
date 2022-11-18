@@ -9,11 +9,22 @@ function setting {
 if [ ! -f /setting.lock ]; then
 	setting
 fi
-chown -R ${PUID}:${PGID} /opt
+
+chown -R ${PUID}:${PGID} ${WORK_DIR}
 umask ${UMASK}
 
-cat /opt/docker/EmbyChineseNameSynchronous
+echo -e "——————————————————————————————————————————————————————————
+        _____  ____  _   _  ____  
+        | ____|/ ___|| \ | |/ ___| 
+        |  _| | |    |  \| |\___ \ 
+        | |___| |___ | |\  | ___) |
+        |_____|\____||_| \_||____/ 
+
+以PUID=${PUID}，PGID=${PGID}，Umask=${UMASK}的身份启动程序
+
+——————————————————————————————————————————————————————————"
 echo
-echo "以PUID=${PUID}，PGID=${PGID}的身份启动程序,umask=${UMASK}"
-cd /opt
+
+cd ${WORK_DIR}
+
 exec su-exec ${PUID}:${PGID} python3 main.py
