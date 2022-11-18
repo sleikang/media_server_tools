@@ -21,15 +21,16 @@ RUN \
     pip install --upgrade pip setuptools wheel \
     && \
     pip install -r \
-        https://raw.githubusercontent.com/DDS-Derek/EmbyChineseNameSynchronous/main/requirement.txt
-
-RUN git config --global pull.ff only && \
-    git clone -b main ${REPO_URL} ${WORK_DIR} --recurse-submodule && \
-    git config --global --add safe.directory ${WORK_DIR} && \
-    chmod -R 755 ${WORK_DIR} && \
+        https://raw.githubusercontent.com/DDS-Derek/EmbyChineseNameSynchronous/main/requirement.txt \
+    && \
     rm -rf \
         /tmp/* \
         /root/.cache \
         /var/cache/apk/*
+
+RUN git config --global pull.ff only && \
+    git clone -b main ${REPO_URL} ${WORK_DIR} --recurse-submodule && \
+    git config --global --add safe.directory ${WORK_DIR} && \
+    chmod -R 755 ${WORK_DIR}
 
 CMD [ "/ecns/docker/start.sh" ]
