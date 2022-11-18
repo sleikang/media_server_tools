@@ -28,8 +28,7 @@ if [ "$ECNS_AUTO_UPDATE" = "true" ]; then
     fi
     echo "更新程序..."
     git remote set-url origin ${REPO_URL} &>/dev/null
-    echo "config/" > .gitignore
-    git clean -fd
+    git clean -dffx
     git reset --hard HEAD
     git pull
     if [ $? -eq 0 ]; then
