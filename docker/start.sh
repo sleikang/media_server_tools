@@ -50,9 +50,9 @@ if [ "$ECNS_AUTO_UPDATE" = "true" ]; then
                     echo "检测到package_list.txt有变化，更新软件包..."
                     apk add --no-cache $(echo $(cat docker/package_list.txt))
                     if [ $? -ne 0 ]; then
-                        echo "无法更新第三方组件，请更新镜像..."
+                        echo "无法更新软件包，请更新镜像..."
                     else
-                        echo "第三方组件安装成功..."
+                        echo "软件包安装成功..."
                         sha256sum docker/package_list.txt > /tmp/package_list.txt.sha256sum
                     fi
                 fi
