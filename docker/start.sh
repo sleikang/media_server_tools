@@ -27,12 +27,15 @@ if [ "$ECNS_AUTO_UPDATE" = "true" ]; then
         sha256sum docker/package_list.txt > /tmp/package_list.txt.sha256sum
     fi
     echo "更新程序..."
+    cp -r /ecns/config/* /tmp/config
     git remote set-url origin ${REPO_URL} &>/dev/null
     git clean -dffx
     git reset --hard HEAD
     git pull
     if [ $? -eq 0 ]; then
         echo "更新成功..."
+        rm -rf /ecns/config/*
+        cp -r /tmp/config/* /ecns/config
         hash_old=$(cat /tmp/requirement.txt.sha256sum)
         hash_new=$(sha256sum requirement.txt)
         if [ "$hash_old" != "$hash_new" ]; then
