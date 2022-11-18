@@ -9,6 +9,7 @@ function setting {
     # 兼容旧config文件路径
     if [ -d /opt/config ]; then
         echo -e "使用v1.x版本config路径配置"
+        rm -rf /ecns/config
         ln -s /opt/config /ecns
     fi
 }
