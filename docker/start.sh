@@ -67,6 +67,7 @@ fi
 
 # 权限设置
 chown -R ${PUID}:${PGID} ${WORK_DIR}
+chmod +x /ecns/docker/start.sh
 umask ${UMASK}
 
 # 启动
