@@ -11,6 +11,7 @@ Emby 媒体标题自动同步
 
 *  注意使用本工具需要emby本身刮削了tmdb的完整数据，工具只是获取原有的数据进行替换
 *  设置了`ECNS_AUTO_UPDATE`=true，重启容器即可自动更新EmbyChineseNameSynchronous程序
+*  不兼容V1.x版本的卷映射方式，升级v2.x请重新映射目录
 **docker-cli**
 
 ```
