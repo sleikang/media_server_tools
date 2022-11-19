@@ -1,8 +1,8 @@
-name: Build EmbyChineseNameSynchronous Nightly
+name: Build EmbyTools Nightly
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 1 * * *'
 
 jobs:
   push:
@@ -31,7 +31,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - 
-        name: Build EmbyChineseNameSynchronous
+        name: Build EmbyTools
         uses: docker/build-push-action@v3
         with:
           context: ./docker/
@@ -45,4 +45,4 @@ jobs:
           build-args: |
             VERSION=${{ steps.set-version.outputs.version }}
           tags: |
-             ${{ secrets.DOCKER_USERNAME }}/embychinesenamesynchronous:nightly
+             ${{ secrets.DOCKER_USERNAME }}/embytools:nightly

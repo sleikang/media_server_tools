@@ -10,8 +10,12 @@ function setting {
     # 兼容旧config文件路径
     if [ -d /opt/config ]; then
         echo -e "使用v1.x版本config路径配置"
-        rm -rf /ecns/config
-        ln -s /opt/config /ecns
+        rm -rf /config
+        ln -s /opt/config /
+    else
+        if [ ! -d /config ]; then
+            mkdir -p /config
+        fi
     fi
 }
 if [ ! -f /setting.lock ]; then
@@ -19,7 +23,7 @@ if [ ! -f /setting.lock ]; then
 fi
 
 # 自动更新
-if [ "$ECNS_AUTO_UPDATE" = "true" ]; then
+if [ "${EmbyTools_AUTO_UPDATE}" = "true" ]; then
     if [ ! -s /tmp/requirement.txt.sha256sum ]; then
         sha256sum requirement.txt > /tmp/requirement.txt.sha256sum
     fi
@@ -66,21 +70,18 @@ else
 fi
 
 # 权限设置
-chown -R ${PUID}:${PGID} ${WORK_DIR}
-chmod +x /ecns/docker/start.sh
+chown -R ${PUID}:${PGID} ${WORK_DIR} ${EMBYTOOLS_CONFIG}
+chmod +x ${WORK_DIR}/docker/start.sh
 umask ${UMASK}
 
 # 启动
-echo -e "——————————————————————————————————————————————————————————
-        _____  ____  _   _  ____  
-        | ____|/ ___|| \ | |/ ___| 
-        |  _| | |    |  \| |\___ \ 
-        | |___| |___ | |\  | ___) |
-        |_____|\____||_| \_||____/ 
+echo -e "——————————————————————————————————————————————————————————"
+cat ${WORK_DIR}/docker/EmbyTools
+echo -e "
 
 以PUID=${PUID}，PGID=${PGID}，Umask=${UMASK}的身份启动程序
+—————————————————————————————————————————————————————————— 
 
-——————————————————————————————————————————————————————————"
-echo
+"
 
 exec su-exec ${PUID}:${PGID} python3 main.py

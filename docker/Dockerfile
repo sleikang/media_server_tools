@@ -1,27 +1,29 @@
 FROM alpine:3.16
 
-ENV WORK_DIR=/ecns \
+ENV WORK_DIR=/embytools \
+    EMBYTOOLS_CONFIG=/config \
     LANG="C.UTF-8" \
     PS1="\u@\h:\w \$ " \
     TZ=Asia/Shanghai \
     PUID=1000 \
     PGID=1000 \
     UMASK=022 \
-    REPO_URL=https://github.com/DDS-Derek/EmbyChineseNameSynchronous.git \
-    ECNS_AUTO_UPDATE=true
+    REPO_URL=https://github.com/DDS-Derek/EmbyTools.git \
+    REPO_RAW_URL=https://raw.githubusercontent.com/DDS-Derek/EmbyTools \
+    EmbyTools_AUTO_UPDATE=true
 
 WORKDIR ${WORK_DIR}
 
 RUN \
     # 软件包安装
     apk add --no-cache \
-        $(echo $(wget --no-check-certificate -qO- https://raw.githubusercontent.com/DDS-Derek/EmbyChineseNameSynchronous/main/docker/package_list.txt)) \
+        $(echo $(wget --no-check-certificate -qO- ${REPO_RAW_URL}/main/docker/package_list.txt)) \
     && \
     # Python库安装
     pip install --upgrade pip setuptools wheel \
     && \
     pip install -r \
-        https://raw.githubusercontent.com/DDS-Derek/EmbyChineseNameSynchronous/main/requirement.txt \
+        ${REPO_RAW_URL}/main/requirement.txt \
     && \
     rm -rf \
         /tmp/* \
@@ -33,4 +35,4 @@ RUN git config --global pull.ff only && \
     git config --global --add safe.directory ${WORK_DIR} && \
     chmod -R 755 ${WORK_DIR}
 
-CMD [ "/ecns/docker/start.sh" ]
+ENTRYPOINT [ "/embytools/docker/start.sh" ]
