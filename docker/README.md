@@ -1,5 +1,7 @@
 # EmbyTools
 
+## 简介
+
 Emby 媒体标题自动同步
 1. 中文标题
 2. 媒体概述
@@ -9,9 +11,14 @@ Emby 媒体标题自动同步
 6. 剧集组自定义同步
 7. 媒体搜刮检查是否正确(配合NasTools)
 
+- Dockerhub: https://hub.docker.com/r/ddsderek/embytools
+- Github: https://github.com/sleikang/EmbyTools
 
 *  注意使用本工具需要emby本身刮削了tmdb的完整数据，工具只是获取原有的数据进行替换
-*  设置了`EmbyTools_AUTO_UPDATE`=true，重启容器即可自动更新EmbyTools程序
+
+## 部署
+
+设置`EmbyTools_AUTO_UPDATE`=true，重启容器即可自动更新EmbyTools程序
 
 **docker-cli**
 
@@ -46,3 +53,8 @@ services:
         network_mode: host
         image: 'ddsderek/embytools:latest'
 ```
+
+
+![image](https://user-images.githubusercontent.com/23020770/188265314-73610b4e-264d-4b8c-9750-e707512f7fef.png)
+![image](https://user-images.githubusercontent.com/23020770/188306989-c722673e-2dac-4c79-8cb1-1a4eb3a35aa2.png)
+![image](https://user-images.githubusercontent.com/23020770/202453243-255b1c95-cbdf-4f24-a215-16399a442ff6.png)
