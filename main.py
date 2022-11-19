@@ -7,10 +7,10 @@ from system.log import log
 
 if __name__ == '__main__':
     try:
-        if 'EMBYCH_CONFIG' not in os.environ:
-            os.environ['EMBYCH_CONFIG'] = os.path.join(os.getcwd(), 'config')
+        if 'EMBYTOOLS_CONFIG' not in os.environ:
+            os.environ['EMBYTOOLS_CONFIG'] = os.path.join(os.getcwd(), 'config')
 
-        path = os.path.join(os.environ['EMBYCH_CONFIG'], 'config.yaml')
+        path = os.path.join(os.environ['EMBYTOOLS_CONFIG'], 'config.yaml')
         configinfo = config(path=path)
         mediaclient = media(configinfo=configinfo)
         while True:
