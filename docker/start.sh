@@ -7,15 +7,15 @@ function setting {
     ln -sf /usr/share/zoneinfo/$TZ   /etc/localtime
     echo $TZ > /etc/timezone
 
-    if [ ! -d /config ]; then
-        mkdir -p /config
-    fi
-
     # 兼容旧config文件路径
     if [ -d /opt/config ]; then
         echo -e "使用v1.x版本config路径配置"
         rm -rf /config
         ln -s /opt/config /
+    else
+        if [ ! -d /config ]; then
+            mkdir -p /config
+        fi
     fi
 }
 if [ ! -f /setting.lock ]; then
@@ -78,6 +78,7 @@ umask ${UMASK}
 echo -e "——————————————————————————————————————————————————————————"
 cat ${WORK_DIR}/docker/EmbyTools
 echo -e "
+
 以PUID=${PUID}，PGID=${PGID}，Umask=${UMASK}的身份启动程序
 —————————————————————————————————————————————————————————— 
 
