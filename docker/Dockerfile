@@ -35,6 +35,6 @@ RUN git config --global pull.ff only && \
     git config --global --add safe.directory ${WORK_DIR} && \
     chmod -R 755 ${WORK_DIR}
 
-CMD [ "${WORK_DIR}/docker/start.sh" ]
+ENTRYPOINT [ "/embytools/docker/start.sh" ]
 
-VOLUME [ "${EMBYTOOLS_CONFIG}" ]
+VOLUME [ "/config" ]
