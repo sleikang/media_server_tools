@@ -36,5 +36,3 @@ RUN git config --global pull.ff only && \
     chmod -R 755 ${WORK_DIR}
 
 ENTRYPOINT [ "/embytools/docker/start.sh" ]
-
-VOLUME [ "/config" ]
