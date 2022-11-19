@@ -9,7 +9,7 @@ class log(object):
 
     def __init__(self) -> None:
         try:
-            path = os.path.join(os.getcwd(), 'config', 'log.txt')
+            path = os.path.join(os.environ['EMBYCH_CONFIG'], 'log.txt')
             self.logger = logging.getLogger(__name__)
             self.logger.setLevel(logging.INFO)
             handler = RotatingFileHandler(filename=path, maxBytes=10*1024*1024, backupCount=3, encoding='utf-8')
