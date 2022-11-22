@@ -86,8 +86,8 @@ fi
 # 权限设置
 chown -R ${PUID}:${PGID} ${WORK_DIR}
 
-if [[ "$(stat -c '%u' ${MediaServerTools_CONFIG})" != "${PUID}" ]] || [[ "$(stat -c '%g' ${MediaServerTools_CONFIG})" != "${PGID}" ]]; then
-    chown ${PUID}:${PGID} ${MediaServerTools_CONFIG}
+if [[ "$(stat -c '%u' ${EMBYTOOLS_CONFIG})" != "${PUID}" ]] || [[ "$(stat -c '%g' ${EMBYTOOLS_CONFIG})" != "${PGID}" ]]; then
+    chown ${PUID}:${PGID} ${EMBYTOOLS_CONFIG}
 fi
 
 if [[ "$(stat -c '%A' ${WORK_DIR}/docker/start.sh)" != "-rwxr-xr-x" ]]; then
