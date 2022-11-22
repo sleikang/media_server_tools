@@ -1,4 +1,4 @@
-# EmbyChineseNameSynchronous
+# MediaServerTools
 Emby/Jellyfin 媒体标题自动同步
 1. 中文标题
 2. 媒体概述
