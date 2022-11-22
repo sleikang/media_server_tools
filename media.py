@@ -170,7 +170,7 @@ class media:
                 mediatype = 'TV'
             ret, mediainfo = self.nastoolsclient.media_info(name=name, year=year, type=mediatype)
             if not ret:
-                log().info('[{}]媒体名称[{}]与原始名称[{}]不一致可能识别错误, NasTools识别媒体[{}]失败, {}'.format(self.mediaservertype,  name, self.nastoolsclient.err))
+                log().info('[{}]媒体名称[{}]与原始名称[{}]不一致可能识别错误, NasTools识别媒体[{}]失败, {}'.format(self.mediaservertype, item['Name'], iteminfo['FileName'], name, self.nastoolsclient.err))
                 return False
             testtmdbid = None
             if year and year != mediainfo['year']:
@@ -290,6 +290,8 @@ class media:
                                         continue
                                     ret = self.meidiaserverclient.set_item_info(itemid=episodeinfo['Id'], iteminfo=episodeinfo)
                                     if ret:
+                                        if 'Jellyfin' in self.mediaservertype:
+                                            _ = self.__refresh_people__(item=episode, iteminfo=episodeinfo)
                                         log().info('原始媒体名称[{}] 第[{}]季 第[{}]集更新人物'.format(iteminfo['Name'], season['IndexNumber'], episode['IndexNumber']))
 
             if self.updateoverview:
@@ -417,7 +419,7 @@ class media:
                     log().info('原始媒体名称[{}]更新为[{}]'.format(originalname, iteminfo['Name']))
                 if updatepeople:
                     if 'Jellyfin' in self.mediaservertype:
-                        self.__refresh_people__(item=item, iteminfo=iteminfo)
+                        _ = self.__refresh_people__(item=item, iteminfo=iteminfo)
                     log().info('原始媒体名称[{}]更新人物'.format(iteminfo['Name']))
                 if updateoverview:
                     log().info('原始媒体名称[{}]更新概述'.format(iteminfo['Name']))
@@ -426,7 +428,7 @@ class media:
                     
         except Exception as result:
             log().info("异常错误：{}".format(result))
-            return False, item['Name']
+        return False, item['Name']
 
     def __refresh_people__(self, item, iteminfo):
         """
@@ -483,6 +485,7 @@ class media:
         try:
             doubanmediainfo = None
             doubancelebritiesinfo = None
+            needdelpeople = []
             for people in iteminfo['People']:
                 ret, peopleinfo = self.meidiaserverclient.get_item_info(itemid=people['Id'])
                 if not ret:
@@ -501,13 +504,15 @@ class media:
                     peopleimdbid = peopleinfo['ProviderIds']['Imdb']
                 elif 'imdb' in peopleinfo['ProviderIds']:
                     peopleimdbid = peopleinfo['ProviderIds']['imdb']
-
+                
+                    
                 if not self.__is_chinese__(string=people['Name'], mode=1):
                     if 'LockedFields' not in peopleinfo:
                         peopleinfo['LockedFields'] = []
 
                     if not peopletmdbid and not peopleimdbid:
                         log().info('{}人物[{}]ID[{}]Tmdb|Imdb不存在'.format(self.mediaservertype, peopleinfo['Name'], peopleinfo['Id']))
+                        needdelpeople.append(peopleinfo['Id'])
                         continue
 
 
@@ -595,6 +600,18 @@ class media:
                     else:
                         updatepeople = True
                 iteminfo['People'] = peoples
+
+            if needdelpeople:
+                peoples = []
+                for people in iteminfo['People']:
+                    if people['Id'] in needdelpeople:
+                        continue
+                    peoples.append(people)
+
+                iteminfo['People'] = peoples
+                updatepeople = True
+
+                
         except Exception as result:
             log().info("异常错误: {}".format(result))
         return updatepeople
@@ -646,10 +663,9 @@ class media:
                     if people['Name'] == celebrities['name'] or people['Name'] == celebrities['latin_name']:
                         return True, celebrities
             
-            return False, None
         except Exception as result:
             log().info("异常错误: {}".format(result))
-            return False, None   
+        return False, None   
 
     def __get_douban_media_celebrities_info__(self, mediatype : int, name : str, id : str):
         """
@@ -697,7 +713,7 @@ class media:
             return True, celebritiesinfo
         except Exception as result:
             log().info("异常错误：{}".format(result))
-            return False, None   
+        return False, None   
 
     def __get_douban_media_info__(self, mediatype : int, name : str, id : str):
         """
@@ -745,10 +761,10 @@ class media:
                     if not ret:
                         log().info('保存豆瓣媒体[{}]ID[{}]信息失败, {}'.format(item['title'], item['target_id'], self.doubanclient.err))
                     return True, mediainfo
-            return False, None
+
         except Exception as result:
             log().info("异常错误：{}".format(result))
-            return False, None    
+        return False, None    
 
     def __get_tmdb_media_info__(self, mediatype : int, name : str, id : str, language : str = 'zh-CN'):
         """
@@ -837,10 +853,9 @@ class media:
                                 return True, zhconv.convert(movieinfo['overview'], 'zh-cn')
                             return True, movieinfo['overview']
                     
-            return False, None
         except Exception as result:
             log().info("异常错误：{}".format(result))
-            return False, None
+        return False, None
 
     def __get_tmdb_tv_season_group_info__(self, name, groupid):
         """
@@ -856,10 +871,10 @@ class media:
                     log().info('获取TMDB剧集[{}]组ID[{}]信息失败, {}'.format(name, groupid, self.tmdbclient.err))
                     continue
                 return True, iteminfo
-            return False, None
+            
         except Exception as result:
             log().info("异常错误：{}".format(result))
-            return False, None
+        return False, None
 
     def __get_tmdb_tv_season_info__(self, name : str, tvid : str, seasonid : str, episodeid : int):
         """
@@ -905,10 +920,9 @@ class media:
                             imageurl = 'https://www.themoviedb.org/t/p/original{}'.format(episodes['still_path'])
                         return True, name, overview, ommunityrating, imageurl
 
-            return False, None, None, None, None
         except Exception as result:
             log().info("异常错误：{}".format(result))
-            return False, None, None, None, None
+        return False, None, None, None, None
 
     def __get_tmdb_person_name(self, name, personid):
         """
@@ -935,10 +949,10 @@ class media:
                         name = zhconv.convert(name, 'zh-cn')
                     return True, re.sub(pattern='\s+', repl='', string=name)
                 break
-            return False, None
+
         except Exception as result:
             log().info("异常错误：{}".format(result))
-            return False, None
+        return False, None
 
     def __alternative_name__(self, alternativetitles):
         """
@@ -960,7 +974,7 @@ class media:
                 return True, title['title']
         except Exception as result:
             log().info("异常错误：{}".format(result))
-            return False, None
+        return False, None
 
 
     def __is_chinese__(self, string : str, mode : int = 1):

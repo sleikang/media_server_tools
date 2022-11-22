@@ -1,6 +1,7 @@
 import json
 from api.server.serverbase import serverbase, network
 import os
+from urllib import parse
 
 class jellyfin(serverbase):
     host = None
@@ -105,9 +106,8 @@ class jellyfin(serverbase):
         :return True or False
         """
         try:
-            url = '{}/Items/{}/Images/Primary/0/Url?api_key={}'.format(self.host, itemid, self.key)
-            data = json.dumps({'Url': imageurl})
-            p, err = self.client.post(url=url, headers=self.headers, data=data)
+            url = '{}/Items/{}/RemoteImages/Download?Type=Primary&ImageUrl={}&ProviderName=TheMovieDb&api_key={}'.format(self.host, itemid, parse.quote(imageurl), self.key)
+            p, err = self.client.post(url=url, headers=self.headers)
             if not self.__get_status__(p=p, err=err):
                 return False
             return True
