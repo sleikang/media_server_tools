@@ -1,4 +1,4 @@
-name: Build EmbyChineseNameSynchronous
+name: Build EmbyTools
 
 on:
     release:
@@ -31,7 +31,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - 
-        name: Build EmbyChineseNameSynchronous
+        name: Build EmbyTools
         uses: docker/build-push-action@v3
         with:
           context: ./docker/
@@ -45,8 +45,8 @@ jobs:
           build-args: |
             VERSION=${{ steps.set-version.outputs.version }}
           tags: |
-             ${{ secrets.DOCKER_USERNAME }}/embychinesenamesynchronous:${{ steps.set-version.outputs.version }}
-             ${{ secrets.DOCKER_USERNAME }}/embychinesenamesynchronous:latest
+             ${{ secrets.DOCKER_USERNAME }}/embytools:${{ steps.set-version.outputs.version }}
+             ${{ secrets.DOCKER_USERNAME }}/embytools:latest
              
       -
         name: Docker Hub Description
@@ -54,6 +54,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: ddsderek/embychinesenamesynchronous
-          short-description: EmbyChineseNameSynchronous Image
+          repository: ddsderek/embytools
+          short-description: EmbyTools Image
           readme-filepath: ./docker/README.md
