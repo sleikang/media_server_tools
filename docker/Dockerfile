@@ -1,16 +1,16 @@
 FROM alpine:3.16
 
-ENV WORK_DIR=/embytools \
-    EMBYTOOLS_CONFIG=/config \
+ENV WORK_DIR=/MediaServerTools \
+    MediaServerTools_CONFIG=/config \
     LANG="C.UTF-8" \
     PS1="\u@\h:\w \$ " \
     TZ=Asia/Shanghai \
     PUID=1000 \
     PGID=1000 \
     UMASK=022 \
-    REPO_URL=https://github.com/DDS-Derek/EmbyTools.git \
-    REPO_RAW_URL=https://raw.githubusercontent.com/DDS-Derek/EmbyTools \
-    EmbyTools_AUTO_UPDATE=true
+    REPO_URL=https://github.com/DDS-Derek/MediaServerTools.git \
+    REPO_RAW_URL=https://raw.githubusercontent.com/DDS-Derek/MediaServerTools \
+    MediaServerTools_AUTO_UPDATE=true
 
 WORKDIR ${WORK_DIR}
 
@@ -35,4 +35,4 @@ RUN git config --global pull.ff only && \
     git config --global --add safe.directory ${WORK_DIR} && \
     chmod -R 755 ${WORK_DIR}
 
-ENTRYPOINT [ "/embytools/docker/start.sh" ]
+ENTRYPOINT [ "/MediaServerTools/docker/start.sh" ]

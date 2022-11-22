@@ -1,8 +1,8 @@
-# EmbyTools
+# MediaServerTools
 
 ## 简介
 
-Emby 媒体标题自动同步
+Emby/Jellyfin 媒体标题自动同步
 1. 中文标题
 2. 媒体概述
 3. 中文人名
@@ -11,20 +11,20 @@ Emby 媒体标题自动同步
 6. 剧集组自定义同步
 7. 媒体搜刮检查是否正确(配合NasTools)
 
-- Dockerhub: https://hub.docker.com/r/ddsderek/embytools
-- Github: https://github.com/sleikang/EmbyTools
+- Dockerhub: https://hub.docker.com/r/ddsderek/mediaservertools
+- Github: https://github.com/sleikang/MediaServerTools
 
 *  注意使用本工具需要emby本身刮削了tmdb的完整数据，工具只是获取原有的数据进行替换
 
 ## 部署
 
-设置`EmbyTools_AUTO_UPDATE`=true，重启容器即可自动更新EmbyTools程序
+设置`MediaServerTools_AUTO_UPDATE`=true，重启容器即可自动更新MediaServerTools程序
 
 **docker-cli**
 
 ```
 docker run -itd \
-  --name EmbyTools \
+  --name MediaServerTools \
   -v /root/config:/config \
   -e TZ=Asia/Shanghai \
   -e PUID=1000 \
@@ -32,7 +32,7 @@ docker run -itd \
   -e UMASK=022 \
   -e ECNS_AUTO_UPDATE=true \
   --net=host \
-  ddsderek/embytools:latest
+  ddsderek/mediaservertools:latest
 ```
 
 **docker-compose**
@@ -40,8 +40,8 @@ docker run -itd \
 ```
 version: '3.3'
 services:
-    embytools:
-        container_name: EmbyTools
+    MediaServerTools:
+        container_name: MediaServerTools
         volumes:
             - './config:/config'
         environment:
@@ -51,7 +51,7 @@ services:
             - UMASK=022
             - ECNS_AUTO_UPDATE=true # 自动更新
         network_mode: host
-        image: 'ddsderek/embytools:latest'
+        image: 'ddsderek/mediaservertools:latest'
 ```
 
 
