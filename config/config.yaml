@@ -7,6 +7,14 @@ api:
     username: ''
     #密码
     passwd: ''
+  jellyfin:
+    #域名 包含http(s)和端口号后面不带/
+    #例如https://xxx.xxx.xxx:8920
+    host: 'http://127.0.0.1:8096'
+    #用户ID 进EMBY 用户点击管理员账号配置可以在网址上看到userId
+    userid: ''
+    #APIKEY
+    key: ''
   emby:
     #域名 包含http(s)和端口号后面不带/
     #例如https://xxx.xxx.xxx:8920

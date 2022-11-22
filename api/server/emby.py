@@ -1,8 +1,7 @@
-from api.network import network
 import json
+from api.server.serverbase import serverbase, network
 
-
-class emby:
+class emby(serverbase):
     host = None
     userid = None
     key = None
@@ -139,6 +138,7 @@ class emby:
         应用搜索
         :param itemid 项目ID
         :param iteminfo 项目信息
+        :return True or False
         """
         try:
             url = '{}/emby/Items/RemoteSearch/Apply/{}?ReplaceAllImages=true&api_key={}'.format(self.host, itemid, self.key)

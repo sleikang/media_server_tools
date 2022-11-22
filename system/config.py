@@ -15,7 +15,7 @@ class config:
             if not os.path.exists(path=self.path):
                 log().info('配置文件[{}]不存在, 开始生成默认配置文件'.format(self.path))
                 file = open(self.path, "w", encoding="utf-8")
-                data = {'api':{'nastools':{'host':'http://127.0.0.1:3000', 'username':'', 'passwd':''},'emby':{'host':'http://127.0.0.1:8096', 'userid':'', 'key':''},'tmdb':{'key':'', 'mediacachefailtime':1, 'peoplecachefailtime':10},'douban':{'key':'0ac44ae016490db2204ce0a042db2916', 'cookie':'', 'mediacachefailtime':1, 'peoplecachefailtime':10}}, 'system':{'threadnum':1, 'updatepeople':True, 'updateoverview':True, 'updateseasongroup':False, 'updatetime':1, 'taskdonespace':1, 'delnotimagepeople':False, 'checkmediasearch': False, 'seasongroup':['纸房子|62ed7ac87d5504007e4ab046']}}
+                data = {'api':{'nastools':{'host':'http://127.0.0.1:3000', 'username':'', 'passwd':''},'emby':{'host':'http://127.0.0.1:8096', 'userid':'', 'key':''},'jellyfin':{'host':'http://127.0.0.1:8096', 'userid':'', 'key':''},'tmdb':{'key':'', 'mediacachefailtime':1, 'peoplecachefailtime':10},'douban':{'key':'0ac44ae016490db2204ce0a042db2916', 'cookie':'', 'mediacachefailtime':1, 'peoplecachefailtime':10}}, 'system':{'threadnum':1, 'updatepeople':True, 'updateoverview':True, 'updateseasongroup':False, 'updatetime':1, 'taskdonespace':1, 'delnotimagepeople':False, 'checkmediasearch': False, 'seasongroup':['纸房子|62ed7ac87d5504007e4ab046']}}
                 yaml.dump(data=data, stream=file)
                 log().info('生成默认配置文件[{}]完成'.format(self.path))
                 file.close()
@@ -30,6 +30,9 @@ class config:
             self.__config_check__(self.apidata['emby'], 'host', 'http://127.0.0.1:8096')
             self.__config_check__(self.apidata['emby'], 'userid', '')
             self.__config_check__(self.apidata['emby'], 'key', '')
+            self.__config_check__(self.apidata['jellyfin'], 'host', 'http://127.0.0.1:8096')
+            self.__config_check__(self.apidata['jellyfin'], 'userid', '')
+            self.__config_check__(self.apidata['jellyfin'], 'key', '')
             self.__config_check__(self.apidata['tmdb'], 'key', '')
             self.__config_check__(self.apidata['tmdb'], 'mediacachefailtime', 1)
             self.__config_check__(self.apidata['tmdb'], 'peoplecachefailtime', 10)
@@ -37,6 +40,7 @@ class config:
             self.__config_check__(self.apidata['douban'], 'cookie', '')
             self.__config_check__(self.apidata['douban'], 'mediacachefailtime', 1)
             self.__config_check__(self.apidata['douban'], 'peoplecachefailtime', 10)
+            self.__config_check__(self.systemdata, 'mediaserver', 'Emby')
             self.__config_check__(self.systemdata, 'threadnum', 1)
             self.__config_check__(self.systemdata, 'updatepeople', True)
             self.__config_check__(self.systemdata, 'updateoverview', True)

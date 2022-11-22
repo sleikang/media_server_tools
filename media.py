@@ -1,4 +1,4 @@
-from api.emby import emby
+from api.server.emby import emby
 from api.tmdb import tmdb
 from api.douban import douban
 from concurrent.futures import ThreadPoolExecutor
@@ -10,10 +10,12 @@ import time
 from system.config import config
 from api.mediasql import mediasql
 from api.nastools import nastools
+from api.server.jellyfin import jellyfin
 
 class media:
+    mediaservertype = None
     nastoolsclient = None
-    embyclient = None
+    meidiaserverclient = None
     tmdbclient = None
     doubanclient = None
     languagelist = None
@@ -35,11 +37,12 @@ class media:
         :param configinfo 配置
         """
         try:
+            self.mediaservertype = configinfo.systemdata['mediaserver']
             self.configload = False
             self.configinfo = configinfo
             self.sqlclient = mediasql(configinfo=configinfo)
             self.nastoolsclient = nastools(host=configinfo.apidata['nastools']['host'], username=configinfo.apidata['nastools']['username'], passwd=configinfo.apidata['nastools']['passwd'])
-            self.embyclient = emby(host=configinfo.apidata['emby']['host'], userid=configinfo.apidata['emby']['userid'], key=configinfo.apidata['emby']['key'])
+            
             self.tmdbclient = tmdb(key=configinfo.apidata['tmdb']['key'])
             self.doubanclient = douban(key=configinfo.apidata['douban']['key'], cookie=configinfo.apidata['douban']['cookie'])
             self.languagelist = ['zh-CN', 'zh-SG', 'zh-TW', 'zh-HK']
@@ -53,6 +56,14 @@ class media:
             self.updateseasongroup = configinfo.systemdata['updateseasongroup']
             self.checkmediasearch = configinfo.systemdata['checkmediasearch']
             self.configload = True
+            if 'Emby' in self.mediaservertype:
+                self.meidiaserverclient = emby(host=configinfo.apidata['emby']['host'], userid=configinfo.apidata['emby']['userid'], key=configinfo.apidata['emby']['key'])
+            elif 'Jellyfin' in self.mediaservertype:
+                self.meidiaserverclient = jellyfin(host=configinfo.apidata['jellyfin']['host'], userid=configinfo.apidata['jellyfin']['userid'], key=configinfo.apidata['jellyfin']['key'])
+            else:
+                log().info('当前设置媒体服务器[{}]不支持'.format(self.mediaservertype))
+                self.configload = False
+            
         except Exception as reuslt:
             log().info('配置异常错误, {}'.format(reuslt))
 
@@ -65,14 +76,14 @@ class media:
             log().info('配置未正常加载')
             return False
         #获取媒体库根文件夹
-        ret, itmes = self.embyclient.get_items()
+        ret, itmes = self.meidiaserverclient.get_items()
         if not ret:
-            log().info('获取Emby媒体总列表失败, {}'.format(self.embyclient.err))
+            log().info('获取{}媒体总列表失败, {}'.format(self.mediaservertype, self.meidiaserverclient.err))
             return False
-        ret, iteminfo = self.embyclient.get_items_count()
+        ret, iteminfo = self.meidiaserverclient.get_items_count()
         log().info('总媒体数量[{}]'.format(iteminfo['MovieCount'] + iteminfo['SeriesCount']))
         if not ret:
-            log().info('获取Emby媒体数量失败, {}'.format(self.embyclient.err))
+            log().info('获取{}媒体数量失败, {}'.format(self.mediaservertype, self.meidiaserverclient.err))
             return False
         
         for item in self.__check_media_info__(itemlist=itmes):
@@ -114,9 +125,9 @@ class media:
         try:
             for item in itemlist['Items']:
                 if 'Folder' in item['Type'] and ('CollectionType' not in item or 'boxsets' not in item['CollectionType']):
-                    ret, items = self.embyclient.get_items(parentid=item['Id'])
+                    ret, items = self.meidiaserverclient.get_items(parentid=item['Id'])
                     if not ret:
-                        log().info('获取Emby媒体[{}]ID[{}]列表失败, {}'.format(item['Name'], item['Id'], self.embyclient.err))
+                        log().info('获取{}媒体[{}]ID[{}]列表失败, {}'.format(self.mediaservertype, item['Name'], item['Id'], self.meidiaserverclient.err))
                         continue
                     for tmpitem in self.__check_media_info__(itemlist=items):
                         yield tmpitem
@@ -135,9 +146,9 @@ class media:
         :param item 媒体信息
         """
         try:
-            ret, iteminfo = self.embyclient.get_item_info(itemid=item['Id'])
+            ret, iteminfo = self.meidiaserverclient.get_item_info(itemid=item['Id'])
             if not ret:
-                log().info('获取Emby媒体[{}]ID[{}]信息失败, {}'.format(item['Name'], item['Id'], self.embyclient.err))
+                log().info('获取{}媒体[{}]ID[{}]信息失败, {}'.format(self.mediaservertype, item['Name'], item['Id'], self.meidiaserverclient.err))
                 return False
             tmdbid = ''
             if 'Tmdb' in iteminfo['ProviderIds']:
@@ -175,18 +186,18 @@ class media:
                     return False
                 
 
-            ret, searchinfo = self.embyclient.search_movie(itemid=item['Id'], tmdbid=testtmdbid)
+            ret, searchinfo = self.meidiaserverclient.search_movie(itemid=item['Id'], tmdbid=testtmdbid)
             if not ret:
-                log().info('Emby搜索媒体[{}]ID[{}]TMDB[{}]信息失败, {}'.format(item['Name'], item['Id'], testtmdbid, self.embyclient.err))
+                log().info('{}搜索媒体[{}]ID[{}]TMDB[{}]信息失败, {}'.format(self.mediaservertype, item['Name'], item['Id'], testtmdbid, self.meidiaserverclient.err))
                 return False
             for info in searchinfo:
                 info['Type'] = iteminfo['Type']
                 info['IsFolder'] = iteminfo['IsFolder']
-                ret = self.embyclient.apply_search(itemid=item['Id'], iteminfo=info)
+                ret = self.meidiaserverclient.apply_search(itemid=item['Id'], iteminfo=info)
                 if not ret:
-                    log().info('Emby更新媒体[{}]ID[{}]TMDB[{}]信息失败, {}'.format(item['Name'], item['Id'], testtmdbid, self.embyclient.err))
+                    log().info('{}更新媒体[{}]ID[{}]TMDB[{}]信息失败, {}'.format(self.mediaservertype, item['Name'], item['Id'], testtmdbid, self.meidiaserverclient.err))
                     return False
-                log().info('Emby更新媒体[{}]ID[{}]TMDB[{}]更新为媒体[{}]TMDB[{}]'.format(item['Name'], item['Id'], tmdbid, info['Name'], testtmdbid))
+                log().info('{}更新媒体[{}]ID[{}]TMDB[{}]更新为媒体[{}]TMDB[{}]'.format(self.mediaservertype, item['Name'], item['Id'], tmdbid, info['Name'], testtmdbid))
                 item['Name'] = info['Name']
                 break
             return True
@@ -207,9 +218,9 @@ class media:
             updatename = False
             updatepeople = False
             updateoverview = False
-            ret, iteminfo = self.embyclient.get_item_info(itemid=item['Id'])
+            ret, iteminfo = self.meidiaserverclient.get_item_info(itemid=item['Id'])
             if not ret:
-                log().info('获取Emby媒体[{}]ID[{}]信息失败, {}'.format(item['Name'], item['Id'], self.embyclient.err))
+                log().info('获取{}媒体[{}]ID[{}]信息失败, {}'.format(self.mediaservertype, item['Name'], item['Id'], self.meidiaserverclient.err))
                 return False, item['Name']
             if 'LockedFields' not in iteminfo:
                 iteminfo['LockedFields'] = []
@@ -230,7 +241,7 @@ class media:
             if not self.__is_chinese__(string=item['Name']):                
 
                 if not tmdbid and not imdbid:
-                    log().info('Emby媒体[{}]ID[{}]Tmdb|Imdb不存在'.format(item['Name'], item['Id']))
+                    log().info('{}媒体[{}]ID[{}]Tmdb|Imdb不存在'.format(self.mediaservertype, item['Name'], item['Id']))
                     return False, item['Name']
                 name = None
                 if tmdbid:
@@ -256,34 +267,34 @@ class media:
 
       
             if self.updatepeople and 'People' in iteminfo:
-                updateoverview = self.__update_people__(item=item, iteminfo=iteminfo, imdbid=imdbid)
+                updatepeople = self.__update_people__(item=item, iteminfo=iteminfo, imdbid=imdbid)
 
                 if 'Series' in item['Type']:
-                    ret, seasons = self.embyclient.get_items(parentid=item['Id'])
+                    ret, seasons = self.meidiaserverclient.get_items(parentid=item['Id'])
                     if not ret:
-                        log().info('获取Emby媒体[{}]ID[{}]信息失败, {}'.format(item['Name'], item['Id'], self.embyclient.err))
+                        log().info('获取{}媒体[{}]ID[{}]信息失败, {}'.format(self.mediaservertype, item['Name'], item['Id'], self.meidiaserverclient.err))
                     else:
                         for season in seasons['Items']:
-                            ret, episodes = self.embyclient.get_items(parentid=season['Id'])
+                            ret, episodes = self.meidiaserverclient.get_items(parentid=season['Id'])
                             if not ret:
-                                log().info('获取Emby媒体[{}]ID[{}]信息失败, {}'.format(season['Name'], season['Id'], self.embyclient.err))
+                                log().info('获取{}媒体[{}]ID[{}]信息失败, {}'.format(self.mediaservertype, season['Name'], season['Id'], self.meidiaserverclient.err))
                                 continue
                             for episode in episodes['Items']:
-                                ret, episodeinfo = self.embyclient.get_item_info(itemid=episode['Id'])
+                                ret, episodeinfo = self.meidiaserverclient.get_item_info(itemid=episode['Id'])
                                 if not ret:
-                                    log().info('获取Emby媒体[{}]ID[{}]信息失败, {}'.format(episode['Name'], episode['Id'], self.embyclient.err))
+                                    log().info('获取{}媒体[{}]ID[{}]信息失败, {}'.format(self.mediaservertype, episode['Name'], episode['Id'], self.meidiaserverclient.err))
                                 else:
                                     ret = self.__update_people__(item=episode, iteminfo=episodeinfo, imdbid=imdbid)
                                     if not ret:
                                         continue
-                                    ret = self.embyclient.set_item_info(itemid=episodeinfo['Id'], iteminfo=episodeinfo)
+                                    ret = self.meidiaserverclient.set_item_info(itemid=episodeinfo['Id'], iteminfo=episodeinfo)
                                     if ret:
                                         log().info('原始媒体名称[{}] 第[{}]季 第[{}]集更新人物'.format(iteminfo['Name'], season['IndexNumber'], episode['IndexNumber']))
 
             if self.updateoverview:
                 if 'Overview' not in iteminfo or not self.__is_chinese__(string=iteminfo['Overview']):
                     if not tmdbid and not imdbid:
-                        log().info('Emby媒体[{}]ID[{}]Tmdb|Imdb不存在'.format(item['Name'], item['Id']))
+                        log().info('{}媒体[{}]ID[{}]Tmdb|Imdb不存在'.format(self.mediaservertype, item['Name'], item['Id']))
                         return False, item['Name']
                     ret = False
                     if tmdbid:
@@ -311,9 +322,9 @@ class media:
 
                 
                 if 'Series' in item['Type']:
-                    ret, seasons = self.embyclient.get_items(parentid=item['Id'])
+                    ret, seasons = self.meidiaserverclient.get_items(parentid=item['Id'])
                     if not ret:
-                        log().info('获取Emby媒体[{}]ID[{}]信息失败, {}'.format(item['Name'], item['Id'], self.embyclient.err))
+                        log().info('获取{}媒体[{}]ID[{}]信息失败, {}'.format(self.mediaservertype, item['Name'], item['Id'], self.meidiaserverclient.err))
                     else:
                         seasongroupinfo = None
                         groupid = None
@@ -326,14 +337,14 @@ class media:
                                     groupid = infolist[1]
                                     break
                         for season in seasons['Items']:
-                            ret, episodes = self.embyclient.get_items(parentid=season['Id'])
+                            ret, episodes = self.meidiaserverclient.get_items(parentid=season['Id'])
                             if not ret:
-                                log().info('获取Emby媒体[{}]ID[{}]信息失败, {}'.format(season['Name'], season['Id'], self.embyclient.err))
+                                log().info('获取{}媒体[{}]ID[{}]信息失败, {}'.format(self.mediaservertype, season['Name'], season['Id'], self.meidiaserverclient.err))
                                 continue
                             for episode in episodes['Items']:
-                                ret, episodeinfo = self.embyclient.get_item_info(itemid=episode['Id'])
+                                ret, episodeinfo = self.meidiaserverclient.get_item_info(itemid=episode['Id'])
                                 if not ret:
-                                    log().info('获取Emby媒体[{}]ID[{}]信息失败, {}'.format(episode['Name'], episode['Id'], self.embyclient.err))
+                                    log().info('获取{}媒体[{}]ID[{}]信息失败, {}'.format(self.mediaservertype, episode['Name'], episode['Id'], self.meidiaserverclient.err))
                                 else:
                                     imageurl = None
                                     name = None
@@ -386,24 +397,26 @@ class media:
                                         episodeinfo['LockedFields'].append('Name')
                                     if 'Overview' not in episodeinfo['LockedFields']:
                                         episodeinfo['LockedFields'].append('Overview')
-                                    ret = self.embyclient.set_item_info(itemid=episodeinfo['Id'], iteminfo=episodeinfo)
+                                    ret = self.meidiaserverclient.set_item_info(itemid=episodeinfo['Id'], iteminfo=episodeinfo)
                                     if ret:
                                         if overview:
                                             log().info('原始媒体名称[{}] 第[{}]季 第[{}]集更新概述'.format(iteminfo['Name'], season['IndexNumber'], episode['IndexNumber']))
                                         if ommunityrating:
                                             log().info('原始媒体名称[{}] 第[{}]季 第[{}]集更新评分'.format(iteminfo['Name'], season['IndexNumber'], episode['IndexNumber']))
                                     if imageurl:
-                                        ret = self.embyclient.set_item_image(itemid=episodeinfo['Id'], imageurl=imageurl)
+                                        ret = self.meidiaserverclient.set_item_image(itemid=episodeinfo['Id'], imageurl=imageurl)
                                         if ret:
                                             log().info('原始媒体名称[{}] 第[{}]季 第[{}]集更新图片'.format(iteminfo['Name'], season['IndexNumber'], episode['IndexNumber']))
 
             if not updatename and not updatepeople and not updateoverview:
                 return True, item['Name']
-            ret = self.embyclient.set_item_info(itemid=iteminfo['Id'], iteminfo=iteminfo)
+            ret = self.meidiaserverclient.set_item_info(itemid=iteminfo['Id'], iteminfo=iteminfo)
             if ret:
                 if updatename:
                     log().info('原始媒体名称[{}]更新为[{}]'.format(originalname, iteminfo['Name']))
                 if updatepeople:
+                    if 'Jellyfin' in self.mediaservertype:
+                        self.__refresh_people__(item=item, iteminfo=iteminfo)
                     log().info('原始媒体名称[{}]更新人物'.format(iteminfo['Name']))
                 if updateoverview:
                     log().info('原始媒体名称[{}]更新概述'.format(iteminfo['Name']))
@@ -413,6 +426,49 @@ class media:
         except Exception as result:
             log().info("异常错误：{}".format(result))
             return False, item['Name']
+
+    def __refresh_people__(self, item, iteminfo):
+        """
+        刷新人物元数据
+        :param iteminfo 项目信息
+        :return True of False
+        """
+        try:
+            ret, newiteminfo = self.meidiaserverclient.get_item_info(itemid=item['Id'])
+            if not ret:
+                log().info('获取{}媒体[{}]ID[{}]信息失败, {}'.format(self.mediaservertype, item['Name'], item['Id'], self.meidiaserverclient.err))
+                return False
+            for (people, newpeople) in zip(iteminfo['People'], newiteminfo['People']):
+                if people['Id'] in newpeople['Id'] or people['Name'] not in newpeople['Name']:
+                    continue
+                ret, peopleinfo = self.meidiaserverclient.get_item_info(itemid=people['Id'])
+                if not ret:
+                    log().info('获取{}人物信息失败, {}'.format(self.mediaservertype, self.meidiaserverclient.err))
+                    continue
+                ret, newpeopleinfo = self.meidiaserverclient.get_item_info(itemid=newpeople['Id'])
+                if not ret:
+                    log().info('获取{}人物信息失败, {}'.format(self.mediaservertype, self.meidiaserverclient.err))
+                    continue
+                newpeopleinfo['ProviderIds'] = peopleinfo['ProviderIds']
+                ret = self.meidiaserverclient.set_item_info(itemid=newpeopleinfo['Id'], iteminfo=newpeopleinfo)
+                if not ret:
+                    log().info('更新{}人物信息失败, {}'.format(self.mediaservertype, self.meidiaserverclient.err))
+                    continue
+                ret, newpeopleinfo = self.meidiaserverclient.get_item_info(itemid=newpeople['Id'])
+                if not ret:
+                    log().info('获取{}人物信息失败, {}'.format(self.mediaservertype, self.meidiaserverclient.err))
+                    continue
+                """
+                ret = self.meidiaserverclient.refresh(peopleinfo['Id'])
+                if not ret:
+                    log().info('刷新{}人物信息失败, {}'.format(self.mediaservertype, self.meidiaserverclient.err))
+                """
+                time.sleep(self.taskdonespace)
+            
+            return True
+        except Exception as result:
+            log().info("异常错误: {}".format(result))
+        return False
 
     def __update_people__(self, item, iteminfo, imdbid):
         """
@@ -427,9 +483,9 @@ class media:
             doubanmediainfo = None
             doubancelebritiesinfo = None
             for people in iteminfo['People']:
-                ret, peopleinfo = self.embyclient.get_item_info(itemid=people['Id'])
+                ret, peopleinfo = self.meidiaserverclient.get_item_info(itemid=people['Id'])
                 if not ret:
-                    log().info('获取Emby人物信息失败, {}'.format(self.embyclient.err))
+                    log().info('获取{}人物信息失败, {}'.format(self.mediaservertype, self.meidiaserverclient.err))
                     continue
                 
                 peopleimdbid = None
@@ -450,7 +506,7 @@ class media:
                         peopleinfo['LockedFields'] = []
 
                     if not peopletmdbid and not peopleimdbid:
-                        log().info('Emby人物[{}]ID[{}]Tmdb|Imdb不存在'.format(peopleinfo['Name'], peopleinfo['Id']))
+                        log().info('{}人物[{}]ID[{}]Tmdb|Imdb不存在'.format(self.mediaservertype, peopleinfo['Name'], peopleinfo['Id']))
                         continue
 
 
@@ -484,7 +540,10 @@ class media:
                         if 'Name' not in peopleinfo['LockedFields']:
                             peopleinfo['LockedFields'].append('Name')
                         people['Name'] = peoplename
-                        ret = self.embyclient.set_item_info(itemid=peopleinfo['Id'], iteminfo=peopleinfo)
+                        if 'Emby' in self.mediaservertype:
+                            ret = self.meidiaserverclient.set_item_info(itemid=peopleinfo['Id'], iteminfo=peopleinfo)
+                        else:
+                            ret = True
                         if ret:
                             log().info('原始人物名称[{}]更新为[{}]'.format(originalpeoplename, peoplename))
                             updatepeople = True
@@ -513,25 +572,28 @@ class media:
                                     originalpeoplename = people['Name']
                                     peopleinfo['Name'] = doubanname
                                     people['Name'] = doubanname
-                                    ret = self.embyclient.set_item_info(itemid=peopleinfo['Id'], iteminfo=peopleinfo)
+                                    if 'Emby' in self.mediaservertype:
+                                        ret = self.meidiaserverclient.set_item_info(itemid=peopleinfo['Id'], iteminfo=peopleinfo)
+                                    else:
+                                        ret = True
                                     if ret:
                                         log().info('原始人物名称[{}]更新为[{}]'.format(originalpeoplename, people['Name']))
                                         updatepeople = True
                             
-            
-            peoplelist = []
-            peoples = []
-            for people in iteminfo['People']:
-                if self.delnotimagepeople:
-                    if 'PrimaryImageTag' not in people:
+            if 'Emby' in self.mediaservertype:
+                peoplelist = []
+                peoples = []
+                for people in iteminfo['People']:
+                    if self.delnotimagepeople:
+                        if 'PrimaryImageTag' not in people:
+                            updatepeople = True
+                            continue
+                    if people['Name'] + people['Type'] not in peoplelist:
+                        peoplelist.append(people['Name'] + people['Type'])
+                        peoples.append(people)
+                    else:
                         updatepeople = True
-                        continue
-                if people['Name'] + people['Type'] not in peoplelist:
-                    peoplelist.append(people['Name'] + people['Type'])
-                    peoples.append(people)
-                else:
-                    updatepeople = True
-            iteminfo['People'] = peoples
+                iteminfo['People'] = peoples
         except Exception as result:
             log().info("异常错误: {}".format(result))
         return updatepeople
