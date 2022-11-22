@@ -30,7 +30,7 @@ docker run -itd \
   -e PUID=1000 \
   -e PGID=1000 \
   -e UMASK=022 \
-  -e ECNS_AUTO_UPDATE=true \
+  -e MediaServerTools_AUTO_UPDATE=true \
   --net=host \
   ddsderek/mediaservertools:latest
 ```
@@ -49,7 +49,7 @@ services:
             - PUID=1000
             - PGID=1000
             - UMASK=022
-            - ECNS_AUTO_UPDATE=true # 自动更新
+            - MediaServerTools_AUTO_UPDATE=true # 自动更新
         network_mode: host
         image: 'ddsderek/mediaservertools:latest'
 ```
