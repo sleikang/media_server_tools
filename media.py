@@ -55,11 +55,12 @@ class media:
             self.delnotimagepeople = configinfo.systemdata['delnotimagepeople']
             self.updateseasongroup = configinfo.systemdata['updateseasongroup']
             self.checkmediasearch = configinfo.systemdata['checkmediasearch']
-            self.configload = True
             if 'Emby' in self.mediaservertype:
                 self.meidiaserverclient = emby(host=configinfo.apidata['emby']['host'], userid=configinfo.apidata['emby']['userid'], key=configinfo.apidata['emby']['key'])
+                self.configload = True
             elif 'Jellyfin' in self.mediaservertype:
                 self.meidiaserverclient = jellyfin(host=configinfo.apidata['jellyfin']['host'], userid=configinfo.apidata['jellyfin']['userid'], key=configinfo.apidata['jellyfin']['key'])
+                self.configload = True
             else:
                 log().info('当前设置媒体服务器[{}]不支持'.format(self.mediaservertype))
                 self.configload = False
@@ -155,12 +156,12 @@ class media:
                 tmdbid = iteminfo['ProviderIds']['Tmdb']
             elif 'tmdb' in iteminfo['ProviderIds']:
                 tmdbid = iteminfo['ProviderIds']['tmdb']
-            name = re.sub(pattern='\.\S{1,4}$', repl='', string=iteminfo['FileName'])
+            name = re.sub(pattern='\s+-\s+\d{1,4}[k|K|p|P]|\s+\(\d{4}\)|\.\S{1,4}$', repl='', string=iteminfo['FileName'])
             year = None
-            redata = re.search(pattern='\((\d{4})\)', string=name)
+            redata = re.search(pattern='\((\d{4})\)', string=iteminfo['FileName'])
             if redata:
                 year = redata.group(1)
-            if item['Name'] in name and (year and year in str(iteminfo['ProductionYear'])):
+            if name in item['Name'] and (year and 'ProductionYear' in iteminfo and year in str(iteminfo['ProductionYear'])):
                 return True
             mediatype = 'MOV'
             if 'Movie' in item['Type']:
@@ -169,7 +170,7 @@ class media:
                 mediatype = 'TV'
             ret, mediainfo = self.nastoolsclient.media_info(name=name, year=year, type=mediatype)
             if not ret:
-                log().info('NasTools识别媒体[{}]失败, {}'.format(name, self.nastoolsclient.err))
+                log().info('[{}]媒体名称[{}]与原始名称[{}]不一致可能识别错误, NasTools识别媒体[{}]失败, {}'.format(self.mediaservertype,  name, self.nastoolsclient.err))
                 return False
             testtmdbid = None
             if year and year != mediainfo['year']:

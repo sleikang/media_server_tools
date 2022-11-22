@@ -150,6 +150,22 @@ class emby(serverbase):
         except Exception as result:
             self.err = "异常错误：{}".format(result)
         return False
+    
+    def refresh(self, itemid):
+        """
+        刷新元数据
+        :param itemid 项目ID
+        :return True or False
+        """
+        try:
+            url = '{}/emby/Items/{}/Refresh?Recursive=true&ImageRefreshMode=FullRefresh&MetadataRefreshMode=FullRefresh&ReplaceAllImages=true&ReplaceAllMetadata=true&api_key={}'.format(self.host, itemid, self.key)
+            p, err = self.client.post(url=url, headers=self.headers)
+            if not self.__get_status__(p=p, err=err):
+                return False
+            return True
+        except Exception as result:
+            self.err = "异常错误：{}".format(result)
+        return False
 
     def __get_status__(self, p, err):
         try:
