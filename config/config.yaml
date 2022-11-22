@@ -41,6 +41,8 @@ api:
     peoplecachefailtime: 120
 
 system:  
+  #使用媒体服务器 Emby Jellyfin
+  mediaserver: 'Emby'  
   #线程数量 豆瓣API有请求频率限制建议线程数量不要过多
   threadnum: 10
   #是否刷新人名
