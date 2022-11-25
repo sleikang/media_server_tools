@@ -54,6 +54,11 @@ function backup_config {
     else
         zip -r /config/config_backup.zip /config
     fi
+    if [ -f /config/config_backup.zip ]; then
+        if [[ "$(stat -c '%u' /config/config_backup.zip)" != "${PUID}" ]] || [[ "$(stat -c '%g' /config/config_backup.zip)" != "${PGID}" ]]; then
+            chown ${PUID}:${PGID} /config/config_backup.zip
+        fi
+    fi
 }
 
 if [ "${MediaServerTools_AUTO_UPDATE}" = "true" ]; then
