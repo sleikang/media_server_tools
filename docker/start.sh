@@ -81,17 +81,17 @@ if [ "${MediaServerTools_AUTO_UPDATE}" = "true" ]; then
             else
                 echo -e "${Green}依赖安装成功...${Font}"
                 sha256sum requirement.txt > /tmp/requirement.txt.sha256sum
-                hash_old=$(cat /tmp/package_list.txt.sha256sum)
-                hash_new=$(sha256sum docker/package_list.txt)
-                if [ "$hash_old" != "$hash_new" ]; then
-                    package_list_update
-                    if [ $? -ne 0 ]; then
-                        echo -e "${Red}无法更新软件包，请更新镜像...${Font}"
-                    else
-                        echo -e "${Green}软件包安装成功...${Font}"
-                        sha256sum docker/package_list.txt > /tmp/package_list.txt.sha256sum
-                    fi
-                fi
+            fi
+        fi
+        hash_old=$(cat /tmp/package_list.txt.sha256sum)
+        hash_new=$(sha256sum docker/package_list.txt)
+        if [ "$hash_old" != "$hash_new" ]; then
+            package_list_update
+            if [ $? -ne 0 ]; then
+                echo -e "${Red}无法更新软件包，请更新镜像...${Font}"
+            else
+                echo -e "${Green}软件包安装成功...${Font}"
+                sha256sum docker/package_list.txt > /tmp/package_list.txt.sha256sum
             fi
         fi
     else
