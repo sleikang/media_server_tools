@@ -1,4 +1,4 @@
-name: Build EmbyTools
+name: Build MediaServerTools
 
 on:
     release:
@@ -31,7 +31,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - 
-        name: Build EmbyTools
+        name: Build MediaServerTools
         uses: docker/build-push-action@v3
         with:
           context: ./docker/
@@ -45,8 +45,8 @@ jobs:
           build-args: |
             VERSION=${{ steps.set-version.outputs.version }}
           tags: |
-             ${{ secrets.DOCKER_USERNAME }}/embytools:${{ steps.set-version.outputs.version }}
-             ${{ secrets.DOCKER_USERNAME }}/embytools:latest
+             ${{ secrets.DOCKER_USERNAME }}/mediaservertools:${{ steps.set-version.outputs.version }}
+             ${{ secrets.DOCKER_USERNAME }}/mediaservertools:latest
              
       -
         name: Docker Hub Description
@@ -54,6 +54,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: ddsderek/embytools
-          short-description: EmbyTools Image
+          repository: ddsderek/mediaservertools
+          short-description: MediaServerTools Image
           readme-filepath: ./docker/README.md

@@ -44,7 +44,7 @@ function package_list_update {
     apk add --no-cache $(echo $(cat docker/package_list.txt))
 }
 
-if [ "${EmbyTools_AUTO_UPDATE}" = "true" ]; then
+if [ "${MediaServerTools_AUTO_UPDATE}" = "true" ]; then
     if [ ! -s /tmp/requirement.txt.sha256sum ]; then
         sha256sum requirement.txt > /tmp/requirement.txt.sha256sum
     fi
@@ -97,12 +97,12 @@ fi
 umask ${UMASK}
 
 # 启动
-echo -e "——————————————————————————————————————————————————————————"
-cat ${WORK_DIR}/docker/EmbyTools
+echo -e "————————————————————————————————————————————————————————————————————————————————————————"
+cat ${WORK_DIR}/docker/MediaServerTools
 echo -e "
 
 ${Green}以PUID=${PUID}，PGID=${PGID}，Umask=${UMASK}的身份启动程序${Font}
-—————————————————————————————————————————————————————————— 
+———————————————————————————————————————————————————————————————————————————————————————— 
 
 "
 
