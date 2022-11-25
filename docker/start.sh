@@ -44,7 +44,20 @@ function package_list_update {
     apk add --no-cache $(echo $(cat docker/package_list.txt))
 }
 
+function backup_config {
+    echo -e "${Green}备份config文件中...${Font}"
+    if [ -f /config/config_backup.zip ]; then
+        rm -rf /config/config_backup.zip
+    fi
+    if [ -f /config/log.txt ]; then
+        zip -r /config/config_backup.zip /config -x='/config/log.txt'
+    else
+        zip -r /config/config_backup.zip /config
+    fi
+}
+
 if [ "${MediaServerTools_AUTO_UPDATE}" = "true" ]; then
+    backup_config
     if [ ! -s /tmp/requirement.txt.sha256sum ]; then
         sha256sum requirement.txt > /tmp/requirement.txt.sha256sum
     fi

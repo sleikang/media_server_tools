@@ -4,3 +4,5 @@ bash
 su-exec
 git
 tzdata
+zip
+unzip
