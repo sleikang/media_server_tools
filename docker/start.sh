@@ -93,7 +93,7 @@ if [[ -n "${MEDIASERVERTOOLS_CONFIG}" ]]; then
     fi
 fi
 if [[ -n "${EMBYTOOLS_CONFIG}" ]]; then
-    echo "${Green}使用旧Config路径环境变量${Font}"
+    echo -e "${Green}使用旧Config路径环境变量${Font}"
     if [[ "$(stat -c '%u' ${EMBYTOOLS_CONFIG})" != "${PUID}" ]] || [[ "$(stat -c '%g' ${EMBYTOOLS_CONFIG})" != "${PGID}" ]]; then
         chown ${PUID}:${PGID} ${EMBYTOOLS_CONFIG}
     fi
