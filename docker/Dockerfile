@@ -1,7 +1,7 @@
 FROM alpine:3.16
 
 ENV WORK_DIR=/MediaServerTools \
-    EMBYTOOLS_CONFIG=/config \
+    MEDIASERVERTOOLS_CONFIG=/config \
     LANG="C.UTF-8" \
     PS1="\u@\h:\w \$ " \
     TZ=Asia/Shanghai \
