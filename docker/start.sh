@@ -44,7 +44,25 @@ function package_list_update {
     apk add --no-cache $(echo $(cat docker/package_list.txt))
 }
 
+function backup_config {
+    echo -e "${Green}备份config文件中...${Font}"
+    if [ -f /config/config_backup.zip ]; then
+        rm -rf /config/config_backup.zip
+    fi
+    if [ -f /config/log.txt ]; then
+        zip -r /config/config_backup.zip /config -x='/config/log.txt'
+    else
+        zip -r /config/config_backup.zip /config
+    fi
+    if [ -f /config/config_backup.zip ]; then
+        if [[ "$(stat -c '%u' /config/config_backup.zip)" != "${PUID}" ]] || [[ "$(stat -c '%g' /config/config_backup.zip)" != "${PGID}" ]]; then
+            chown ${PUID}:${PGID} /config/config_backup.zip
+        fi
+    fi
+}
+
 if [ "${MediaServerTools_AUTO_UPDATE}" = "true" ]; then
+    backup_config
     if [ ! -s /tmp/requirement.txt.sha256sum ]; then
         sha256sum requirement.txt > /tmp/requirement.txt.sha256sum
     fi
@@ -63,17 +81,17 @@ if [ "${MediaServerTools_AUTO_UPDATE}" = "true" ]; then
             else
                 echo -e "${Green}依赖安装成功...${Font}"
                 sha256sum requirement.txt > /tmp/requirement.txt.sha256sum
-                hash_old=$(cat /tmp/package_list.txt.sha256sum)
-                hash_new=$(sha256sum docker/package_list.txt)
-                if [ "$hash_old" != "$hash_new" ]; then
-                    package_list_update
-                    if [ $? -ne 0 ]; then
-                        echo -e "${Red}无法更新软件包，请更新镜像...${Font}"
-                    else
-                        echo -e "${Green}软件包安装成功...${Font}"
-                        sha256sum docker/package_list.txt > /tmp/package_list.txt.sha256sum
-                    fi
-                fi
+            fi
+        fi
+        hash_old=$(cat /tmp/package_list.txt.sha256sum)
+        hash_new=$(sha256sum docker/package_list.txt)
+        if [ "$hash_old" != "$hash_new" ]; then
+            package_list_update
+            if [ $? -ne 0 ]; then
+                echo -e "${Red}无法更新软件包，请更新镜像...${Font}"
+            else
+                echo -e "${Green}软件包安装成功...${Font}"
+                sha256sum docker/package_list.txt > /tmp/package_list.txt.sha256sum
             fi
         fi
     else
