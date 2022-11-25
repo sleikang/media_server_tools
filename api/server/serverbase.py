@@ -10,7 +10,6 @@ class serverbase(metaclass=ABCMeta):
     err = None
     client = None
 
-    @abstractmethod
     def __init__(self, host : str, userid : str, key : str) -> None:
         """
         :param host
@@ -24,10 +23,11 @@ class serverbase(metaclass=ABCMeta):
         self.client = network(maxnumconnect=10, maxnumcache=20)
     
     @abstractmethod
-    def get_items(self, parentid : str = ''):
+    def get_items(self, parentid : str = '', type = None):
         """
         获取项目列表
         :param parentid 父文件夹ID
+        :param type 类型
         :return True or False, items
         """
         pass
@@ -68,11 +68,13 @@ class serverbase(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def search_movie(self, itemid, tmdbid):
+    def search_movie(self, itemid, tmdbid, name = None, year = None):
         """
         搜索视频
         :param itemid 项目ID
         :param tmdbid TMDB ID
+        :param name 标题
+        :param year 年代
         :return True or False, iteminfo
         """
         pass
@@ -87,7 +89,6 @@ class serverbase(metaclass=ABCMeta):
         """
         pass
 
-    @abstractmethod  
     def refresh(self, itemid):
         """
         刷新元数据
@@ -95,6 +96,5 @@ class serverbase(metaclass=ABCMeta):
         :return True or False
         """
 
-    @abstractmethod
     def __get_status__(self, p, err):
         pass

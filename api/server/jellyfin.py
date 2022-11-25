@@ -1,34 +1,15 @@
 import json
-from api.server.serverbase import serverbase, network
+from api.server.serverbase import serverbase
 import os
 from urllib import parse
 
 class jellyfin(serverbase):
-    host = None
-    userid = None
-    key = None
-    headers = None
-    err = None
-    client = None
 
-
-    def __init__(self, host : str, userid : str, key : str) -> None:
-        """
-        :param host
-        :param userid
-        :param key
-        """
-        self.host = host
-        self.userid = userid
-        self.key = key
-        self.headers = {'Content-Type':'application/json'}
-        self.client = network(maxnumconnect=10, maxnumcache=20)
-    
-
-    def get_items(self, parentid : str = ''):
+    def get_items(self, parentid : str = '', type = None):
         """
         获取项目列表
         :param parentid 父文件夹ID
+        :param type 类型
         :return True or False, items
         """
         items = {}
@@ -115,11 +96,13 @@ class jellyfin(serverbase):
             self.err = "异常错误：{}".format(result)
         return False
 
-    def search_movie(self, itemid, tmdbid):
+    def search_movie(self, itemid, tmdbid, name = None, year = None):
         """
         搜索视频
         :param itemid 项目ID
         :param tmdbid TMDB ID
+        :param name 标题
+        :param year 年代
         :return True or False, iteminfo
         """
         iteminfo = {}

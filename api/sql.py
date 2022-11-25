@@ -10,7 +10,7 @@ class sql:
     def __init__(self) -> None:
         try:
             self.lock = threading.Lock()
-            path = os.path.join(os.environ['EMBYTOOLS_CONFIG'], 'data.db')
+            path = os.path.join(os.environ['MEDIASERVERTOOLS_CONFIG'], 'data.db')
             self.sqlconnect = sqlite3.connect(database=path, check_same_thread=False)
             self.execution(sql='CREATE TABLE IF NOT EXISTS "douban_movie" ("id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"media_id" text,"media_name" TEXT,"media_brief" TEXT,"media_data" TEXT,"media_celebrities" TEXT,"update_time" TEXT);')
             self.execution(sql='CREATE TABLE IF NOT EXISTS "douban_people" ("id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"people_id" text,"people_name" TEXT,"people_data" TEXT,"update_time" TEXT);')

@@ -7,6 +7,12 @@ api:
     username: ''
     #密码
     passwd: ''
+  plex:
+    #域名 包含http(s)和端口号后面不带/
+    #例如https://xxx.xxx.xxx:32400
+    host: 'http://127.0.0.1:32400'
+    #X-Plex-Token
+    key: ''
   jellyfin:
     #域名 包含http(s)和端口号后面不带/
     #例如https://xxx.xxx.xxx:8920
@@ -40,9 +46,9 @@ api:
     #TMDB人物数据缓存失效时间 [天]
     peoplecachefailtime: 120
 
-system:
-  #使用媒体服务器 Emby Jellyfin
-  mediaserver: 'Emby'   
+system:  
+  #使用媒体服务器 Emby Jellyfin Plex
+  mediaserver: 'Emby'  
   #线程数量 豆瓣API有请求频率限制建议线程数量不要过多
   threadnum: 10
   #是否刷新人名

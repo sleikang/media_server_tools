@@ -11,6 +11,7 @@ from system.config import config
 from api.mediasql import mediasql
 from api.nastools import nastools
 from api.server.jellyfin import jellyfin
+from api.server.plex import plex
 
 class media:
     mediaservertype = None
@@ -60,6 +61,9 @@ class media:
                 self.configload = True
             elif 'Jellyfin' in self.mediaservertype:
                 self.meidiaserverclient = jellyfin(host=configinfo.apidata['jellyfin']['host'], userid=configinfo.apidata['jellyfin']['userid'], key=configinfo.apidata['jellyfin']['key'])
+                self.configload = True
+            elif 'Plex' in self.mediaservertype:
+                self.meidiaserverclient = plex(host=configinfo.apidata['plex']['host'], userid='', key=configinfo.apidata['plex']['key'])
                 self.configload = True
             else:
                 log().info('当前设置媒体服务器[{}]不支持'.format(self.mediaservertype))
@@ -161,7 +165,7 @@ class media:
             redata = re.search(pattern='\((\d{4})\)', string=iteminfo['FileName'])
             if redata:
                 year = redata.group(1)
-            if name in item['Name'] and (year and 'ProductionYear' in iteminfo and year in str(iteminfo['ProductionYear'])):
+            if name in item['Name'] and (year and 'ProductionYear' in iteminfo and year in str(iteminfo['ProductionYear'])) and tmdbid:
                 return True
             mediatype = 'MOV'
             if 'Movie' in item['Type']:
@@ -187,19 +191,20 @@ class media:
                     return False
                 
 
-            ret, searchinfo = self.meidiaserverclient.search_movie(itemid=item['Id'], tmdbid=testtmdbid)
+            ret, searchinfo = self.meidiaserverclient.search_movie(itemid=item['Id'], tmdbid=testtmdbid, name=name, year=year)
             if not ret:
                 log().info('{}搜索媒体[{}]ID[{}]TMDB[{}]信息失败, {}'.format(self.mediaservertype, item['Name'], item['Id'], testtmdbid, self.meidiaserverclient.err))
                 return False
             for info in searchinfo:
-                info['Type'] = iteminfo['Type']
-                info['IsFolder'] = iteminfo['IsFolder']
+                if 'Plex' not in self.mediaservertype:
+                    info['Type'] = iteminfo['Type']
+                    info['IsFolder'] = iteminfo['IsFolder']
                 ret = self.meidiaserverclient.apply_search(itemid=item['Id'], iteminfo=info)
                 if not ret:
                     log().info('{}更新媒体[{}]ID[{}]TMDB[{}]信息失败, {}'.format(self.mediaservertype, item['Name'], item['Id'], testtmdbid, self.meidiaserverclient.err))
                     return False
-                log().info('{}更新媒体[{}]ID[{}]TMDB[{}]更新为媒体[{}]TMDB[{}]'.format(self.mediaservertype, item['Name'], item['Id'], tmdbid, info['Name'], testtmdbid))
-                item['Name'] = info['Name']
+                log().info('{}更新媒体[{}]ID[{}]TMDB[{}]更新为媒体[{}]TMDB[{}]'.format(self.mediaservertype, item['Name'], item['Id'], tmdbid, mediainfo['title'], testtmdbid))
+                item['Name'] = mediainfo['title']
                 break
             return True
         except Exception as result:
@@ -271,12 +276,12 @@ class media:
                 updatepeople = self.__update_people__(item=item, iteminfo=iteminfo, imdbid=imdbid)
 
                 if 'Series' in item['Type']:
-                    ret, seasons = self.meidiaserverclient.get_items(parentid=item['Id'])
+                    ret, seasons = self.meidiaserverclient.get_items(parentid=item['Id'], type='Season')
                     if not ret:
                         log().info('获取{}媒体[{}]ID[{}]信息失败, {}'.format(self.mediaservertype, item['Name'], item['Id'], self.meidiaserverclient.err))
                     else:
                         for season in seasons['Items']:
-                            ret, episodes = self.meidiaserverclient.get_items(parentid=season['Id'])
+                            ret, episodes = self.meidiaserverclient.get_items(parentid=season['Id'], type='Episode')
                             if not ret:
                                 log().info('获取{}媒体[{}]ID[{}]信息失败, {}'.format(self.mediaservertype, season['Name'], season['Id'], self.meidiaserverclient.err))
                                 continue
@@ -325,7 +330,7 @@ class media:
 
                 
                 if 'Series' in item['Type']:
-                    ret, seasons = self.meidiaserverclient.get_items(parentid=item['Id'])
+                    ret, seasons = self.meidiaserverclient.get_items(parentid=item['Id'], type='Season')
                     if not ret:
                         log().info('获取{}媒体[{}]ID[{}]信息失败, {}'.format(self.mediaservertype, item['Name'], item['Id'], self.meidiaserverclient.err))
                     else:
@@ -340,7 +345,7 @@ class media:
                                     groupid = infolist[1]
                                     break
                         for season in seasons['Items']:
-                            ret, episodes = self.meidiaserverclient.get_items(parentid=season['Id'])
+                            ret, episodes = self.meidiaserverclient.get_items(parentid=season['Id'], type='Episode')
                             if not ret:
                                 log().info('获取{}媒体[{}]ID[{}]信息失败, {}'.format(self.mediaservertype, season['Name'], season['Id'], self.meidiaserverclient.err))
                                 continue
