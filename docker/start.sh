@@ -86,8 +86,17 @@ fi
 # 权限设置
 chown -R ${PUID}:${PGID} ${WORK_DIR}
 
-if [[ "$(stat -c '%u' ${EMBYTOOLS_CONFIG})" != "${PUID}" ]] || [[ "$(stat -c '%g' ${EMBYTOOLS_CONFIG})" != "${PGID}" ]]; then
-    chown ${PUID}:${PGID} ${EMBYTOOLS_CONFIG}
+# 兼容旧环境变量
+if [[ -n "${MEDIASERVERTOOLS_CONFIG}" ]]; then
+    if [[ "$(stat -c '%u' ${MEDIASERVERTOOLS_CONFIG})" != "${PUID}" ]] || [[ "$(stat -c '%g' ${MEDIASERVERTOOLS_CONFIG})" != "${PGID}" ]]; then
+        chown ${PUID}:${PGID} ${MEDIASERVERTOOLS_CONFIG}
+    fi
+fi
+if [[ -n "${EMBYTOOLS_CONFIG}" ]]; then
+    if [[ "$(stat -c '%u' ${EMBYTOOLS_CONFIG})" != "${PUID}" ]] || [[ "$(stat -c '%g' ${EMBYTOOLS_CONFIG})" != "${PGID}" ]]; then
+        echo "${Green}使用旧Config路径环境变量${Font}"
+        chown ${PUID}:${PGID} ${EMBYTOOLS_CONFIG}
+    fi
 fi
 
 if [[ "$(stat -c '%A' ${WORK_DIR}/docker/start.sh)" != "-rwxr-xr-x" ]]; then
