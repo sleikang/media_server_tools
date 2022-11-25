@@ -1,9 +1,9 @@
 # MediaServerTools
-Emby/Jellyfin 媒体标题自动同步
+Emby/Jellyfin/Plex 媒体标题自动同步
 1. 中文标题
 2. 媒体概述
-3. 中文人名
-4. 中文扮演
+3. 中文人名(Plex暂时不支持)
+4. 中文扮演(Plex暂时不支持)
 5. 剧集概述评分图片同步
 6. 剧集组自定义同步
 7. 媒体搜刮检查是否正确(配合NasTools)
