@@ -2,11 +2,11 @@
 
 ## 简介
 
-Emby/Jellyfin 媒体标题自动同步
+Emby/Jellyfin/Plex 媒体中文自动同步
 1. 中文标题
 2. 媒体概述
-3. 中文人名
-4. 中文扮演
+3. 中文人名(Plex暂时不支持)
+4. 中文扮演(Plex暂时不支持)
 5. 剧集概述评分图片同步
 6. 剧集组自定义同步
 7. 媒体搜刮检查是否正确(配合NasTools)
@@ -14,7 +14,7 @@ Emby/Jellyfin 媒体标题自动同步
 - Dockerhub: https://hub.docker.com/r/ddsderek/mediaservertools
 - Github: https://github.com/sleikang/MediaServerTools
 
-*  注意使用本工具需要emby本身刮削了tmdb的完整数据，工具只是获取原有的数据进行替换
+*  注意使用本工具需要媒体服务器本身刮削了tmdb的完整数据，工具只是获取原有的数据进行替换
 
 ## 部署
 
