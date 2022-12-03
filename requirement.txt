@@ -3,3 +3,4 @@ requests
 pyjson
 pyyaml
 html2text
+plexapi
