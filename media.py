@@ -281,6 +281,18 @@ class media:
                         log().info('获取{}媒体[{}]ID[{}]信息失败, {}'.format(self.mediaservertype, item['Name'], item['Id'], self.meidiaserverclient.err))
                     else:
                         for season in seasons['Items']:
+                            if 'Jellyfin' in self.mediaservertype: 
+                                ret, seasoninfo = self.meidiaserverclient.get_item_info(itemid=season['Id'])
+                                if not ret:
+                                    log().info('获取{}媒体[{}]ID[{}]信息失败, {}'.format(self.mediaservertype, season['Name'], season['Id'], self.meidiaserverclient.err))
+                                    continue
+                                ret = self.__update_people__(item=season, iteminfo=seasoninfo, imdbid=imdbid)
+                                if not ret:
+                                    continue
+                                if ret:
+                                    _ = self.__refresh_people__(item=season, iteminfo=seasoninfo)
+                                    log().info('原始媒体名称[{}] 第[{}]季更新人物'.format(iteminfo['Name'], season['IndexNumber']))
+                                ret = self.meidiaserverclient.set_item_info(itemid=seasoninfo['Id'], iteminfo=seasoninfo)
                             ret, episodes = self.meidiaserverclient.get_items(parentid=season['Id'], type='Episode')
                             if not ret:
                                 log().info('获取{}媒体[{}]ID[{}]信息失败, {}'.format(self.mediaservertype, season['Name'], season['Id'], self.meidiaserverclient.err))
