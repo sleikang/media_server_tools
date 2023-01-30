@@ -15,13 +15,10 @@ ENV WORK_DIR=/MediaServerTools \
 WORKDIR ${WORK_DIR}
 
 RUN \
-    apk add --no-cache \
-        $(echo $(wget --no-check-certificate -qO- ${REPO_RAW_URL}/main/docker/package_list.txt)) \
+    apk add --no-cache $(echo $(wget --no-check-certificate -qO- ${REPO_RAW_URL}/main/docker/package_list.txt)) \
     && pip install --upgrade pip setuptools wheel \
-    && pip install -r \
-        ${REPO_RAW_URL}/main/requirement.txt \
-    && \
-    && ln -sf /usr/share/zoneinfo/${TZ}   /etc/localtime \
+    && pip install -r ${REPO_RAW_URL}/main/requirement.txt \
+    && ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime \
     && echo ${TZ} > /etc/timezone \
     && rm -rf \
         /tmp/* \
