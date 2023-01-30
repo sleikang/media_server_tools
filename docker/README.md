@@ -22,7 +22,7 @@ Emby/Jellyfin/Plex 媒体中文自动同步
 
 **docker-cli**
 
-```
+```bash
 docker run -itd \
   --name MediaServerTools \
   -v /root/config:/config \
@@ -32,12 +32,13 @@ docker run -itd \
   -e UMASK=022 \
   -e MediaServerTools_AUTO_UPDATE=true \
   --net=host \
+  --log-opt max-size=5m \
   ddsderek/mediaservertools:latest
 ```
 
 **docker-compose**
 
-```
+```yaml
 version: '3.3'
 services:
     MediaServerTools:
@@ -51,6 +52,10 @@ services:
             - UMASK=022
             - MediaServerTools_AUTO_UPDATE=true # 自动更新
         network_mode: host
+        logging:
+          driver: json-file
+          options:
+            max-size: 5m
         image: 'ddsderek/mediaservertools:latest'
 ```
 

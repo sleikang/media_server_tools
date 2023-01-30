@@ -15,17 +15,15 @@ ENV WORK_DIR=/MediaServerTools \
 WORKDIR ${WORK_DIR}
 
 RUN \
-    # 软件包安装
     apk add --no-cache \
         $(echo $(wget --no-check-certificate -qO- ${REPO_RAW_URL}/main/docker/package_list.txt)) \
-    && \
-    # Python库安装
-    pip install --upgrade pip setuptools wheel \
-    && \
-    pip install -r \
+    && pip install --upgrade pip setuptools wheel \
+    && pip install -r \
         ${REPO_RAW_URL}/main/requirement.txt \
     && \
-    rm -rf \
+    && ln -sf /usr/share/zoneinfo/${TZ}   /etc/localtime \
+    && echo ${TZ} > /etc/timezone \
+    && rm -rf \
         /tmp/* \
         /root/.cache \
         /var/cache/apk/*

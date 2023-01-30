@@ -8,9 +8,6 @@ Red="\033[31m"
 function setting {
     touch /setting.lock
 
-    ln -sf /usr/share/zoneinfo/$TZ   /etc/localtime
-    echo $TZ > /etc/timezone
-
     # 兼容旧config文件路径
     if [ -d /opt/config ] && [ ! -d /config ]; then
         echo -e "${Green}使用v1.x版本config路径配置${Font}"
@@ -20,9 +17,6 @@ function setting {
         mkdir -p /config
     fi
 }
-if [ ! -f /setting.lock ]; then
-	setting
-fi
 
 # 自动更新
 function app_update {
@@ -60,6 +54,10 @@ function backup_config {
         fi
     fi
 }
+
+if [ ! -f /setting.lock ]; then
+	setting
+fi
 
 if [ "${MediaServerTools_AUTO_UPDATE}" = "true" ]; then
     backup_config
