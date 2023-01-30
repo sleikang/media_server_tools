@@ -22,7 +22,7 @@ Emby/Jellyfin/Plex 媒体中文自动同步
 
 **docker-cli**
 
-```
+```bash
 docker run -itd \
   --name MediaServerTools \
   -v /root/config:/config \
@@ -38,7 +38,7 @@ docker run -itd \
 
 **docker-compose**
 
-```
+```yaml
 version: '3.3'
 services:
     MediaServerTools:
