@@ -32,6 +32,7 @@ docker run -itd \
   -e UMASK=022 \
   -e MediaServerTools_AUTO_UPDATE=true \
   --net=host \
+  --log-opt max-size=5m \
   ddsderek/mediaservertools:latest
 ```
 
@@ -51,6 +52,10 @@ services:
             - UMASK=022
             - MediaServerTools_AUTO_UPDATE=true # 自动更新
         network_mode: host
+        logging:
+          driver: json-file
+          options:
+            max-size: 5m
         image: 'ddsderek/mediaservertools:latest'
 ```
 
