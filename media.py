@@ -1,17 +1,20 @@
-from api.server.emby import emby
-from api.tmdb import tmdb
-from api.douban import douban
+import re
+import time
 from concurrent.futures import ThreadPoolExecutor
 from threading import BoundedSemaphore
-import re
+
 import zhconv
-from system.log import log
-import time
-from system.config import config
+
+from api.douban import douban
 from api.mediasql import mediasql
 from api.nastools import nastools
+from api.server.emby import emby
 from api.server.jellyfin import jellyfin
 from api.server.plex import plex
+from api.tmdb import tmdb
+from system.config import config
+from system.log import log
+
 
 class media:
     mediaservertype = None
@@ -904,13 +907,13 @@ class media:
         """
         try:
             for language in self.languagelist:
-                ret, seasoninfo = self.sqlclient.get_tmdb_season_info(id=tvid, language=language)
+                ret, seasoninfo = self.sqlclient.get_tmdb_season_info(id=tvid, seasonid=seasonid, language=language)
                 if not ret:
                     ret, seasoninfo = self.tmdbclient.get_tv_season_info(tvid=tvid, seasonid=seasonid, language=language)
                     if not ret:
                         log().info('获取TMDB媒体[{}]ID[{}]季ID[{}]信息失败, {}'.format(name, tvid, seasonid, self.tmdbclient.err))
                         continue
-                    ret = self.sqlclient.write_tmdb_season_info(id=tvid, language=language, iteminfo=seasoninfo)
+                    ret = self.sqlclient.write_tmdb_season_info(id=tvid, seasonid=seasonid, language=language, iteminfo=seasoninfo)
                     if not ret:
                         log().info('保存TMDB媒体[{}]ID[{}]季ID[{}]信息失败, {}'.format(name, tvid, seasonid, self.tmdbclient.err))
                 for episodes in seasoninfo['episodes']:

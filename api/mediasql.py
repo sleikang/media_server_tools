@@ -1,7 +1,9 @@
-from api.sql import sql
-import json
 import datetime
+import json
+
+from api.sql import sql
 from system.config import config
+
 
 class mediasql(sql):
     tmdbmediacachefailtime = None
@@ -321,7 +323,7 @@ class mediasql(sql):
             self.err = "异常错误：{}".format(result)
             return False
 
-    def get_tmdb_season_info(self, id : str, language):
+    def get_tmdb_season_info(self, id : str, seasonid, language):
         """
         读取TMDB季信息
         :param id 媒体ID
@@ -349,13 +351,21 @@ class mediasql(sql):
                 day = (nowtime - datatime).days
                 if day > self.tmdbmediacachefailtime:
                     continue
-                return True, json.loads(item)
+                root_object = json.loads(item)
+                if type(root_object) == dict:
+                    if root_object['season_number'] == int(seasonid):
+                        return True, root_object
+                else:
+                    for season in root_object:
+                        if season['season_number'] == int(seasonid):
+                            return True, season
+                
             return False, None        
         except Exception as result:
             self.err = "异常错误：{}".format(result)
             return False, None
 
-    def write_tmdb_season_info(self, id : str, language, iteminfo):
+    def write_tmdb_season_info(self, id : str, seasonid, language, iteminfo):
         """
         写入TMDB季信息
         :param id 媒体ID
@@ -379,10 +389,34 @@ class mediasql(sql):
             if not key:
                 self.err = '当前语言[{}]不支持'.format(language)
                 return False
+            data_array = []
+            data_array.append(iteminfo)
             for data in datalist:
-                ret = self.execution(sql="update tmdb_tv set {} = ?, update_time = ? where media_id = ?;".format(key), data=(json.dumps(iteminfo), datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), data[1]))
+                item = None
+                if language == 'zh-CN':
+                    item = data[7]
+                elif language == 'zh-SG':
+                    item = data[8]
+                elif language == 'zh-TW':
+                    item = data[9]
+                elif language == 'zh-HK':
+                    item = data[10]   
+                if not item:
+                    ret = self.execution(sql="update tmdb_tv set {} = ?, update_time = ? where media_id = ?;".format(key), data=(json.dumps(data_array), datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), data[1]))
+                else:
+                    root_object = json.loads(item)
+                    if type(root_object) == dict:
+                        if root_object['season_number'] == int(seasonid):
+                            continue
+                        data_array.append(root_object)
+                    else:
+                        for season in root_object:
+                            if season['season_number'] == int(seasonid):
+                                continue
+                            data_array.append(season)
+                    ret = self.execution(sql="update tmdb_tv set {} = ?, update_time = ? where media_id = ?;".format(key), data=(json.dumps(data_array), datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), data[1]))
                 return ret
-            ret = self.execution(sql="insert into tmdb_tv(id, media_id, {}, update_time) values(null, ?, ?, ?);".format(key), data=(id, json.dumps(iteminfo), datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+            ret = self.execution(sql="insert into tmdb_tv(id, media_id, {}, update_time) values(null, ?, ?, ?);".format(key), data=(id, json.dumps(data_array), datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
             return ret
         except Exception as result:
             self.err = "异常错误：{}".format(result)
