@@ -50,8 +50,8 @@ class config:
             self.__config_check__(self.systemdata, 'delnotimagepeople', False)
             self.__config_check__(self.systemdata, 'checkmediasearch', False)
             self.__config_check__(self.systemdata, 'seasongroup', ['纸房子|5eb730dfca7ec6001f7beb51'])
-        except Exception as reuslt:
-            log().info('配置异常错误, {}'.format(reuslt))
+        except Exception as result:
+            log().info('配置异常错误, {}'.format(result))
 
 
     def __config_check__(self, config, key, defaultvalue):
@@ -61,5 +61,5 @@ class config:
                 config[key] = defaultvalue
                 with open(file=self.path, mode='w') as file:
                     yaml.safe_dump(self.configdata, file, default_flow_style=False)
-        except Exception as reuslt:
-            log().info('配置异常错误, {}'.format(reuslt))
+        except Exception as result:
+            log().info('配置异常错误, {}'.format(result))

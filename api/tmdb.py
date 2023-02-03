@@ -1,5 +1,6 @@
-from api.network import network
 import json
+
+from api.network import network
 
 
 class tmdb:
@@ -31,7 +32,7 @@ class tmdb:
             iteminfo = json.loads(p.text)
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
 
 
@@ -50,7 +51,7 @@ class tmdb:
             iteminfo = json.loads(p.text)
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
 
     def get_tv_season_group(self, groupid : str, language : str = 'zh-CN'):
@@ -68,7 +69,7 @@ class tmdb:
             iteminfo = json.loads(p.text)
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
 
 
@@ -87,7 +88,7 @@ class tmdb:
             iteminfo = json.loads(p.text)
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
     
     def get_person_info(self, personid : str, language : str = 'zh-CN'):
@@ -105,7 +106,7 @@ class tmdb:
             personinfo = json.loads(p.text)
             return True, personinfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, personinfo
 
     def __get_status__(self, p, err):
@@ -122,6 +123,6 @@ class tmdb:
                 return False
             return True
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         
         return False

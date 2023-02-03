@@ -1,6 +1,9 @@
-from api.server.serverbase import serverbase
-from plexapi.server import PlexServer
 import os
+
+from plexapi.server import PlexServer
+
+from api.server.serverbase import serverbase
+
 
 class plex(serverbase):
     def __init__(self, host : str, userid : str, key : str) -> None:
@@ -13,7 +16,7 @@ class plex(serverbase):
             super().__init__(host=host, userid=userid, key=key)
             self.client = PlexServer(baseurl=host, token=key)
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
     
 
     def get_items(self, parentid : str = '', type = None):
@@ -80,7 +83,7 @@ class plex(serverbase):
 
             return True, items
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, items
 
     def get_items_count(self):
@@ -100,7 +103,7 @@ class plex(serverbase):
                     iteminfo['SeriesCount'] += item.totalSize
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
 
     def get_item_info(self, itemid : str):
@@ -146,7 +149,7 @@ class plex(serverbase):
             """
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
 
     def set_item_info(self, itemid : str, iteminfo):
@@ -166,7 +169,7 @@ class plex(serverbase):
             plexitem.editTitle(iteminfo['Name']).editSummary(iteminfo['Overview']).reload()     
             return True
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False
 
     def set_item_image(self, itemid : str, imageurl : str):
@@ -180,7 +183,7 @@ class plex(serverbase):
             plexitem.uploadPoster(url=imageurl)
             return True
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False
 
     def search_movie(self, itemid, tmdbid, name = None, year = None):
@@ -206,7 +209,7 @@ class plex(serverbase):
                     return True, iteminfo
             self.err = '未匹配到结果'
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
     
     def apply_search(self, itemid, iteminfo):
@@ -221,6 +224,6 @@ class plex(serverbase):
             plexitem.fixMatch(searchResult=iteminfo)
             return True
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False
     

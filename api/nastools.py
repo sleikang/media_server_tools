@@ -1,6 +1,8 @@
-from api.network import network
 import json
 from urllib import parse
+
+from api.network import network
+
 
 class nastools:
     client = None
@@ -36,7 +38,7 @@ class nastools:
             iteminfo = json.loads(p.text)['data']['data']
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
     
     def media_info(self, name, year = None, type = 'MOV'):
@@ -62,7 +64,7 @@ class nastools:
             iteminfo = json.loads(p.text)['data']
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
 
     def __login__(self):
@@ -83,7 +85,7 @@ class nastools:
             self.headers['Authorization'] = self.token
             return True
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False
 
     def __get_status__(self, p, err):
@@ -100,7 +102,7 @@ class nastools:
                 return False
             return True
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         
         return False
 

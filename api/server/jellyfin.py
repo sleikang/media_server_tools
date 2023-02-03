@@ -1,7 +1,9 @@
 import json
-from api.server.serverbase import serverbase
 import os
 from urllib import parse
+
+from api.server.serverbase import serverbase
+
 
 class jellyfin(serverbase):
 
@@ -24,7 +26,7 @@ class jellyfin(serverbase):
             items = json.loads(p.text)
             return True, items
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, items
 
     def get_items_count(self):
@@ -41,7 +43,7 @@ class jellyfin(serverbase):
             iteminfo = json.loads(p.text)
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
 
     def get_item_info(self, itemid : str):
@@ -60,7 +62,7 @@ class jellyfin(serverbase):
             iteminfo['FileName'] = os.path.basename(iteminfo['Path'])
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
 
     def set_item_info(self, itemid : str, iteminfo):
@@ -77,7 +79,7 @@ class jellyfin(serverbase):
                 return False
             return True
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False
 
     def set_item_image(self, itemid : str, imageurl : str):
@@ -93,7 +95,7 @@ class jellyfin(serverbase):
                 return False
             return True
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False
 
     def search_movie(self, itemid, tmdbid, name = None, year = None):
@@ -115,7 +117,7 @@ class jellyfin(serverbase):
             iteminfo = json.loads(p.text)
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
     
     def apply_search(self, itemid, iteminfo):
@@ -133,7 +135,7 @@ class jellyfin(serverbase):
                 return False
             return True
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False
 
     def refresh(self, itemid):
@@ -149,7 +151,7 @@ class jellyfin(serverbase):
                 return False
             return True
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False
 
     def __get_status__(self, p, err):
@@ -162,6 +164,6 @@ class jellyfin(serverbase):
                 return False
             return True
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         
         return False

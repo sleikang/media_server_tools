@@ -1,5 +1,7 @@
-import requests
 import threading
+
+import requests
+
 
 class session(object):
     client = None
@@ -25,7 +27,7 @@ class session(object):
         try:
             p = self.client.get(url=url, params=params, data=data, headers=headers, timeout=timeout, json=json)
         except Exception as result:
-            err = "异常错误：{}".format(result)
+            err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         self.lock.release()
         return p, err
 
@@ -41,7 +43,7 @@ class session(object):
         try:
             p = self.client.post(url=url, params=params, data=data, headers=headers, timeout=timeout, json=json)
         except Exception as result:
-            err = "异常错误：{}".format(result)
+            err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         self.lock.release()
         return p, err
 

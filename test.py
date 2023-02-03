@@ -24,7 +24,7 @@ if __name__ == '__main__':
                 ret, mediainfo = mediaclient.tmdbclient.get_tv_season_info('64387', '2')
                 #ret, mediainfo = mediaclient.tmdbclient.get_person_info('1796805')
                 print(mediainfo)
-            except Exception as reuslt:
-                log().info(reuslt)
-    except Exception as reuslt:
-        log().info('异常错误, {}'.format(reuslt))
+            except Exception as result:
+                log().info("文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result))
+    except Exception as result:
+        log().info("文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result))

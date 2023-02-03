@@ -1,7 +1,10 @@
-from api.network import network
 import json
-import html2text
 import re
+
+import html2text
+
+from api.network import network
+
 
 class douban:
     host = None
@@ -52,7 +55,7 @@ class douban:
                     iteminfo['info'][info[0]] = re.sub(pattern='\s+', repl='', string=info[1])
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
 
     def get_movie_celebrities_info(self, movieid : str):
@@ -69,7 +72,7 @@ class douban:
             iteminfo = json.loads(p.text)
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
 
     def get_tv_info(self, tvid : str):
@@ -104,7 +107,7 @@ class douban:
                     iteminfo['info'][info[0]] = re.sub(pattern='\s+', repl='', string=info[1])
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
 
     def get_tv_celebrities_info(self, tvid : str):
@@ -121,7 +124,7 @@ class douban:
             iteminfo = json.loads(p.text)
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
 
     def get_celebrity_info(self, celebrityid : str):
@@ -139,7 +142,7 @@ class douban:
             iteminfo = json.loads(p.text)
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
 
     def search_media_pc(self, title : str):
@@ -162,7 +165,7 @@ class douban:
             iteminfo['items'] = medialist
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
 
     def search_media(self, title : str):
@@ -180,7 +183,7 @@ class douban:
             iteminfo = json.loads(p.text)
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
 
     def search_media_weixin(self, title : str):
@@ -198,7 +201,7 @@ class douban:
             iteminfo = json.loads(p.text)
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
 
     def __get_status__(self, p, err):
@@ -215,7 +218,7 @@ class douban:
                 return False
             return True
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         
         return False
             

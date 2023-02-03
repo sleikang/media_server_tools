@@ -72,8 +72,8 @@ class media:
                 log().info('当前设置媒体服务器[{}]不支持'.format(self.mediaservertype))
                 self.configload = False
             
-        except Exception as reuslt:
-            log().info('配置异常错误, {}'.format(reuslt))
+        except Exception as result:
+            log().info('配置异常错误, {}'.format(result))
 
     def start_scan_media(self):
         """
@@ -144,7 +144,7 @@ class media:
                         yield item
 
         except Exception as result:
-            log().info("异常错误：{}".format(result))
+            log().info("文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result))
         
         yield {}
 
@@ -211,7 +211,7 @@ class media:
                 break
             return True
         except Exception as result:
-            log().info("异常错误：{}".format(result))
+            log().info("文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result))
         return False
 
     def __to_deal_with_item__(self, item):
@@ -447,7 +447,7 @@ class media:
             return True, item['Name']
                     
         except Exception as result:
-            log().info("异常错误：{}".format(result))
+            log().info("文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result))
         return False, item['Name']
 
     def __refresh_people__(self, item, iteminfo):
@@ -732,7 +732,7 @@ class media:
                 celebrities['info'] = info
             return True, celebritiesinfo
         except Exception as result:
-            log().info("异常错误：{}".format(result))
+            log().info("文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result))
         return False, None   
 
     def __get_douban_media_info__(self, mediatype : int, name : str, id : str):
@@ -783,7 +783,7 @@ class media:
                     return True, mediainfo
 
         except Exception as result:
-            log().info("异常错误：{}".format(result))
+            log().info("文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result))
         return False, None    
 
     def __get_tmdb_media_info__(self, mediatype : int, name : str, id : str, language : str = 'zh-CN'):
@@ -820,7 +820,7 @@ class media:
                 return True, iteminfo
 
         except Exception as result:
-            log().info("异常错误：{}".format(result))
+            log().info("文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result))
         return False, None
 
     def __get_tmdb_media_name__(self, mediatype : int, datatype : int, name : str, id : str):
@@ -874,7 +874,7 @@ class media:
                             return True, movieinfo['overview']
                     
         except Exception as result:
-            log().info("异常错误：{}".format(result))
+            log().info("文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result))
         return False, None
 
     def __get_tmdb_tv_season_group_info__(self, name, groupid):
@@ -893,7 +893,7 @@ class media:
                 return True, iteminfo
             
         except Exception as result:
-            log().info("异常错误：{}".format(result))
+            log().info("文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result))
         return False, None
 
     def __get_tmdb_tv_season_info__(self, name : str, tvid : str, seasonid : str, episodeid : int):
@@ -941,7 +941,7 @@ class media:
                         return True, name, overview, ommunityrating, imageurl
 
         except Exception as result:
-            log().info("异常错误：{}".format(result))
+            log().info("文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result))
         return False, None, None, None, None
 
     def __get_tmdb_person_name(self, name, personid):
@@ -971,7 +971,7 @@ class media:
                 break
 
         except Exception as result:
-            log().info("异常错误：{}".format(result))
+            log().info("文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result))
         return False, None
 
     def __alternative_name__(self, alternativetitles):
@@ -993,7 +993,7 @@ class media:
                     return True, zhconv.convert(title['title'], 'zh-cn')
                 return True, title['title']
         except Exception as result:
-            log().info("异常错误：{}".format(result))
+            log().info("文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result))
         return False, None
 
 

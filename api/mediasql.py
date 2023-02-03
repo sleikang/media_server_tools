@@ -43,7 +43,7 @@ class mediasql(sql):
                 return True, iteminfo
             return False, None
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
             return False, iteminfo
 
     def write_douban_media(self, mediatype : int, id : str, iteminfo):
@@ -74,7 +74,7 @@ class mediasql(sql):
                 ret = self.execution(sql="insert into douban_movie(id, media_id, media_name, media_brief, media_data, media_celebrities, update_time) values(null, ?, ?, ?, '', '', ?);", data=(id, iteminfo['title'], json.dumps(iteminfo), datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
             return ret
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
             return False
 
     def get_douban_media_info(self, mediatype : int, id : str):
@@ -102,7 +102,7 @@ class mediasql(sql):
                 return True, iteminfo
             return False, None
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
             return False, iteminfo
 
     def write_douban_media_info(self, mediatype : int, id : str, iteminfo):
@@ -133,7 +133,7 @@ class mediasql(sql):
                 ret = self.execution(sql="insert into douban_movie(id, media_id, media_name, media_brief, media_data, media_celebrities, update_time) values(null, ?, ?, '', ?, '', ?);", data=(id, iteminfo['title'], json.dumps(iteminfo), datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
             return ret
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
             return False
 
     def get_douban_celebrities_info(self, mediatype : int, id : str):
@@ -161,7 +161,7 @@ class mediasql(sql):
                 return True, iteminfo
             return False, None
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
             return False, iteminfo
 
     def write_douban_celebrities_info(self, mediatype : int, id : str, iteminfo):
@@ -192,7 +192,7 @@ class mediasql(sql):
                 ret = self.execution(sql="insert into douban_movie(id, media_id, media_name, media_brief, media_data, media_celebrities, update_time) values(null, ?, '', '', '', ?, ?);", data=(id, json.dumps(iteminfo), datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
             return ret
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
             return False
 
     def get_douban_people_info(self, id : str):
@@ -217,7 +217,7 @@ class mediasql(sql):
                 return True, iteminfo
             return False, None
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
             return False, iteminfo
 
     def write_douban_people_info(self, id : str, iteminfo):
@@ -238,7 +238,7 @@ class mediasql(sql):
             ret = self.execution(sql="insert into douban_people(id, people_id, people_name, people_data, update_time) values(null, ?, ?, ?, ?)", data=(id, iteminfo['title'], json.dumps(iteminfo), datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
             return ret
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
             return False
 
 
@@ -277,7 +277,7 @@ class mediasql(sql):
                 return True, json.loads(item)
             return False, None       
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
             return False, None
 
     def write_tmdb_media_info(self, mediatype : int, id : str, language, iteminfo):
@@ -320,7 +320,7 @@ class mediasql(sql):
                 ret = self.execution(sql="insert into tmdb_movie(id, media_id, media_name, {}, update_time) values(null, ?, ?, ?, ?);".format(key), data=(id, iteminfo['title'], json.dumps(iteminfo), datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
             return ret
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
             return False
 
     def get_tmdb_season_info(self, id : str, seasonid, language):
@@ -362,7 +362,7 @@ class mediasql(sql):
                 
             return False, None        
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}][{}]异常错误：".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
             return False, None
 
     def write_tmdb_season_info(self, id : str, seasonid, language, iteminfo):
@@ -419,7 +419,7 @@ class mediasql(sql):
             ret = self.execution(sql="insert into tmdb_tv(id, media_id, {}, update_time) values(null, ?, ?, ?);".format(key), data=(id, json.dumps(data_array), datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
             return ret
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
             return False
 
     def get_tmdb_people_info(self, id : str, language):
@@ -453,7 +453,7 @@ class mediasql(sql):
                 return True, json.loads(item)
             return False, None        
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
             return False, None
 
     def write_tmdb_people_info(self, id : str, language, iteminfo):
@@ -486,5 +486,5 @@ class mediasql(sql):
             ret = self.execution(sql="insert into tmdb_people(id, people_id, people_name, {}, update_time) values(null, ?, ?, ?, ?);".format(key), data=(id, iteminfo['name'], json.dumps(iteminfo), datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
             return ret
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
             return False

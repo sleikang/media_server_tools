@@ -1,9 +1,9 @@
+import os
 import time
+
 from media import media
 from system.config import config
-import os
 from system.log import log
-
 
 if __name__ == '__main__':
     try:
@@ -24,7 +24,7 @@ if __name__ == '__main__':
                 mediaclient.start_scan_media()
                 log().info('刷新媒体库元数据完成')
                 time.sleep(configinfo.systemdata['updatetime'] * 3600)
-            except Exception as reuslt:
-                log().info(reuslt)
-    except Exception as reuslt:
-        log().info('异常错误, {}'.format(reuslt))
+            except Exception as result:
+                log().info(result)
+    except Exception as result:
+        log().info("文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result))

@@ -1,5 +1,7 @@
 import json
+
 from api.server.serverbase import serverbase
+
 
 class emby(serverbase):
 
@@ -22,7 +24,7 @@ class emby(serverbase):
             items = json.loads(p.text)
             return True, items
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, items
 
     def get_items_count(self):
@@ -39,7 +41,7 @@ class emby(serverbase):
             iteminfo = json.loads(p.text)
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
 
     def get_item_info(self, itemid : str):
@@ -57,7 +59,7 @@ class emby(serverbase):
             iteminfo = json.loads(p.text)
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
 
     def set_item_info(self, itemid : str, iteminfo):
@@ -74,7 +76,7 @@ class emby(serverbase):
                 return False
             return True
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False
 
     def set_item_image(self, itemid : str, imageurl : str):
@@ -91,7 +93,7 @@ class emby(serverbase):
                 return False
             return True
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False
 
     def search_movie(self, itemid, tmdbid, name = None, year = None):
@@ -113,7 +115,7 @@ class emby(serverbase):
             iteminfo = json.loads(p.text)
             return True, iteminfo
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False, iteminfo
     
     def apply_search(self, itemid, iteminfo):
@@ -131,7 +133,7 @@ class emby(serverbase):
                 return False
             return True
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False
     
     def refresh(self, itemid):
@@ -147,7 +149,7 @@ class emby(serverbase):
                 return False
             return True
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         return False
 
     def __get_status__(self, p, err):
@@ -160,6 +162,6 @@ class emby(serverbase):
                 return False
             return True
         except Exception as result:
-            self.err = "异常错误：{}".format(result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
         
         return False
