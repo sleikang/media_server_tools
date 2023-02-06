@@ -18,8 +18,8 @@ class log(object):
             streamhandler = logging.StreamHandler()
             streamhandler.setFormatter(logging.Formatter('%(asctime)s\t%(levelname)s: %(message)s'))
             self.logger.addHandler(streamhandler)
-        except Exception as reuslt:
-            print(reuslt)
+        except Exception as result:
+            print(result)
     
     def debug(self, message):
         self.logger.debug(message)

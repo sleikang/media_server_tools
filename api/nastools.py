@@ -52,7 +52,7 @@ class nastools:
         iteminfo = {}
         try:
             if not self.__login__():
-                return False
+                return False, iteminfo
             url = "{}/api/v1/media/info".format(self.host)
             if year:
                 data = "type={}&title={}&year=".format(type, parse.quote(name), year)
