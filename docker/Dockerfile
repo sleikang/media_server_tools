@@ -10,7 +10,8 @@ ENV WORK_DIR=/MediaServerTools \
     UMASK=022 \
     REPO_URL=https://github.com/DDS-Derek/MediaServerTools.git \
     REPO_RAW_URL=https://raw.githubusercontent.com/DDS-Derek/MediaServerTools \
-    MediaServerTools_AUTO_UPDATE=true
+    MediaServerTools_AUTO_UPDATE=true \
+    MediaServerTools_CN_UPDATE=true
 
 WORKDIR ${WORK_DIR}
 
