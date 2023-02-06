@@ -31,6 +31,7 @@ docker run -itd \
   -e PGID=1000 \
   -e UMASK=022 \
   -e MediaServerTools_AUTO_UPDATE=true \
+  -e MediaServerTools_CN_UPDATE=true \
   --net=host \
   --log-opt max-size=5m \
   ddsderek/mediaservertools:latest
@@ -51,6 +52,7 @@ services:
             - PGID=1000
             - UMASK=022
             - MediaServerTools_AUTO_UPDATE=true # 自动更新
+            - MediaServerTools_CN_UPDATE=true # 使用国内源更新
         network_mode: host
         logging:
           driver: json-file
