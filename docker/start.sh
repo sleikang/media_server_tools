@@ -99,7 +99,7 @@ if [ "${MediaServerTools_AUTO_UPDATE}" = "true" ]; then
     fi
     app_update
     if [ $? -eq 0 ]; then
-        INFO "更新成功..."
+        INFO "更新成功"
         hash_old=$(cat /tmp/requirement.txt.sha256sum)
         hash_new=$(sha256sum requirement.txt)
         if [ "$hash_old" != "$hash_new" ]; then
