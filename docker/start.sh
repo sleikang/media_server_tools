@@ -29,12 +29,21 @@ function app_update {
 
 function requirement_update {
     echo -e "${Green}检测到requirement.txt有变化，重新安装依赖...${Font}"
-    pip install --upgrade pip setuptools wheel
-    pip install -r requirement.txt
+    if [ "${MediaServerTools_CN_UPDATE}" = "true" ]; then
+        pip install --upgrade pip setuptools wheel -i https://pypi.tuna.tsinghua.edu.cn/simple
+        pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+    else
+        pip install --upgrade pip setuptools wheel
+        pip install -r requirement.txt
+    fi
 }
 
 function package_list_update {
     echo -e "${Green}检测到package_list.txt有变化，更新软件包...${Font}"
+    if [ "${NASTOOL_CN_UPDATE}" = "true" ]; then
+        sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
+        apk update -f
+    fi
     apk add --no-cache $(echo $(cat docker/package_list.txt))
 }
 
