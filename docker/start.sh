@@ -75,6 +75,13 @@ function backup_config {
         if [[ "$(stat -c '%u' /config/config_backup.zip)" != "${PUID}" ]] || [[ "$(stat -c '%g' /config/config_backup.zip)" != "${PGID}" ]]; then
             chown ${PUID}:${PGID} /config/config_backup.zip
         fi
+        if [ $? -ne 0 ]; then
+            ERROR "备份失败，未成功设置权限"
+        else
+            INFO "备份成功"
+        fi
+    else
+        ERROR "备份失败,未正常生成文件"
     fi
 }
 
@@ -98,9 +105,9 @@ if [ "${MediaServerTools_AUTO_UPDATE}" = "true" ]; then
         if [ "$hash_old" != "$hash_new" ]; then
             requirement_update
             if [ $? -ne 0 ]; then
-                ERROR "无法安装依赖，请更新镜像..."
+                ERROR "无法安装依赖，请更新镜像"
             else
-                INFO "依赖安装成功..."
+                INFO "依赖安装成功"
                 sha256sum requirement.txt > /tmp/requirement.txt.sha256sum
             fi
         fi
@@ -109,14 +116,14 @@ if [ "${MediaServerTools_AUTO_UPDATE}" = "true" ]; then
         if [ "$hash_old" != "$hash_new" ]; then
             package_list_update
             if [ $? -ne 0 ]; then
-                ERROR "无法更新软件包，请更新镜像..."
+                ERROR "无法更新软件包，请更新镜像"
             else
-                INFO "软件包安装成功..."
+                INFO "软件包安装成功"
                 sha256sum docker/package_list.txt > /tmp/package_list.txt.sha256sum
             fi
         fi
     else
-        WARN "更新失败，继续使用旧的程序来启动..."
+        WARN "更新失败，继续使用旧的程序来启动"
     fi
 else
     INFO "程序自动升级已关闭，如需自动升级请在创建容器时设置环境变量：MediaServerTools_AUTO_UPDATE=true"
