@@ -1,13 +1,14 @@
-from api.session import session
+from network.client_data import ClientData
 import threading
 
-class network:
+
+class Network:
     maxnumconnect = None
     maxnumcache = None
     clientlist = None
     lock = None
 
-    def __init__(self, maxnumconnect : int = 1, maxnumcache : int = 5) -> None:
+    def __init__(self, maxnumconnect: int = 1, maxnumcache: int = 5) -> None:
         """
         构造函数
         :param maxnumconnect 最大连接数
@@ -22,9 +23,9 @@ class network:
         if self.maxnumconnect < 0:
             self.maxnumconnect = 1
         for i in range(self.maxnumconnect):
-            self.clientlist.append(session(allotmaxnum=self.maxnumcache))
+            self.clientlist.append(ClientData(allotmaxnum=self.maxnumcache))
 
-    def get(self, url, params=None, data=None, headers=None, timeout=None, json=None):
+    def get(self, url, **kwargs):
         """
         GET
         :param url
@@ -33,11 +34,11 @@ class network:
         p = None
         ret, num, err = self.__getclient__()
         if ret:
-            p, err = self.clientlist[num].get(url=url, params=params, data=data, headers=headers, timeout=timeout, json=json)
+            p, err = self.clientlist[num].get(url=url, **kwargs)
             self.__releasecache__(num=num)
         return p, err
 
-    def post(self, url, params=None, data=None, headers=None, timeout=None, json=None):
+    def post(self, url, **kwargs):
         """
         POST
         :param url
@@ -48,7 +49,7 @@ class network:
         p = None
         ret, num, err = self.__getclient__()
         if ret:
-            p, err = self.clientlist[num].post(url=url, params=params, data=data, headers=headers, timeout=timeout, json=json)
+            p, err = self.clientlist[num].post(url=url, **kwargs)
             self.__releasecache__(num=num)
         return p, err
 
@@ -57,13 +58,16 @@ class network:
         获取客户端
         :return True, num, err 成功返回True, 编号, None 失败返回False, None, 错误
         """
-        #优先空闲连接
+        # 优先空闲连接
         for i in range(len(self.clientlist)):
-            if self.clientlist[i].allotnum < self.clientlist[i].allotmaxnum and self.clientlist[i].allotnum == 0:
+            if (
+                self.clientlist[i].allotnum < self.clientlist[i].allotmaxnum
+                and self.clientlist[i].allotnum == 0
+            ):
                 self.clientlist[i].allotnum += 1
                 return True, i, None
-        
-        #优先缓存数少的
+
+        # 优先缓存数少的
         minallotnum = -1
         num = -1
 
@@ -79,11 +83,10 @@ class network:
         if num > -1:
             self.clientlist[num].allotnum += 1
             return True, num, None
-        
-        return False, None, '连接缓存已满'
 
+        return False, None, "连接缓存已满"
 
-    def __releasecache__(self, num : int):
+    def __releasecache__(self, num: int):
         """
         释放连接
         :param num 连接编号

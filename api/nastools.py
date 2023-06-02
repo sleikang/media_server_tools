@@ -1,7 +1,7 @@
 import json
 from urllib import parse
 
-from api.network import network
+from network.network import Network
 
 
 class nastools:
@@ -10,15 +10,22 @@ class nastools:
     username = None
     passwd = None
     headers = None
+    authorization = None
     token = None
     err = None
 
-    def __init__(self, host : str, username : str, passwd : str) -> None:
-        self.client = network(maxnumconnect=10, maxnumcache=20)
+    def __init__(
+        self, host: str, authorization: str, username: str, passwd: str
+    ) -> None:
+        self.client = Network(maxnumconnect=10, maxnumcache=20)
+        self.authorization = authorization
         self.host = host
         self.username = username
         self.passwd = passwd
-        self.headers = {'accept':'application/json', 'Content-Type':'application/x-www-form-urlencoded'}
+        self.headers = {
+            "accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded",
+        }
 
     def name_test(self, name):
         """
@@ -35,13 +42,17 @@ class nastools:
             p, err = self.client.post(url=url, data=data, headers=self.headers)
             if not self.__get_status__(p=p, err=err):
                 return False, iteminfo
-            iteminfo = json.loads(p.text)['data']['data']
+            iteminfo = json.loads(p.text)["data"]["data"]
             return True, iteminfo
         except Exception as result:
-            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(
+                result.__traceback__.tb_frame.f_globals["__file__"],
+                result.__traceback__.tb_lineno,
+                result,
+            )
         return False, iteminfo
-    
-    def media_info(self, name, year = None, type = 'MOV'):
+
+    def media_info(self, name, year=None, type="MOV"):
         """
         媒体识别
         :param name 媒体名称
@@ -61,10 +72,14 @@ class nastools:
             p, err = self.client.post(url=url, data=data, headers=self.headers)
             if not self.__get_status__(p=p, err=err):
                 return False, iteminfo
-            iteminfo = json.loads(p.text)['data']
+            iteminfo = json.loads(p.text)["data"]
             return True, iteminfo
         except Exception as result:
-            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(
+                result.__traceback__.tb_frame.f_globals["__file__"],
+                result.__traceback__.tb_lineno,
+                result,
+            )
         return False, iteminfo
 
     def __login__(self):
@@ -72,6 +87,7 @@ class nastools:
             if self.token:
                 url = "{}/api/v1/user/info".format(self.host)
                 data = "username={}".format(self.username, self.passwd)
+                self.headers["Authorization"] = self.authorization
                 p, err = self.client.post(url=url, data=data, headers=self.headers)
                 if self.__get_status__(p=p, err=err):
                     return True
@@ -81,11 +97,15 @@ class nastools:
             if not self.__get_status__(p=p, err=err):
                 return False
             rootobject = json.loads(p.text)
-            self.token = rootobject['data']['token']
-            self.headers['Authorization'] = self.token
+            self.token = rootobject["data"]["token"]
+            self.headers["Authorization"] = self.token
             return True
         except Exception as result:
-            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
+            self.err = "文件[{}]行[{}]异常错误：{}".format(
+                result.__traceback__.tb_frame.f_globals["__file__"],
+                result.__traceback__.tb_lineno,
+                result,
+            )
         return False
 
     def __get_status__(self, p, err):
@@ -97,13 +117,15 @@ class nastools:
                 self.err = p.text
                 return False
             rootobject = json.loads(p.text)
-            if rootobject['code'] != 0:
-                self.err = rootobject['message']
+            if rootobject["code"] != 0:
+                self.err = rootobject["message"]
                 return False
             return True
         except Exception as result:
-            self.err = "文件[{}]行[{}]异常错误：{}".format(result.__traceback__.tb_frame.f_globals["__file__"], result.__traceback__.tb_lineno, result)
-        
-        return False
+            self.err = "文件[{}]行[{}]异常错误：{}".format(
+                result.__traceback__.tb_frame.f_globals["__file__"],
+                result.__traceback__.tb_lineno,
+                result,
+            )
 
-    
+        return False

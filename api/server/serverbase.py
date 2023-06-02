@@ -1,4 +1,4 @@
-from api.network import network
+from network.network import Network
 from abc import ABCMeta, abstractmethod
 
 
@@ -10,7 +10,7 @@ class serverbase(metaclass=ABCMeta):
     err = None
     client = None
 
-    def __init__(self, host : str, userid : str, key : str) -> None:
+    def __init__(self, host: str, userid: str, key: str) -> None:
         """
         :param host
         :param userid
@@ -19,11 +19,11 @@ class serverbase(metaclass=ABCMeta):
         self.host = host
         self.userid = userid
         self.key = key
-        self.headers = {'Content-Type':'application/json'}
-        self.client = network(maxnumconnect=10, maxnumcache=20)
-    
+        self.headers = {"Content-Type": "application/json"}
+        self.client = Network(maxnumconnect=10, maxnumcache=20)
+
     @abstractmethod
-    def get_items(self, parentid : str = '', type = None):
+    def get_items(self, parentid: str = "", type=None):
         """
         获取项目列表
         :param parentid 父文件夹ID
@@ -41,7 +41,7 @@ class serverbase(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_item_info(self, itemid : str):
+    def get_item_info(self, itemid: str):
         """
         获取项目
         :param itemid 项目ID
@@ -50,7 +50,7 @@ class serverbase(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def set_item_info(self, itemid : str, iteminfo):
+    def set_item_info(self, itemid: str, iteminfo):
         """
         更新项目
         :param iteminfo 项目信息
@@ -59,7 +59,7 @@ class serverbase(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def set_item_image(self, itemid : str, imageurl : str):
+    def set_item_image(self, itemid: str, imageurl: str):
         """
         更新项目图片
         :param imageurl 图片URL
@@ -68,7 +68,7 @@ class serverbase(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def search_movie(self, itemid, tmdbid, name = None, year = None):
+    def search_movie(self, itemid, tmdbid, name=None, year=None):
         """
         搜索视频
         :param itemid 项目ID
@@ -79,7 +79,7 @@ class serverbase(metaclass=ABCMeta):
         """
         pass
 
-    @abstractmethod  
+    @abstractmethod
     def apply_search(self, itemid, iteminfo):
         """
         应用搜索
