@@ -9,13 +9,15 @@ class tmdb:
     err = None
     client = None
 
-    def __init__(self, key: str) -> None:
+    def __init__(
+        self, key: str, host: str = "https://api.themoviedb.org/3", proxy: str = None
+    ) -> None:
         """
         :param key apikey
         """
-        self.host = "https://api.themoviedb.org/3"
+        self.host = host
         self.key = key
-        self.client = Network(maxnumconnect=10, maxnumcache=20)
+        self.client = Network(maxnumconnect=10, maxnumcache=20, proxy=proxy)
 
     def get_movie_info(self, movieid: str, language: str = "zh-CN"):
         """

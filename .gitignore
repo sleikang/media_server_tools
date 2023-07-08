@@ -1,0 +1,10 @@
+# .gitignore
+
+__pycache__/
+*.py[cod]
+build/
+dist/
+*.spec
+config.yaml
+*.txt
+*.db

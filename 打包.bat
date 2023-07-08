@@ -1,0 +1,1 @@
+pyinstaller -D --version-file="ver.txt" main.py --name="media_server_tools"

@@ -8,7 +8,9 @@ class Network:
     clientlist = None
     lock = None
 
-    def __init__(self, maxnumconnect: int = 1, maxnumcache: int = 5) -> None:
+    def __init__(
+        self, maxnumconnect: int = 1, maxnumcache: int = 5, proxy: str = None
+    ) -> None:
         """
         构造函数
         :param maxnumconnect 最大连接数
@@ -23,7 +25,9 @@ class Network:
         if self.maxnumconnect < 0:
             self.maxnumconnect = 1
         for i in range(self.maxnumconnect):
-            self.clientlist.append(ClientData(allotmaxnum=self.maxnumcache))
+            self.clientlist.append(
+                ClientData(allotmaxnum=self.maxnumcache, proxy=proxy)
+            )
 
     def get(self, url, **kwargs):
         """

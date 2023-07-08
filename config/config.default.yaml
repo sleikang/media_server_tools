@@ -1,74 +1,78 @@
 api:
-  nastools:
-    #域名 包含http(s)和端口号后面不带/
-    #例如http://xxx.xxx.xxx:3000
-    host: 'http://127.0.0.1:3000'
-    #用户名
-    username: ''
-    #密码
-    passwd: ''
-  plex:
-    #域名 包含http(s)和端口号后面不带/
-    #例如https://xxx.xxx.xxx:32400
-    host: 'http://127.0.0.1:32400'
-    #X-Plex-Token
-    key: ''
-  jellyfin:
-    #域名 包含http(s)和端口号后面不带/
-    #例如https://xxx.xxx.xxx:8920
-    host: 'http://127.0.0.1:8096'
-    #用户ID 进EMBY 用户点击管理员账号配置可以在网址上看到userId
-    userid: ''
-    #APIKEY
-    key: ''
-  emby:
-    #域名 包含http(s)和端口号后面不带/
-    #例如https://xxx.xxx.xxx:8920
-    host: 'http://127.0.0.1:8096'
-    #用户ID 进EMBY 用户点击管理员账号配置可以在网址上看到userId
-    userid: ''
-    #APIKEY
-    key: ''
-  tmdb:
-    #APIKEY
-    key: ''
-    #媒体数据缓存失效时间 [天]
-    mediacachefailtime: 1
-    #TMDB人物数据缓存失效时间 [天]
-    peoplecachefailtime: 10
-  douban:
-    #APIKEY
-    key: '0ac44ae016490db2204ce0a042db2916'
-    #豆瓣PC cookie
-    cookie: ''
-    #媒体数据缓存失效时间 [天]
-    mediacachefailtime: 30
-    #TMDB人物数据缓存失效时间 [天]
-    peoplecachefailtime: 120
+    nastools:
+        #域名 包含http(s)和端口号后面不带/
+        #例如http://xxx.xxx.xxx:3000
+        host: "http://127.0.0.1:3000"
+        #用户名
+        username: ""
+        #密码
+        passwd: ""
+    plex:
+        #域名 包含http(s)和端口号后面不带/
+        #例如https://xxx.xxx.xxx:32400
+        host: "http://127.0.0.1:32400"
+        #X-Plex-Token
+        key: ""
+    jellyfin:
+        #域名 包含http(s)和端口号后面不带/
+        #例如https://xxx.xxx.xxx:8920
+        host: "http://127.0.0.1:8096"
+        #用户ID 进EMBY 用户点击管理员账号配置可以在网址上看到userId
+        userid: ""
+        #APIKEY
+        key: ""
+    emby:
+        #域名 包含http(s)和端口号后面不带/
+        #例如https://xxx.xxx.xxx:8920
+        host: "http://127.0.0.1:8096"
+        #用户ID 进EMBY 用户点击管理员账号配置可以在网址上看到userId
+        userid: ""
+        #APIKEY
+        key: ""
+    tmdb:
+        #APIKEY
+        key: ""
+        #代理
+        #proxy: ""
+        #API
+        host: "https://api.themoviedb.org/3"
+        #媒体数据缓存失效时间 [天]
+        mediacachefailtime: 1
+        #TMDB人物数据缓存失效时间 [天]
+        peoplecachefailtime: 10
+    douban:
+        #APIKEY
+        key: "0ac44ae016490db2204ce0a042db2916"
+        #豆瓣PC cookie
+        cookie: ""
+        #媒体数据缓存失效时间 [天]
+        mediacachefailtime: 30
+        #TMDB人物数据缓存失效时间 [天]
+        peoplecachefailtime: 120
 
-system:  
-  #使用媒体服务器 Emby Jellyfin Plex
-  mediaserver: 'Emby'  
-  #线程数量 豆瓣API有请求频率限制建议线程数量不要过多
-  threadnum: 10
-  #是否刷新人名
-  updatepeople: False
-  #是否更新概述
-  updateoverview: False
-  #是否更新剧集组, 在TMDB有些剧集会有剧集组, EMBY只能刮削初始播放日期的剧集, 例如纸房子是有5季, EMBY只能刮削初始播放日期3季的版本
-  updateseasongroup: False
-  #每次刷新全部媒体间隔时间 [小时]
-  updatetime: 12
-  #检查媒体搜刮是否正确 不正确自动更新 需要配合NasTools使用
-  checkmediasearch: False
-  #任务完成等待时间 [秒] 豆瓣API有请求频率限制建议时间可以设置长一点
-  taskdonespace: 0
-  #删除没有头像的演员
-  delnotimagepeople: False
-  #剧集组配置, 在启用更新剧集组后有效
-  #例如
-  #seasongroup:
-  #- EMBY媒体名称|TMDB episode_group剧集组ID
-  #- "纸房子|5eb730dfca7ec6001f7beb51"
-  seasongroup:
-  - "纸房子|5eb730dfca7ec6001f7beb51"
+system:
+    #使用媒体服务器 Emby Jellyfin Plex
+    mediaserver: "Emby"
+    #线程数量 豆瓣API有请求频率限制建议线程数量不要过多
+    threadnum: 10
+    #是否刷新人名
+    updatepeople: False
+    #是否更新概述
+    updateoverview: False
+    #是否更新剧集组, 在TMDB有些剧集会有剧集组, EMBY只能刮削初始播放日期的剧集, 例如纸房子是有5季, EMBY只能刮削初始播放日期3季的版本
+    updateseasongroup: False
+    #每次刷新全部媒体间隔时间 [小时]
+    updatetime: 12
+    #检查媒体搜刮是否正确 不正确自动更新 需要配合NasTools使用
+    checkmediasearch: False
+    #任务完成等待时间 [秒] 豆瓣API有请求频率限制建议时间可以设置长一点
+    taskdonespace: 0
+    #删除没有头像的演员
+    delnotimagepeople: False
+    #剧集组配置, 在启用更新剧集组后有效
+    #例如
+    #seasongroup:
+    #- EMBY媒体名称|TMDB episode_group剧集组ID
+    #- "纸房子|5eb730dfca7ec6001f7beb51"
+    seasongroup:
+        - "纸房子|5eb730dfca7ec6001f7beb51"
