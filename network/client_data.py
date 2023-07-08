@@ -8,11 +8,15 @@ class ClientData(object):
     allotmaxnum = None
     lock = None
 
-    def __init__(self, allotnum: int = 0, allotmaxnum: int = 3):
+    def __init__(self, allotnum: int = 0, allotmaxnum: int = 3, proxy: str = None):
         self.lock = threading.Lock()
         self.allotnum = allotnum
         self.allotmaxnum = allotmaxnum
         self.client = requests.Session()
+
+        # 设置代理
+        if proxy:
+            self.client.proxies = {"http": proxy, "https": proxy}
 
     def get(self, url, **kwargs):
         """

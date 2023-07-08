@@ -52,7 +52,11 @@ class media:
                 passwd=configinfo.apidata["nastools"]["passwd"],
             )
 
-            self.tmdbclient = tmdb(key=configinfo.apidata["tmdb"]["key"])
+            self.tmdbclient = tmdb(
+                key=configinfo.apidata["tmdb"]["key"],
+                host=configinfo.apidata["tmdb"].get("host", 'https://api.themoviedb.org/3'),
+                proxy=configinfo.apidata["tmdb"].get("proxy", None),
+            )
             self.doubanclient = douban(
                 key=configinfo.apidata["douban"]["key"],
                 cookie=configinfo.apidata["douban"]["cookie"],
