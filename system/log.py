@@ -10,7 +10,7 @@ class log(object):
 
     def __init__(self) -> None:
         try:
-            path = os.path.join(os.environ["MEDIASERVERTOOLS_CONFIG"], "log.txt")
+            path = os.path.join(os.getcwd(), "log", "log.txt")
             self.logger = logging.getLogger(__name__)
             self.logger.setLevel(logging.INFO)
             handler = RotatingFileHandler(

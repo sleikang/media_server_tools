@@ -1,8 +1,0 @@
-python3-dev
-py3-pip
-bash
-su-exec
-git
-tzdata
-zip
-unzip

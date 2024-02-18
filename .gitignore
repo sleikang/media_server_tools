@@ -6,5 +6,7 @@ build/
 dist/
 *.spec
 config.yaml
-*.txt
-*.db
+*.txt*
+!requirements.txt
+!ver*.txt
+config/*

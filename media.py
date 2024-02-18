@@ -35,6 +35,7 @@ class media:
     configinfo = None
     threadnum = None
     semaphore = None
+    excludepath = None
 
     def __init__(self, configinfo: config) -> None:
         """
@@ -54,7 +55,9 @@ class media:
 
             self.tmdbclient = tmdb(
                 key=configinfo.apidata["tmdb"]["key"],
-                host=configinfo.apidata["tmdb"].get("host", 'https://api.themoviedb.org/3'),
+                host=configinfo.apidata["tmdb"].get(
+                    "host", "https://api.themoviedb.org/3"
+                ),
                 proxy=configinfo.apidata["tmdb"].get("proxy", None),
             )
             self.doubanclient = douban(
@@ -71,6 +74,7 @@ class media:
             self.delnotimagepeople = configinfo.systemdata["delnotimagepeople"]
             self.updateseasongroup = configinfo.systemdata["updateseasongroup"]
             self.checkmediasearch = configinfo.systemdata["checkmediasearch"]
+            self.excludepath = configinfo.systemdata["excludepath"]
             if "Emby" in self.mediaservertype:
                 self.meidiaserverclient = emby(
                     host=configinfo.apidata["emby"]["host"],
@@ -117,7 +121,9 @@ class media:
             )
             return False
         ret, iteminfo = self.meidiaserverclient.get_items_count()
-        log().info("总媒体数量[{}]".format(iteminfo["MovieCount"] + iteminfo["SeriesCount"]))
+        log().info(
+            "总媒体数量[{}]".format(iteminfo["MovieCount"] + iteminfo["SeriesCount"])
+        )
         if not ret:
             log().info(
                 "获取{}媒体数量失败, {}".format(
@@ -125,6 +131,8 @@ class media:
                 )
             )
             return False
+
+        ret = True
 
         for item in self.__check_media_info__(itemlist=itmes):
             if not item:
@@ -166,6 +174,9 @@ class media:
                     "CollectionType" not in item
                     or "boxsets" not in item["CollectionType"]
                 ):
+                    # 排除文件夹
+                    if item["Name"] in self.excludepath:
+                        continue
                     ret, items = self.meidiaserverclient.get_items(parentid=item["Id"])
                     if not ret:
                         log().info(
@@ -217,12 +228,12 @@ class media:
             elif "tmdb" in iteminfo["ProviderIds"]:
                 tmdbid = iteminfo["ProviderIds"]["tmdb"]
             name = re.sub(
-                pattern="\s+-\s+\d{1,4}[k|K|p|P]|\s+\(\d{4}\)|\.\S{1,4}$",
+                pattern="\\s+-\\s+\\d{1,4}[k|K|p|P]|\\s+\\(\\d{4}\\)|\\.\\S{1,4}$",
                 repl="",
                 string=iteminfo["FileName"],
             )
             year = None
-            redata = re.search(pattern="\((\d{4})\)", string=iteminfo["FileName"])
+            redata = re.search(pattern="\\((\\d{4})\\)", string=iteminfo["FileName"])
             if redata:
                 year = redata.group(1)
             if (
@@ -748,7 +759,9 @@ class media:
             if ret:
                 if updatename:
                     log().info(
-                        "原始媒体名称[{}]更新为[{}]".format(originalname, iteminfo["Name"])
+                        "原始媒体名称[{}]更新为[{}]".format(
+                            originalname, iteminfo["Name"]
+                        )
                     )
                 if updatepeople:
                     if "Jellyfin" in self.mediaservertype:
@@ -938,12 +951,12 @@ class media:
                             )
                             if ret and self.__is_chinese__(string=celebrities["name"]):
                                 peoplename = re.sub(
-                                    pattern="\s+", repl="", string=celebrities["name"]
+                                    pattern="\\s+", repl="", string=celebrities["name"]
                                 )
                     if not peoplename:
                         if self.__is_chinese__(string=peopleinfo["Name"], mode=2):
                             peoplename = re.sub(
-                                pattern="\s+", repl="", string=peopleinfo["Name"]
+                                pattern="\\s+", repl="", string=peopleinfo["Name"]
                             )
                             peoplename = zhconv.convert(peopleinfo["Name"], "zh-cn")
                         elif peopletmdbid:
@@ -1013,19 +1026,19 @@ class media:
                             if ret:
                                 if self.__is_chinese__(
                                     string=re.sub(
-                                        pattern="饰\s+",
+                                        pattern="饰\\s+",
                                         repl="",
                                         string=celebrities["character"],
                                     )
                                 ):
                                     people["Role"] = re.sub(
-                                        pattern="饰\s+",
+                                        pattern="饰\\s+",
                                         repl="",
                                         string=celebrities["character"],
                                     )
                                     updatepeople = True
                                 doubanname = re.sub(
-                                    pattern="\s+", repl="", string=celebrities["name"]
+                                    pattern="\\s+", repl="", string=celebrities["name"]
                                 )
                                 if people["Name"] != doubanname and self.__is_chinese__(
                                     string=doubanname
@@ -1255,7 +1268,9 @@ class media:
                     ret, items = self.doubanclient.search_media_weixin(name)
                 if not ret:
                     log().info(
-                        "豆瓣搜索媒体[{}]失败, {}".format(name, str(self.doubanclient.err))
+                        "豆瓣搜索媒体[{}]失败, {}".format(
+                            name, str(self.doubanclient.err)
+                        )
                     )
                     return False, None
 
@@ -1610,7 +1625,7 @@ class media:
                         continue
                     if self.__is_chinese__(string=name, mode=3):
                         name = zhconv.convert(name, "zh-cn")
-                    return True, re.sub(pattern="\s+", repl="", string=name)
+                    return True, re.sub(pattern="\\s+", repl="", string=name)
                 break
 
         except Exception as result:
