@@ -40,7 +40,7 @@ services:
       - TZ=Asia/Shanghai
     volumes:
       - /your_path/media_server_tools/log:/app/log #日志文件目录
-      - /your_path/docker/media_server_tools/config:/app/config #配置文件目录
+      - /your_path/media_server_tools/config:/app/config #配置文件目录
     restart: always
 
 ```
@@ -52,7 +52,7 @@ docker run -d \
   --name media_server_tools \
   -e TZ=Asia/Shanghai \
   -v /your_path/media_server_tools/log:/app/log \
-  -v /your_path/docker/media_server_tools/config:/app/config \
+  -v /your_path/media_server_tools/config:/app/config \
   --restart always \
   sleikang/media_server_tools:latest
 
