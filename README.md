@@ -1,4 +1,4 @@
-# MediaServerTools
+# media_server_tools
 
 Emby/Jellyfin/Plex 媒体中文自动同步
 
