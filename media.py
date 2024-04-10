@@ -175,8 +175,26 @@ class media:
                     or "boxsets" not in item["CollectionType"]
                 ):
                     # 排除文件夹
-                    if item["Name"] in self.excludepath:
+                    is_exclude_path = False
+                    for exclude in self.excludepath:
+                        match = re.match(exclude, item["Name"])
+                        if match:
+                            is_exclude_path = True
+                            break
+                    if is_exclude_path:
+                        log().info(
+                            "***************************************排除{}媒体[{}]***************************************".format(
+                                self.mediaservertype,
+                                item["Name"],
+                            )
+                        )
                         continue
+                    log().info(
+                        "***************************************开始处理{}媒体[{}]***************************************".format(
+                            self.mediaservertype,
+                            item["Name"],
+                        )
+                    )
                     ret, items = self.meidiaserverclient.get_items(parentid=item["Id"])
                     if not ret:
                         log().info(
