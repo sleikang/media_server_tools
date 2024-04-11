@@ -191,12 +191,6 @@ class media:
                             )
                         )
                         continue
-                    log().logger.info(
-                        "开始处理[{}]媒体[{}]".format(
-                            self.mediaservertype,
-                            item["Name"],
-                        )
-                    )
                     ret, items = self.meidiaserverclient.get_items(parentid=item["Id"])
                     if not ret:
                         log().logger.info(
