@@ -30,12 +30,14 @@ class config:
             self.apidata = self.configdata["api"]
 
         except Exception as result:
-            log().info("配置异常错误, {}".format(result))
+            log().logger.info("配置异常错误, {}".format(result))
 
     def __config_check__(self, config, key, defaultvalue):
         try:
             if key not in config:
-                log().info("配置项[{}]不存在, 创建默认值[{}]".format(key, defaultvalue))
+                log().logger.info(
+                    "配置项[{}]不存在, 创建默认值[{}]".format(key, defaultvalue)
+                )
                 config[key] = defaultvalue
                 with open(file=self.path, mode="w", encoding="utf-8") as file:
                     yaml.safe_dump(
@@ -49,4 +51,4 @@ class config:
                     self.__config_check__(config[key], subkey, defaultvalue[subkey])
 
         except Exception as result:
-            log().info("配置异常错误, {}".format(result))
+            log().logger.info("配置异常错误, {}".format(result))

@@ -97,11 +97,13 @@ class media:
                 )
                 self.configload = True
             else:
-                log().info("当前设置媒体服务器[{}]不支持".format(self.mediaservertype))
+                log().logger.info(
+                    "当前设置媒体服务器[{}]不支持".format(self.mediaservertype)
+                )
                 self.configload = False
 
         except Exception as result:
-            log().info("配置异常错误, {}".format(result))
+            log().logger.info("配置异常错误, {}".format(result))
 
     def start_scan_media(self):
         """
@@ -109,23 +111,23 @@ class media:
         :return True or False
         """
         if not self.configload:
-            log().info("配置未正常加载")
+            log().logger.info("配置未正常加载")
             return False
         # 获取媒体库根文件夹
         ret, itmes = self.meidiaserverclient.get_items()
         if not ret:
-            log().info(
+            log().logger.info(
                 "获取{}媒体总列表失败, {}".format(
                     self.mediaservertype, self.meidiaserverclient.err
                 )
             )
             return False
         ret, iteminfo = self.meidiaserverclient.get_items_count()
-        log().info(
+        log().logger.info(
             "总媒体数量[{}]".format(iteminfo["MovieCount"] + iteminfo["SeriesCount"])
         )
         if not ret:
-            log().info(
+            log().logger.info(
                 "获取{}媒体数量失败, {}".format(
                     self.mediaservertype, self.meidiaserverclient.err
                 )
@@ -157,9 +159,9 @@ class media:
         """
         ret, name = self.__to_deal_with_item__(item=item)
         if ret:
-            log().info("媒体[{}]处理完成".format(name))
+            log().logger.info("媒体[{}]处理完成".format(name))
         else:
-            log().info("媒体[{}]处理失败".format(name))
+            log().logger.info("媒体[{}]处理失败".format(name))
         self.semaphore.release()
 
     def __check_media_info__(self, itemlist):
@@ -179,7 +181,7 @@ class media:
                         continue
                     ret, items = self.meidiaserverclient.get_items(parentid=item["Id"])
                     if not ret:
-                        log().info(
+                        log().logger.info(
                             "获取{}媒体[{}]ID[{}]列表失败, {}".format(
                                 self.mediaservertype,
                                 item["Name"],
@@ -195,10 +197,8 @@ class media:
                         yield item
 
         except Exception as result:
-            log().info(
-                "文件[{}]行[{}]异常错误：{}".format(
-                    result.__traceback__.tb_frame.f_globals["__file__"],
-                    result.__traceback__.tb_lineno,
+            log().logger.info(
+                "异常错误：{}".format(
                     result,
                 )
             )
@@ -213,7 +213,7 @@ class media:
         try:
             ret, iteminfo = self.meidiaserverclient.get_item_info(itemid=item["Id"])
             if not ret:
-                log().info(
+                log().logger.info(
                     "获取{}媒体[{}]ID[{}]信息失败, {}".format(
                         self.mediaservertype,
                         item["Name"],
@@ -255,7 +255,7 @@ class media:
                 name=name, year=year, type=mediatype
             )
             if not ret:
-                log().info(
+                log().logger.info(
                     "[{}]媒体名称[{}]与原始名称[{}]不一致可能识别错误, NasTools识别媒体[{}]失败, {}".format(
                         self.mediaservertype,
                         item["Name"],
@@ -285,7 +285,7 @@ class media:
                 itemid=item["Id"], tmdbid=testtmdbid, name=name, year=year
             )
             if not ret:
-                log().info(
+                log().logger.info(
                     "{}搜索媒体[{}]ID[{}]TMDB[{}]信息失败, {}".format(
                         self.mediaservertype,
                         item["Name"],
@@ -303,7 +303,7 @@ class media:
                     itemid=item["Id"], iteminfo=info
                 )
                 if not ret:
-                    log().info(
+                    log().logger.info(
                         "{}更新媒体[{}]ID[{}]TMDB[{}]信息失败, {}".format(
                             self.mediaservertype,
                             item["Name"],
@@ -313,7 +313,7 @@ class media:
                         )
                     )
                     return False
-                log().info(
+                log().logger.info(
                     "{}更新媒体[{}]ID[{}]TMDB[{}]更新为媒体[{}]TMDB[{}]".format(
                         self.mediaservertype,
                         item["Name"],
@@ -327,10 +327,8 @@ class media:
                 break
             return True
         except Exception as result:
-            log().info(
-                "文件[{}]行[{}]异常错误：{}".format(
-                    result.__traceback__.tb_frame.f_globals["__file__"],
-                    result.__traceback__.tb_lineno,
+            log().logger.info(
+                "异常错误：{}".format(
                     result,
                 )
             )
@@ -351,7 +349,7 @@ class media:
             updateoverview = False
             ret, iteminfo = self.meidiaserverclient.get_item_info(itemid=item["Id"])
             if not ret:
-                log().info(
+                log().logger.info(
                     "获取{}媒体[{}]ID[{}]信息失败, {}".format(
                         self.mediaservertype,
                         item["Name"],
@@ -378,7 +376,7 @@ class media:
 
             if not self.__is_chinese__(string=item["Name"]):
                 if not tmdbid and not imdbid:
-                    log().info(
+                    log().logger.info(
                         "{}媒体[{}]ID[{}]Tmdb|Imdb不存在".format(
                             self.mediaservertype, item["Name"], item["Id"]
                         )
@@ -424,7 +422,7 @@ class media:
                         parentid=item["Id"], type="Season"
                     )
                     if not ret:
-                        log().info(
+                        log().logger.info(
                             "获取{}媒体[{}]ID[{}]信息失败, {}".format(
                                 self.mediaservertype,
                                 item["Name"],
@@ -439,7 +437,7 @@ class media:
                                     itemid=season["Id"]
                                 )
                                 if not ret:
-                                    log().info(
+                                    log().logger.info(
                                         "获取{}媒体[{}]ID[{}]信息失败, {}".format(
                                             self.mediaservertype,
                                             season["Name"],
@@ -457,7 +455,7 @@ class media:
                                     _ = self.__refresh_people__(
                                         item=season, iteminfo=seasoninfo
                                     )
-                                    log().info(
+                                    log().logger.info(
                                         "原始媒体名称[{}] 第[{}]季更新人物".format(
                                             iteminfo["Name"], season["IndexNumber"]
                                         )
@@ -469,7 +467,7 @@ class media:
                                 parentid=season["Id"], type="Episode"
                             )
                             if not ret:
-                                log().info(
+                                log().logger.info(
                                     "获取{}媒体[{}]ID[{}]信息失败, {}".format(
                                         self.mediaservertype,
                                         season["Name"],
@@ -486,7 +484,7 @@ class media:
                                     itemid=episode["Id"]
                                 )
                                 if not ret:
-                                    log().info(
+                                    log().logger.info(
                                         "获取{}媒体[{}]ID[{}]信息失败, {}".format(
                                             self.mediaservertype,
                                             episode["Name"],
@@ -510,7 +508,7 @@ class media:
                                             _ = self.__refresh_people__(
                                                 item=episode, iteminfo=episodeinfo
                                             )
-                                        log().info(
+                                        log().logger.info(
                                             "原始媒体名称[{}] 第[{}]季 第[{}]集更新人物".format(
                                                 iteminfo["Name"],
                                                 season["IndexNumber"],
@@ -523,7 +521,7 @@ class media:
                     string=iteminfo["Overview"]
                 ):
                     if not tmdbid and not imdbid:
-                        log().info(
+                        log().logger.info(
                             "{}媒体[{}]ID[{}]Tmdb|Imdb不存在".format(
                                 self.mediaservertype, item["Name"], item["Id"]
                             )
@@ -566,7 +564,7 @@ class media:
                         parentid=item["Id"], type="Season"
                     )
                     if not ret:
-                        log().info(
+                        log().logger.info(
                             "获取{}媒体[{}]ID[{}]信息失败, {}".format(
                                 self.mediaservertype,
                                 item["Name"],
@@ -590,7 +588,7 @@ class media:
                                 parentid=season["Id"], type="Episode"
                             )
                             if not ret:
-                                log().info(
+                                log().logger.info(
                                     "获取{}媒体[{}]ID[{}]信息失败, {}".format(
                                         self.mediaservertype,
                                         season["Name"],
@@ -607,7 +605,7 @@ class media:
                                     itemid=episode["Id"]
                                 )
                                 if not ret:
-                                    log().info(
+                                    log().logger.info(
                                         "获取{}媒体[{}]ID[{}]信息失败, {}".format(
                                             self.mediaservertype,
                                             episode["Name"],
@@ -669,7 +667,7 @@ class media:
                                             if tmdbepisodeinfo:
                                                 break
                                         if not tmdbepisodeinfo:
-                                            log().info(
+                                            log().logger.info(
                                                 "原始媒体名称[{}] 第[{}]季 第[{}]集未匹配到TMDB剧集组数据".format(
                                                     iteminfo["Name"],
                                                     season["IndexNumber"],
@@ -723,7 +721,7 @@ class media:
                                     )
                                     if ret:
                                         if overview:
-                                            log().info(
+                                            log().logger.info(
                                                 "原始媒体名称[{}] 第[{}]季 第[{}]集更新概述".format(
                                                     iteminfo["Name"],
                                                     season["IndexNumber"],
@@ -731,7 +729,7 @@ class media:
                                                 )
                                             )
                                         if ommunityrating:
-                                            log().info(
+                                            log().logger.info(
                                                 "原始媒体名称[{}] 第[{}]季 第[{}]集更新评分".format(
                                                     iteminfo["Name"],
                                                     season["IndexNumber"],
@@ -743,7 +741,7 @@ class media:
                                             itemid=episodeinfo["Id"], imageurl=imageurl
                                         )
                                         if ret:
-                                            log().info(
+                                            log().logger.info(
                                                 "原始媒体名称[{}] 第[{}]季 第[{}]集更新图片".format(
                                                     iteminfo["Name"],
                                                     season["IndexNumber"],
@@ -758,7 +756,7 @@ class media:
             )
             if ret:
                 if updatename:
-                    log().info(
+                    log().logger.info(
                         "原始媒体名称[{}]更新为[{}]".format(
                             originalname, iteminfo["Name"]
                         )
@@ -766,17 +764,19 @@ class media:
                 if updatepeople:
                     if "Jellyfin" in self.mediaservertype:
                         _ = self.__refresh_people__(item=item, iteminfo=iteminfo)
-                    log().info("原始媒体名称[{}]更新人物".format(iteminfo["Name"]))
+                    log().logger.info(
+                        "原始媒体名称[{}]更新人物".format(iteminfo["Name"])
+                    )
                 if updateoverview:
-                    log().info("原始媒体名称[{}]更新概述".format(iteminfo["Name"]))
+                    log().logger.info(
+                        "原始媒体名称[{}]更新概述".format(iteminfo["Name"])
+                    )
             time.sleep(self.taskdonespace)
             return True, item["Name"]
 
         except Exception as result:
-            log().info(
-                "文件[{}]行[{}]异常错误：{}".format(
-                    result.__traceback__.tb_frame.f_globals["__file__"],
-                    result.__traceback__.tb_lineno,
+            log().logger.info(
+                "异常错误：{}".format(
                     result,
                 )
             )
@@ -791,7 +791,7 @@ class media:
         try:
             ret, newiteminfo = self.meidiaserverclient.get_item_info(itemid=item["Id"])
             if not ret:
-                log().info(
+                log().logger.info(
                     "获取{}媒体[{}]ID[{}]信息失败, {}".format(
                         self.mediaservertype,
                         item["Name"],
@@ -810,7 +810,7 @@ class media:
                     itemid=people["Id"]
                 )
                 if not ret:
-                    log().info(
+                    log().logger.info(
                         "获取{}人物信息失败, {}".format(
                             self.mediaservertype, self.meidiaserverclient.err
                         )
@@ -820,7 +820,7 @@ class media:
                     itemid=newpeople["Id"]
                 )
                 if not ret:
-                    log().info(
+                    log().logger.info(
                         "获取{}人物信息失败, {}".format(
                             self.mediaservertype, self.meidiaserverclient.err
                         )
@@ -831,7 +831,7 @@ class media:
                     itemid=newpeopleinfo["Id"], iteminfo=newpeopleinfo
                 )
                 if not ret:
-                    log().info(
+                    log().logger.info(
                         "更新{}人物信息失败, {}".format(
                             self.mediaservertype, self.meidiaserverclient.err
                         )
@@ -841,7 +841,7 @@ class media:
                     itemid=newpeople["Id"]
                 )
                 if not ret:
-                    log().info(
+                    log().logger.info(
                         "获取{}人物信息失败, {}".format(
                             self.mediaservertype, self.meidiaserverclient.err
                         )
@@ -850,13 +850,13 @@ class media:
                 """
                 ret = self.meidiaserverclient.refresh(peopleinfo['Id'])
                 if not ret:
-                    log().info('刷新{}人物信息失败, {}'.format(self.mediaservertype, self.meidiaserverclient.err))
+                    log().logger.info('刷新{}人物信息失败, {}'.format(self.mediaservertype, self.meidiaserverclient.err))
                 """
                 time.sleep(self.taskdonespace)
 
             return True
         except Exception as result:
-            log().info("异常错误: {}".format(result))
+            log().logger.info("异常错误: {}".format(result))
         return False
 
     def __update_people__(self, item, iteminfo, imdbid):
@@ -877,7 +877,7 @@ class media:
                     itemid=people["Id"]
                 )
                 if not ret:
-                    log().info(
+                    log().logger.info(
                         "获取{}人物信息失败, {}".format(
                             self.mediaservertype, self.meidiaserverclient.err
                         )
@@ -902,7 +902,7 @@ class media:
                         peopleinfo["LockedFields"] = []
 
                     if not peopletmdbid and not peopleimdbid:
-                        log().info(
+                        log().logger.info(
                             "{}人物[{}]ID[{}]Tmdb|Imdb不存在".format(
                                 self.mediaservertype,
                                 peopleinfo["Name"],
@@ -977,7 +977,7 @@ class media:
                         else:
                             ret = True
                         if ret:
-                            log().info(
+                            log().logger.info(
                                 "原始人物名称[{}]更新为[{}]".format(
                                     originalpeoplename, peoplename
                                 )
@@ -1053,7 +1053,7 @@ class media:
                                     else:
                                         ret = True
                                     if ret:
-                                        log().info(
+                                        log().logger.info(
                                             "原始人物名称[{}]更新为[{}]".format(
                                                 originalpeoplename, people["Name"]
                                             )
@@ -1086,7 +1086,7 @@ class media:
                 updatepeople = True
 
         except Exception as result:
-            log().info("异常错误: {}".format(result))
+            log().logger.info("异常错误: {}".format(result))
         return updatepeople
 
     def __get_people_info__(self, celebritiesinfo, people, imdbid):
@@ -1143,7 +1143,7 @@ class media:
                         return True, celebrities
 
         except Exception as result:
-            log().info("异常错误: {}".format(result))
+            log().logger.info("异常错误: {}".format(result))
         return False, None
 
     def __get_douban_media_celebrities_info__(self, mediatype: int, name: str, id: str):
@@ -1168,7 +1168,7 @@ class media:
                         movieid=id
                     )
                 if not ret:
-                    log().info(
+                    log().logger.info(
                         "获取豆瓣媒体[{}]ID[{}]演员信息失败, {}".format(
                             name, id, self.doubanclient.err
                         )
@@ -1178,7 +1178,7 @@ class media:
                     mediatype=mediatype, id=id, iteminfo=celebritiesinfo
                 )
                 if not ret:
-                    log().info(
+                    log().logger.info(
                         "保存豆瓣媒体[{}]ID[{}]演员信息失败, {}".format(
                             name, id, self.doubanclient.err
                         )
@@ -1190,7 +1190,7 @@ class media:
                         celebrityid=celebrities["id"]
                     )
                     if not ret:
-                        log().info(
+                        log().logger.info(
                             "获取豆瓣媒体[{}]ID[{}]演员信息失败, {}".format(
                                 name, id, self.doubanclient.err
                             )
@@ -1200,7 +1200,7 @@ class media:
                         id=celebrities["id"], iteminfo=info
                     )
                     if not ret:
-                        log().info(
+                        log().logger.info(
                             "获取豆瓣媒体[{}]ID[{}]演员信息失败, {}".format(
                                 name, id, self.doubanclient.err
                             )
@@ -1213,7 +1213,7 @@ class media:
                         celebrityid=celebrities["id"]
                     )
                     if not ret:
-                        log().info(
+                        log().logger.info(
                             "获取豆瓣媒体[{}]ID[{}]演员[{}]ID[{}]信息失败, {}".format(
                                 name,
                                 id,
@@ -1227,7 +1227,7 @@ class media:
                         id=celebrities["id"], iteminfo=info
                     )
                     if not ret:
-                        log().info(
+                        log().logger.info(
                             "保存豆瓣媒体[{}]ID[{}]演员[{}]ID[{}]信息失败, {}".format(
                                 name,
                                 id,
@@ -1239,10 +1239,8 @@ class media:
                 celebrities["info"] = info
             return True, celebritiesinfo
         except Exception as result:
-            log().info(
-                "文件[{}]行[{}]异常错误：{}".format(
-                    result.__traceback__.tb_frame.f_globals["__file__"],
-                    result.__traceback__.tb_lineno,
+            log().logger.info(
+                "异常错误：{}".format(
                     result,
                 )
             )
@@ -1267,7 +1265,7 @@ class media:
                 if not ret:
                     ret, items = self.doubanclient.search_media_weixin(name)
                 if not ret:
-                    log().info(
+                    log().logger.info(
                         "豆瓣搜索媒体[{}]失败, {}".format(
                             name, str(self.doubanclient.err)
                         )
@@ -1294,7 +1292,7 @@ class media:
                             tvid=item["target_id"]
                         )
                     if not ret:
-                        log().info(
+                        log().logger.info(
                             "获取豆瓣媒体[{}]ID[{}]信息失败, {}".format(
                                 item["title"], item["target_id"], self.doubanclient.err
                             )
@@ -1304,7 +1302,7 @@ class media:
                         mediatype=mediatype, id=item["target_id"], iteminfo=mediainfo
                     )
                     if not ret:
-                        log().info(
+                        log().logger.info(
                             "保存豆瓣媒体[{}]ID[{}]信息失败, {}".format(
                                 item["title"], item["target_id"], self.doubanclient.err
                             )
@@ -1316,7 +1314,7 @@ class media:
                         mediatype=mediatype, id=item["target_id"], iteminfo=item
                     )
                     if not ret:
-                        log().info(
+                        log().logger.info(
                             "保存豆瓣媒体[{}]ID[{}]信息失败, {}".format(
                                 item["title"], item["target_id"], self.doubanclient.err
                             )
@@ -1324,10 +1322,8 @@ class media:
                     return True, mediainfo
 
         except Exception as result:
-            log().info(
-                "文件[{}]行[{}]异常错误：{}".format(
-                    result.__traceback__.tb_frame.f_globals["__file__"],
-                    result.__traceback__.tb_lineno,
+            log().logger.info(
+                "异常错误：{}".format(
                     result,
                 )
             )
@@ -1354,7 +1350,7 @@ class media:
                         tvid=id, language=language
                     )
                     if not ret:
-                        log().info(
+                        log().logger.info(
                             "获取TMDB媒体[{}]ID[{}]信息失败, {}".format(
                                 name, id, self.tmdbclient.err
                             )
@@ -1364,7 +1360,7 @@ class media:
                         mediatype=mediatype, id=id, language=language, iteminfo=iteminfo
                     )
                     if not ret:
-                        log().info(
+                        log().logger.info(
                             "保存TMDB媒体[{}]ID[{}]信息失败, {}".format(
                                 name, id, self.tmdbclient.err
                             )
@@ -1379,7 +1375,7 @@ class media:
                         movieid=id, language=language
                     )
                     if not ret:
-                        log().info(
+                        log().logger.info(
                             "获取TMDB媒体[{}]ID[{}]信息失败, {}".format(
                                 name, id, self.tmdbclient.err
                             )
@@ -1389,7 +1385,7 @@ class media:
                         mediatype=mediatype, id=id, language=language, iteminfo=iteminfo
                     )
                     if not ret:
-                        log().info(
+                        log().logger.info(
                             "保存TMDB媒体[{}]ID[{}]信息失败, {}".format(
                                 name, id, self.tmdbclient.err
                             )
@@ -1397,10 +1393,8 @@ class media:
                 return True, iteminfo
 
         except Exception as result:
-            log().info(
-                "文件[{}]行[{}]异常错误：{}".format(
-                    result.__traceback__.tb_frame.f_globals["__file__"],
-                    result.__traceback__.tb_lineno,
+            log().logger.info(
+                "异常错误：{}".format(
                     result,
                 )
             )
@@ -1471,10 +1465,8 @@ class media:
                             return True, movieinfo["overview"]
 
         except Exception as result:
-            log().info(
-                "文件[{}]行[{}]异常错误：{}".format(
-                    result.__traceback__.tb_frame.f_globals["__file__"],
-                    result.__traceback__.tb_lineno,
+            log().logger.info(
+                "异常错误：{}".format(
                     result,
                 )
             )
@@ -1493,7 +1485,7 @@ class media:
                     groupid=groupid, language=language
                 )
                 if not ret:
-                    log().info(
+                    log().logger.info(
                         "获取TMDB剧集[{}]组ID[{}]信息失败, {}".format(
                             name, groupid, self.tmdbclient.err
                         )
@@ -1502,10 +1494,8 @@ class media:
                 return True, iteminfo
 
         except Exception as result:
-            log().info(
-                "文件[{}]行[{}]异常错误：{}".format(
-                    result.__traceback__.tb_frame.f_globals["__file__"],
-                    result.__traceback__.tb_lineno,
+            log().logger.info(
+                "异常错误：{}".format(
                     result,
                 )
             )
@@ -1532,7 +1522,7 @@ class media:
                         tvid=tvid, seasonid=seasonid, language=language
                     )
                     if not ret:
-                        log().info(
+                        log().logger.info(
                             "获取TMDB媒体[{}]ID[{}]季ID[{}]信息失败, {}".format(
                                 name, tvid, seasonid, self.tmdbclient.err
                             )
@@ -1545,7 +1535,7 @@ class media:
                         iteminfo=seasoninfo,
                     )
                     if not ret:
-                        log().info(
+                        log().logger.info(
                             "保存TMDB媒体[{}]ID[{}]季ID[{}]信息失败, {}".format(
                                 name, tvid, seasonid, self.tmdbclient.err
                             )
@@ -1579,10 +1569,8 @@ class media:
                         return True, name, overview, ommunityrating, imageurl
 
         except Exception as result:
-            log().info(
-                "文件[{}]行[{}]异常错误：{}".format(
-                    result.__traceback__.tb_frame.f_globals["__file__"],
-                    result.__traceback__.tb_lineno,
+            log().logger.info(
+                "异常错误：{}".format(
                     result,
                 )
             )
@@ -1605,7 +1593,7 @@ class media:
                         personid=personid, language=language
                     )
                     if not ret:
-                        log().info(
+                        log().logger.info(
                             "获取TMDB人物[{}]ID[{}]信息失败, {}".format(
                                 name, personid, self.tmdbclient.err
                             )
@@ -1615,7 +1603,7 @@ class media:
                         id=personid, language=language, iteminfo=personinfo
                     )
                     if not ret:
-                        log().info(
+                        log().logger.info(
                             "保存TMDB人物[{}]ID[{}]信息失败, {}".format(
                                 name, personid, self.tmdbclient.err
                             )
@@ -1629,10 +1617,8 @@ class media:
                 break
 
         except Exception as result:
-            log().info(
-                "文件[{}]行[{}]异常错误：{}".format(
-                    result.__traceback__.tb_frame.f_globals["__file__"],
-                    result.__traceback__.tb_lineno,
+            log().logger.info(
+                "异常错误：{}".format(
                     result,
                 )
             )
@@ -1660,10 +1646,8 @@ class media:
                     return True, zhconv.convert(title["title"], "zh-cn")
                 return True, title["title"]
         except Exception as result:
-            log().info(
-                "文件[{}]行[{}]异常错误：{}".format(
-                    result.__traceback__.tb_frame.f_globals["__file__"],
-                    result.__traceback__.tb_lineno,
+            log().logger.info(
+                "异常错误：{}".format(
                     result,
                 )
             )

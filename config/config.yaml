@@ -1,5 +1,7 @@
 api:
     nastools:
+        #授权码
+        authorization: ""
         #域名 包含http(s)和端口号后面不带/
         #例如http://xxx.xxx.xxx:3000
         host: "http://127.0.0.1:3000"
@@ -24,14 +26,14 @@ api:
     emby:
         #域名 包含http(s)和端口号后面不带/
         #例如https://xxx.xxx.xxx:8920
-        host: "http://127.0.0.1:8096"
+        host: "https://emby.smwap.top:88"
         #用户ID 进EMBY 用户点击管理员账号配置可以在网址上看到userId
-        userid: ""
+        userid: "b511b7e1b23a4f45aca4b25b12c38741"
         #APIKEY
-        key: ""
+        key: "2723439e915242fa951f3f3e4d9f648f"
     tmdb:
         #APIKEY
-        key: ""
+        key: "8dcc68473afb858174575cc7a1af8eb5"
         #代理
         #proxy: ""
         #API
@@ -51,6 +53,13 @@ api:
         peoplecachefailtime: 120
 
 system:
+    #排除媒体文件夹
+    #例如
+    #excludepath:
+    #    - "AV"
+    #    - "xxx"
+    excludepath:
+        - "合集"
     #使用媒体服务器 Emby Jellyfin Plex
     mediaserver: "Emby"
     #线程数量 豆瓣API有请求频率限制建议线程数量不要过多
@@ -58,9 +67,9 @@ system:
     #是否刷新人名
     updatepeople: False
     #是否更新概述
-    updateoverview: False
+    updateoverview: True
     #是否更新剧集组, 在TMDB有些剧集会有剧集组, EMBY只能刮削初始播放日期的剧集, 例如纸房子是有5季, EMBY只能刮削初始播放日期3季的版本
-    updateseasongroup: False
+    updateseasongroup: True
     #每次刷新全部媒体间隔时间 [小时]
     updatetime: 12
     #检查媒体搜刮是否正确 不正确自动更新 需要配合NasTools使用
@@ -76,3 +85,6 @@ system:
     #- "纸房子|5eb730dfca7ec6001f7beb51"
     seasongroup:
         - "纸房子|5eb730dfca7ec6001f7beb51"
+        - "Re：从零开始的异世界生活|641eb9d6b234b9007ac67063"
+        - "物语系列|6224ccddfe077a0043a57f5c"
+        - "进击的巨人|645589ac5b4fed0185ce7d2b"

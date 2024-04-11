@@ -20,25 +20,17 @@ class log(object):
                 encoding="utf-8",
             )
             handler.setFormatter(
-                logging.Formatter("%(asctime)s\t%(levelname)s: %(message)s")
+                logging.Formatter(
+                    "[%(asctime)s][%(levelname)s][%(filename)s:%(lineno)d]: %(message)s"
+                )
             )
             self.logger.addHandler(handler)
             streamhandler = logging.StreamHandler()
             streamhandler.setFormatter(
-                logging.Formatter("%(asctime)s\t%(levelname)s: %(message)s")
+                logging.Formatter(
+                    "[%(asctime)s][%(levelname)s][%(filename)s:%(lineno)d]: %(message)s"
+                )
             )
             self.logger.addHandler(streamhandler)
         except Exception as result:
-            print(result)
-
-    def debug(self, message):
-        self.logger.debug(message)
-
-    def info(self, message):
-        self.logger.info(message)
-
-    def warn(self, message):
-        self.logger.warn(message)
-
-    def error(self, message):
-        self.logger.error(message)
+            print("异常错误: %s" % result)
