@@ -9,6 +9,7 @@ Emby/Jellyfin/Plex 媒体中文自动同步
 5. 剧集概述评分图片同步
 6. 剧集组自定义同步
 7. 媒体搜刮检查是否正确(配合 NasTools)
+8. 替换豆瓣评分
 
 -   注意使用本工具需要媒体服务器本身刮削了 tmdb 的完整数据，工具只是获取原有的数据进行替换使用方式
 -   源码运行
@@ -59,3 +60,9 @@ docker run -d \
 ```
 
 ![image](https://user-images.githubusercontent.com/23020770/188265314-73610b4e-264d-4b8c-9750-e707512f7fef.png) ![image](https://user-images.githubusercontent.com/23020770/188306989-c722673e-2dac-4c79-8cb1-1a4eb3a35aa2.png) ![image](https://user-images.githubusercontent.com/23020770/202453243-255b1c95-cbdf-4f24-a215-16399a442ff6.png)
+
+赞助与支持
+如果您觉得 media_server_tools 对你有帮助，可以请作者喝杯咖啡。 
+![5985fe93dd3871cb0b7cbbd2fdd4760](https://github.com/sleikang/media_server_tools/assets/23020770/c355c978-892a-48c6-ace8-5e8aa270467d)
+
+
