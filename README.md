@@ -63,6 +63,6 @@ docker run -d \
 
 赞助与支持
 如果您觉得 media_server_tools 对你有帮助，可以请作者喝杯咖啡。 
-![5985fe93dd3871cb0b7cbbd2fdd4760](https://github.com/sleikang/media_server_tools/assets/23020770/c355c978-892a-48c6-ace8-5e8aa270467d)
+![5985fe93dd3871cb0b7cbbd2fdd4760](https://github.com/sleikang/media_server_tools/assets/23020770/c355c978-892a-48c6-ace8-5e8aa270467d){width="200" height="300"}
 
 
