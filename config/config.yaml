@@ -26,14 +26,14 @@ api:
     emby:
         #域名 包含http(s)和端口号后面不带/
         #例如https://xxx.xxx.xxx:8920
-        host: "https://emby.smwap.top:88"
+        host: "http://127.0.0.1:8096"
         #用户ID 进EMBY 用户点击管理员账号配置可以在网址上看到userId
-        userid: "b511b7e1b23a4f45aca4b25b12c38741"
+        userid: ""
         #APIKEY
-        key: "2723439e915242fa951f3f3e4d9f648f"
+        key: ""
     tmdb:
         #APIKEY
-        key: "8dcc68473afb858174575cc7a1af8eb5"
+        key: ""
         #代理
         #proxy: ""
         #API
@@ -60,8 +60,6 @@ system:
     #    - "xxx"
     excludepath:
         - "合集"
-    excludepath:
-        - "合集"
     #排除媒体
     #例如
     #excludemedia:
@@ -71,23 +69,23 @@ system:
     #使用媒体服务器 Emby Jellyfin Plex
     mediaserver: "Emby"
     #线程数量 豆瓣API有请求频率限制建议线程数量不要过多
-    threadnum: 1
+    threadnum: 10
     #是否更新豆瓣评分
-    updatescore: True
+    updatescore: False
     #是否更新标题
     updatetitle: True
     #是否刷新人名
     updatepeople: False
     #是否更新概述
-    updateoverview: True
+    updateoverview: False
     #是否更新剧集组, 在TMDB有些剧集会有剧集组, EMBY只能刮削初始播放日期的剧集, 例如纸房子是有5季, EMBY只能刮削初始播放日期3季的版本
-    updateseasongroup: True
+    updateseasongroup: False
     #每次刷新全部媒体间隔时间 [小时]
     updatetime: 12
     #检查媒体搜刮是否正确 不正确自动更新 需要配合NasTools使用
     checkmediasearch: False
-    #任务完成等待时间 [秒] 豆瓣API有请求频率限制建议时间可以设置长一点
-    taskdonespace: 0
+    #豆瓣API延迟[秒] 豆瓣API有请求频率限制建议时间可以设置长一点
+    doubanapispace: 0
     #删除没有头像的演员
     delnotimagepeople: False
     #剧集组配置, 在启用更新剧集组后有效
@@ -97,6 +95,3 @@ system:
     #- "纸房子|5eb730dfca7ec6001f7beb51"
     seasongroup:
         - "纸房子|5eb730dfca7ec6001f7beb51"
-        - "Re：从零开始的异世界生活|641eb9d6b234b9007ac67063"
-        - "物语系列|6224ccddfe077a0043a57f5c"
-        - "进击的巨人|645589ac5b4fed0185ce7d2b"

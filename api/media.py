@@ -27,7 +27,7 @@ class media:
     update_people = None
     update_overview = None
     update_season_group = None
-    task_done_space = None
+    douban_api_space = None
     del_not_image_people = None
     check_media_search = None
     config_load = None
@@ -73,7 +73,7 @@ class media:
             self.thread_pool = ThreadPoolExecutor(max_workers=self.thread_num)
             self.update_people = self.config_info["system"]["updatepeople"]
             self.update_overview = self.config_info["system"]["updateoverview"]
-            self.task_done_space = self.config_info["system"]["taskdonespace"]
+            self.douban_api_space = self.config_info["system"]["doubanapispace"]
             self.del_not_image_people = self.config_info["system"]["delnotimagepeople"]
             self.update_season_group = self.config_info["system"]["updateseasongroup"]
             self.check_media_search = self.config_info["system"]["checkmediasearch"]
@@ -470,7 +470,7 @@ class media:
                         score = douban_media_info["rating"]["value"]
                         if "CommunityRating" not in item_info["LockedFields"]:
                             item_info["LockedFields"].append("CommunityRating")
-                        if score != original_score:
+                        if score > 0 and score != original_score:
                             update_score = True
                             item_info["CommunityRating"] = score
 
@@ -846,7 +846,7 @@ class media:
                     log().logger.info(
                         "原始媒体名称[{}]更新概述".format(item_info["Name"])
                     )
-            time.sleep(self.task_done_space)
+
             return True, item["Name"]
 
         except Exception as result:
@@ -929,7 +929,6 @@ class media:
                 if not ret:
                     log().logger.info('刷新[{}]人物信息失败, {}'.format(self.mediaservertype, self.meidiaserverclient.err))
                 """
-                time.sleep(self.task_done_space)
 
             return True
         except Exception as result:
@@ -1338,10 +1337,13 @@ class media:
                 mediatype=mediatype, title=name
             )
             if not ret:
+                time.sleep(self.douban_api_space)
                 ret, items = self.douban_client.search_media_pc(name)
                 if not ret or not items["items"]:
+                    time.sleep(self.douban_api_space)
                     ret, items = self.douban_client.search_media(name)
                 if not ret or not items["items"]:
+                    time.sleep(self.douban_api_space)
                     ret, items = self.douban_client.search_media_weixin(name)
                 if not ret or not items["items"]:
                     log().logger.info(

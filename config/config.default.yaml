@@ -84,8 +84,8 @@ system:
     updatetime: 12
     #检查媒体搜刮是否正确 不正确自动更新 需要配合NasTools使用
     checkmediasearch: False
-    #任务完成等待时间 [秒] 豆瓣API有请求频率限制建议时间可以设置长一点
-    taskdonespace: 0
+    #豆瓣API延迟[秒] 豆瓣API有请求频率限制建议时间可以设置长一点
+    doubanapispace: 0
     #删除没有头像的演员
     delnotimagepeople: False
     #剧集组配置, 在启用更新剧集组后有效

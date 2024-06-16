@@ -111,6 +111,9 @@ class douban:
             if not self.__get_status__(p=p, err=err):
                 return False, iteminfo
             iteminfo = json.loads(p.text)
+            if "info_url" not in iteminfo:
+                self.err = "获取电视剧信息失败"
+                return False, iteminfo
             url = iteminfo["info_url"]
             p, err = self.client.get(url=url, headers=self.mobileheaders)
             if not self.__get_status__(p=p, err=err):
@@ -199,8 +202,13 @@ class douban:
                 return False, iteminfo
             medialist = json.loads(p.text)
             for media in medialist:
-                if re.search(pattern="第[\s\S]+季", string=media["title"]):
+                if (
+                    re.search(pattern="第[\s\S]+季", string=media["title"])
+                    or len(media["episode"]) > 1
+                ):
                     media["target_type"] = "tv"
+                else:
+                    media["target_type"] = "movie"
                 media["target_id"] = media["id"]
             iteminfo["items"] = medialist
             return True, iteminfo
