@@ -1,0 +1,22 @@
+services:
+  - docker:dind
+
+stages:
+  - build-and_push
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_HOST: tcp://docker:2375/  # 设置DOCKER_HOST指向docker服务
+  DOCKER_TLS_CERTDIR: ""           # 禁用TLS验证（仅在安全环境下使用）
+
+before_script:
+  - docker login -u $DOCKER_HUB_USERNAME -p $DOCKER_HUB_PASSWORD
+
+build-and_push:
+  stage: build-and_push
+  script:
+    - docker build -t media_server_tools .
+    - docker tag media_server_tools $DOCKER_HUB_USERNAME/media_server_tools:latest
+    - docker push $DOCKER_HUB_USERNAME/media_server_tools:latest
+  only:
+    - main

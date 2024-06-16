@@ -1,9 +1,10 @@
 import os
 import time
 import shutil
-from media import media
-from system.config import config
+from api.media import media
 from system.log import log
+from api.media_config import MediaConfig
+from system.config import Config
 
 if __name__ == "__main__":
     try:
@@ -20,16 +21,15 @@ if __name__ == "__main__":
                 "默认配置文件不存在, 拷贝默认配置文件[config.default.yaml]->[/config/config.default.yaml]"
             )
             shutil.copy("config.default.yaml", "config/config.default.yaml")
-
-        path = os.path.join(os.getcwd(), "config", "config.yaml")
-        configinfo = config(path=path)
-        mediaclient = media(configinfo=configinfo)
+        _ = MediaConfig()
+        config = Config().get_config()
+        mediaclient = media()
         while True:
             try:
                 log().logger.info("开始刷新媒体库元数据")
                 mediaclient.start_scan_media()
                 log().logger.info("刷新媒体库元数据完成")
-                time.sleep(configinfo.systemdata["updatetime"] * 3600)
+                time.sleep(config["system"]["updatetime"] * 3600)
             except Exception as result:
                 log().logger.info(result)
     except Exception as result:

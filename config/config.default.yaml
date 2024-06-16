@@ -1,5 +1,7 @@
 api:
     nastools:
+        #授权码
+        authorization: ""
         #域名 包含http(s)和端口号后面不带/
         #例如http://xxx.xxx.xxx:3000
         host: "http://127.0.0.1:3000"
@@ -51,10 +53,27 @@ api:
         peoplecachefailtime: 120
 
 system:
+    #排除媒体文件夹
+    #例如
+    #excludepath:
+    #    - "AV"
+    #    - "xxx"
+    excludepath:
+        - "合集"
+    #排除媒体
+    #例如
+    #excludemedia:
+    #    - "xxx"
+    excludemedia:
+        - "进击的巨人"
     #使用媒体服务器 Emby Jellyfin Plex
     mediaserver: "Emby"
     #线程数量 豆瓣API有请求频率限制建议线程数量不要过多
     threadnum: 10
+    #是否更新豆瓣评分
+    updatescore: False
+    #是否更新标题
+    updatetitle: True
     #是否刷新人名
     updatepeople: False
     #是否更新概述

@@ -3,31 +3,26 @@ from system.log import log
 import os
 
 
-class config:
-    path = None
-    configdata = None
-    defaultconfig = None
-    apidata = None
-    systemdata = None
-
-    def __init__(self, path: str) -> None:
+class MediaConfig:
+    def __init__(self) -> None:
         try:
             # 打开文件
             self.defaultconfig = yaml.load(
                 open("config.default.yaml", "r", encoding="utf-8"),
                 Loader=yaml.FullLoader,
             )
-            self.path = path
             self.configdata = yaml.load(
-                open(self.path, "r", encoding="utf-8"), Loader=yaml.FullLoader
+                open(
+                    os.path.join(os.getcwd(), "config", "config.yaml"),
+                    "r",
+                    encoding="utf-8",
+                ),
+                Loader=yaml.FullLoader,
             )
 
             # 递归检查配置文件是否包含默认配置文件的所有配置项
             for key in self.defaultconfig:
                 self.__config_check__(self.configdata, key, self.defaultconfig[key])
-
-            self.systemdata = self.configdata["system"]
-            self.apidata = self.configdata["api"]
 
         except Exception as result:
             log().logger.info("配置异常错误, {}".format(result))

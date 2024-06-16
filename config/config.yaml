@@ -60,10 +60,22 @@ system:
     #    - "xxx"
     excludepath:
         - "合集"
+    excludepath:
+        - "合集"
+    #排除媒体
+    #例如
+    #excludemedia:
+    #    - "xxx"
+    excludemedia:
+        - "进击的巨人"
     #使用媒体服务器 Emby Jellyfin Plex
     mediaserver: "Emby"
     #线程数量 豆瓣API有请求频率限制建议线程数量不要过多
-    threadnum: 10
+    threadnum: 1
+    #是否更新豆瓣评分
+    updatescore: True
+    #是否更新标题
+    updatetitle: True
     #是否刷新人名
     updatepeople: False
     #是否更新概述
