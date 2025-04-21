@@ -62,9 +62,4 @@ docker run -d \
 <h2>展示</h2>
 <img src="https://user-images.githubusercontent.com/23020770/188306989-c722673e-2dac-4c79-8cb1-1a4eb3a35aa2.png" >
 <img src="https://user-images.githubusercontent.com/23020770/202453243-255b1c95-cbdf-4f24-a215-16399a442ff6.png" >
-<h2>赞助与支持</h2>
-如果您觉得 media_server_tools 对你有帮助，可以请作者喝杯咖啡。
-<br>
-<img src="https://github.com/sleikang/media_server_tools/assets/23020770/c355c978-892a-48c6-ace8-5e8aa270467d" alt="5985fe93dd3871cb0b7cbbd2fdd4760" width="200" height="300">
-
 
